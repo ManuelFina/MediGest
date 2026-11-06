@@ -25,11 +25,11 @@
     <Folder Include="Areas\Reception\Views\" />
     <Folder Include="Database\StoredProcedures\" />
     <Folder Include="Data\Configurations\" />
-    <Folder Include="Data\Seed\" />
     <Folder Include="Models\Entities\" />
     <Folder Include="Models\Enums\" />
-    <Folder Include="Services\Implementations\" />
-    <Folder Include="Services\Interfaces\" />
+    <Folder Include="ViewModels\Appointments\" />
+    <Folder Include="ViewModels\Patients\" />
+    <Folder Include="ViewModels\Professionals\" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Acceso denegado";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 text-center">
+
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+
+                    <h1 class="display-4 text-danger mb-3">
+                        403
+                    </h1>
+
+                    <h2 class="mb-3">
+                        Acceso denegado
+                    </h2>
+
+                    <p class="text-muted mb-4">
+                        No tenés permisos para acceder a esta sección.
+                        Si considerás que se trata de un error,
+                        comunicate con el administrador del sistema.
+                    </p>
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        Volver al inicio
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
