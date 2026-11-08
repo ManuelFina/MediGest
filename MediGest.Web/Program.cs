@@ -48,6 +48,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IProfessionalScheduleService, ProfessionalScheduleService>();
+builder.Services.AddScoped<IScheduleDayService, ScheduleDayService>();
+builder.Services.AddScoped<IScheduleExceptionService, ScheduleExceptionService>();
+builder.Services.AddScoped<IAppointmentAvailabilityService, AppointmentAvailabilityService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
 builder.Services.AddControllersWithViews();
 

@@ -24,9 +24,6 @@
     <Folder Include="Areas\Reception\Controllers\" />
     <Folder Include="Areas\Reception\Views\" />
     <Folder Include="Database\StoredProcedures\" />
-    <Folder Include="Data\Configurations\" />
-    <Folder Include="Models\Entities\" />
-    <Folder Include="Models\Enums\" />
     <Folder Include="ViewModels\Appointments\" />
     <Folder Include="ViewModels\Patients\" />
     <Folder Include="ViewModels\Professionals\" />
