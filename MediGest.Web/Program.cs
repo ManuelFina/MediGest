@@ -53,6 +53,7 @@ builder.Services.AddScoped<IScheduleDayService, ScheduleDayService>();
 builder.Services.AddScoped<IScheduleExceptionService, ScheduleExceptionService>();
 builder.Services.AddScoped<IAppointmentAvailabilityService, AppointmentAvailabilityService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 builder.Services.AddControllersWithViews();
 
