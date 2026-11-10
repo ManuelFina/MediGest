@@ -261,40 +261,67 @@
 {
     <aside class="mg-sidebar">
         <a asp-area="" asp-controller="Home" asp-action="Index" class="mg-brand">
-            <span class="mg-brand-icon"><i class="bi bi-heart-pulse-fill"></i></span>
+            <span class="mg-brand-icon">
+                <i class="bi bi-heart-pulse-fill"></i>
+            </span>
             <span class="mg-brand-text">MediGest</span>
         </a>
 
         <div class="mg-menu-label">Principal</div>
 
         <a asp-area="" asp-controller="Home" asp-action="Index" class="mg-nav-link">
-            <i class="bi bi-grid-1x2-fill"></i><span>Inicio</span>
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Inicio</span>
         </a>
 
         @if (isAdmin || isReceptionist)
         {
             <div class="mg-menu-label">Gestión</div>
-
-            <a asp-area="Reception" asp-controller="Patients" asp-action="Index" class="mg-nav-link">
-                <i class="bi bi-people-fill"></i><span>Pacientes</span>
-            </a>
         }
 
         @if (isAdmin)
         {
-            <a asp-area="Admin" asp-controller="Professionals" asp-action="Index" class="mg-nav-link">
-                <i class="bi bi-person-badge-fill"></i><span>Profesionales</span>
+            <a asp-area="Admin"
+               asp-controller="Users"
+               asp-action="Index"
+               class="mg-nav-link">
+                <i class="bi bi-people-fill"></i>
+                <span>Usuarios</span>
             </a>
 
-            <a asp-area="Admin" asp-controller="Specialties" asp-action="Index" class="mg-nav-link">
-                <i class="bi bi-heart-pulse"></i><span>Especialidades</span>
+            <a asp-area="Admin"
+               asp-controller="Professionals"
+               asp-action="Index"
+               class="mg-nav-link">
+                <i class="bi bi-person-badge-fill"></i>
+                <span>Profesionales</span>
+            </a>
+
+            <a asp-area="Admin"
+               asp-controller="Specialties"
+               asp-action="Index"
+               class="mg-nav-link">
+                <i class="bi bi-heart-pulse"></i>
+                <span>Especialidades</span>
             </a>
         }
 
-        @if (isAdmin || isReceptionist)
+        @if (isReceptionist)
         {
-            <a asp-area="Reception" asp-controller="Appointments" asp-action="Index" class="mg-nav-link">
-                <i class="bi bi-calendar-check-fill"></i><span>Turnos</span>
+            <a asp-area="Reception"
+               asp-controller="Patients"
+               asp-action="Index"
+               class="mg-nav-link">
+                <i class="bi bi-person-lines-fill"></i>
+                <span>Pacientes</span>
+            </a>
+
+            <a asp-area="Reception"
+               asp-controller="Appointments"
+               asp-action="Index"
+               class="mg-nav-link">
+                <i class="bi bi-calendar-check-fill"></i>
+                <span>Turnos</span>
             </a>
         }
 
@@ -302,12 +329,20 @@
         {
             <div class="mg-menu-label">Mi espacio</div>
 
-            <a asp-area="Doctor" asp-controller="ProfessionalSchedules" asp-action="Index" class="mg-nav-link">
-                <i class="bi bi-calendar-week-fill"></i><span>Mi agenda</span>
+            <a asp-area="Doctor"
+               asp-controller="ProfessionalSchedules"
+               asp-action="Index"
+               class="mg-nav-link">
+                <i class="bi bi-calendar-week-fill"></i>
+                <span>Mi agenda</span>
             </a>
 
-            <a asp-area="Doctor" asp-controller="ScheduleExceptions" asp-action="Index" class="mg-nav-link">
-                <i class="bi bi-calendar-x-fill"></i><span>Excepciones</span>
+            <a asp-area="Doctor"
+               asp-controller="ScheduleExceptions"
+               asp-action="Index"
+               class="mg-nav-link">
+                <i class="bi bi-calendar-x-fill"></i>
+                <span>Excepciones</span>
             </a>
         }
 
@@ -316,17 +351,27 @@
                 <div class="mg-avatar">
                     @userName.Substring(0, 1).ToUpper()
                 </div>
+
                 <div class="mg-user-info">
                     <strong>@userName</strong>
                     <small>
-                        @(isAdmin ? "Administrador" : isReceptionist ? "Recepcionista" : "Profesional")
+                        @(isAdmin
+                            ? "Administrador"
+                            : isReceptionist
+                                ? "Recepcionista"
+                                : "Profesional")
                     </small>
                 </div>
             </div>
 
-            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+            <form asp-area=""
+                  asp-controller="Account"
+                  asp-action="Logout"
+                  method="post">
+
                 <button type="submit" class="mg-nav-link mg-logout">
-                    <i class="bi bi-box-arrow-left"></i><span>Cerrar sesión</span>
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Cerrar sesión</span>
                 </button>
             </form>
         </div>
@@ -337,8 +382,10 @@
             <div class="mg-topbar-title">
                 Sistema de gestión de consultorio
             </div>
+
             <div class="text-muted small">
-                <i class="bi bi-shield-check me-1"></i>Acceso seguro
+                <i class="bi bi-shield-check me-1"></i>
+                Acceso seguro
             </div>
         </header>
 
@@ -353,18 +400,15 @@
 }
 else
 {
-<main class="mg-content">
-    <div class="alert alert-warning">
-        LAYOUT GLOBAL CARGADO
-    </div>
-
-    @RenderBody()
-</main>
+    <main class="mg-content">
+        @RenderBody()
+    </main>
 }
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+
 @await RenderSectionAsync("Scripts", required: false)
 
 </body>

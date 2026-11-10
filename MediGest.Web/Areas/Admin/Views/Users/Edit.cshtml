@@ -1,0 +1,163 @@
+﻿
+@model MediGest.Web.ViewModels.Users.UserFormViewModel
+
+@{
+    ViewData["Title"] = "Editar usuario";
+}
+
+<div class="container-fluid">
+
+    <div class="mb-4">
+        <a asp-area="Admin"
+           asp-controller="Users"
+           asp-action="Index"
+           class="text-decoration-none text-muted">
+            <i class="bi bi-arrow-left me-1"></i>
+            Volver a usuarios
+        </a>
+
+        <h2 class="fw-bold mt-3 mb-1">Editar usuario</h2>
+        <p class="text-muted mb-0">
+            Modificá los datos y permisos de acceso de la cuenta.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            <form asp-area="Admin"
+                  asp-controller="Users"
+                  asp-action="Edit"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                <input asp-for="Id" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger">
+                </div>
+
+                <h5 class="fw-semibold mb-3">
+                    <i class="bi bi-person me-2"></i>
+                    Datos personales
+                </h5>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email"
+                               type="email"
+                               class="form-control" />
+                        <span asp-validation-for="Email"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+                        <input asp-for="PhoneNumber"
+                               class="form-control" />
+                        <span asp-validation-for="PhoneNumber"
+                              class="text-danger small"></span>
+                    </div>
+
+                </div>
+
+                <hr class="my-4" />
+
+                <h5 class="fw-semibold mb-3">
+                    <i class="bi bi-shield-lock me-2"></i>
+                    Acceso al sistema
+                </h5>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="Role" class="form-label"></label>
+                        <select asp-for="Role"
+                                asp-items="Model.AvailableRoles"
+                                class="form-select">
+                            <option value="">Seleccioná un rol</option>
+                        </select>
+                        <span asp-validation-for="Role"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password"
+                               type="password"
+                               class="form-control"
+                               autocomplete="new-password"
+                               placeholder="Dejar vacío para conservar la actual" />
+                        <span asp-validation-for="Password"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label"></label>
+                        <input asp-for="ConfirmPassword"
+                               type="password"
+                               class="form-control"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-check form-switch mt-4">
+                            <input asp-for="IsActive"
+                                   class="form-check-input"
+                                   type="checkbox" />
+                            <label asp-for="IsActive"
+                                   class="form-check-label"></label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="alert alert-info mt-4 mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Si no ingresás una nueva contraseña, se conservará
+                    la contraseña actual.
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+
+                    <a asp-area="Admin"
+                       asp-controller="Users"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Guardar cambios
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
