@@ -34,7 +34,6 @@ public class AppointmentsController : Controller
 
     // GET: Reception/Appointments
     [HttpGet]
-
     public async Task<IActionResult> Index(DateOnly? date)
     {
         var selectedDate = date ?? DateOnly.FromDateTime(DateTime.Today);
@@ -73,10 +72,12 @@ public class AppointmentsController : Controller
             WeekStartDate = weekStart,
             WeekEndDate = weekEnd,
             WeekDays = weekDays,
+
             Appointments = appointments
                 .OrderBy(a => a.AppointmentDate)
                 .ThenBy(a => a.StartTime)
                 .ToList(),
+
             Professionals = professionals,
 
             TotalAppointments = appointments.Count,
@@ -94,14 +95,14 @@ public class AppointmentsController : Controller
         return View(viewModel);
     }
 
-
     // GET: Reception/Appointments/Create
     [HttpGet]
     public async Task<IActionResult> Create()
     {
         var viewModel = new AppointmentFormViewModel
         {
-            AppointmentDate = DateOnly.FromDateTime(DateTime.Today)
+            AppointmentDate = DateOnly.FromDateTime(DateTime.Today),
+            Status = AppointmentStatus.Pending
         };
 
         await LoadFormDataAsync(viewModel);
@@ -115,6 +116,15 @@ public class AppointmentsController : Controller
     public async Task<IActionResult> Create(
         AppointmentFormViewModel viewModel)
     {
+        // Recepción solamente puede crear turnos pendientes o confirmados.
+        if (viewModel.Status != AppointmentStatus.Pending &&
+            viewModel.Status != AppointmentStatus.Confirmed)
+        {
+            ModelState.AddModelError(
+                nameof(viewModel.Status),
+                "El estado inicial solo puede ser pendiente o confirmado.");
+        }
+
         if (!ModelState.IsValid)
         {
             await LoadFormDataAsync(viewModel);
@@ -136,6 +146,7 @@ public class AppointmentsController : Controller
                 ProfessionalId = viewModel.ProfessionalId,
                 AppointmentDate = viewModel.AppointmentDate,
                 StartTime = viewModel.StartTime,
+                Status = viewModel.Status,
                 Notes = viewModel.Notes
             };
 
@@ -234,6 +245,18 @@ public class AppointmentsController : Controller
                 id,
                 GetCurrentUserId()),
             "Turno confirmado correctamente.");
+    }
+
+    // POST: Reception/Appointments/MarkAsWaiting/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public Task<IActionResult> MarkAsWaiting(int id)
+    {
+        return ExecuteAppointmentActionAsync(
+            () => _appointmentService.MarkAsWaitingAsync(
+                id,
+                GetCurrentUserId()),
+            "Llegada del paciente registrada correctamente.");
     }
 
     // POST: Reception/Appointments/Cancel/5
@@ -364,7 +387,6 @@ public class AppointmentsController : Controller
     }
 
     // GET: Reception/Appointments/GetRescheduleSlots
-
     [HttpGet]
     public async Task<IActionResult> GetRescheduleSlots(
         int appointmentId,
@@ -395,8 +417,8 @@ public class AppointmentsController : Controller
         }));
     }
 
-
     // POST: Reception/Appointments/Complete/5
+    // Se conserva temporalmente hasta trasladar esta operación al área Doctor.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public Task<IActionResult> Complete(int id)
@@ -468,7 +490,6 @@ public class AppointmentsController : Controller
         }
     }
 
-
     private async Task LoadRescheduleSlotsAsync(
         RescheduleAppointmentViewModel viewModel)
     {
@@ -493,7 +514,6 @@ public class AppointmentsController : Controller
             })
             .ToList();
     }
-
 
     private async Task<IActionResult> ExecuteAppointmentActionAsync(
         Func<Task> action,

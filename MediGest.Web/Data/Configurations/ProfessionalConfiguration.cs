@@ -1,4 +1,5 @@
-﻿using MediGest.Web.Models.Entities;
+﻿
+using MediGest.Web.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -23,6 +24,13 @@ public class ProfessionalConfiguration : IEntityTypeConfiguration<Professional>
         builder.HasOne(p => p.ApplicationUser)
             .WithOne()
             .HasForeignKey<Professional>(p => p.ApplicationUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Specialty relationship
+        builder.HasOne(p => p.Specialty)
+            .WithMany(s => s.Professionals)
+            .HasForeignKey(p => p.SpecialtyId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(p => p.Schedules)

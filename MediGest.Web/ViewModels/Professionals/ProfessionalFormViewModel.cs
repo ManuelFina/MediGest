@@ -17,9 +17,16 @@ public class ProfessionalFormViewModel
     [Display(Name = "Matrícula profesional")]
     public string LicenseNumber { get; set; } = string.Empty;
 
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una especialidad.")]
+    [Display(Name = "Especialidad")]
+    public int SpecialtyId { get; set; }
+
     [Display(Name = "Estado")]
     public bool IsActive { get; set; } = true;
 
     public IEnumerable<SelectListItem> AvailableUsers { get; set; }
+        = new List<SelectListItem>();
+
+    public IEnumerable<SelectListItem> AvailableSpecialties { get; set; }
         = new List<SelectListItem>();
 }

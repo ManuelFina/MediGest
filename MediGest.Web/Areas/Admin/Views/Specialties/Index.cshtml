@@ -1,0 +1,254 @@
+﻿
+@model MediGest.Web.ViewModels.Specialties.SpecialtyListViewModel
+
+@{
+    ViewData["Title"] = "Especialidades";
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Especialidades médicas</h2>
+            <p class="text-muted mb-0">
+                Administrá las especialidades disponibles en MediGest.
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Specialties"
+           asp-action="Create"
+           class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>
+            Nueva especialidad
+        </a>
+    </div>
+
+    @if (TempData["Success"] is not null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] is not null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">Total de especialidades</p>
+                        <h3 class="fw-bold mb-0">@Model.TotalSpecialties</h3>
+                    </div>
+                    <i class="bi bi-clipboard2-pulse fs-1 text-primary"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">Activas</p>
+                        <h3 class="fw-bold text-success mb-0">@Model.ActiveSpecialties</h3>
+                    </div>
+                    <i class="bi bi-check-circle fs-1 text-success"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1">Inactivas</p>
+                        <h3 class="fw-bold text-secondary mb-0">@Model.InactiveSpecialties</h3>
+                    </div>
+                    <i class="bi bi-pause-circle fs-1 text-secondary"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <h5 class="fw-bold mb-0">Listado de especialidades</h5>
+
+                <form asp-area="Admin"
+                      asp-controller="Specialties"
+                      asp-action="Index"
+                      method="get"
+                      class="d-flex gap-2">
+
+                    <input type="text"
+                           name="searchTerm"
+                           value="@Model.SearchTerm"
+                           class="form-control"
+                           placeholder="Buscar especialidad..." />
+
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-search"></i>
+                    </button>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Specialties"
+                           asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    }
+                </form>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Especialidad</th>
+                            <th>Descripción</th>
+                            <th class="text-center">Médicos</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model.Specialties.Any())
+                        {
+                            @foreach (var specialty in Model.Specialties)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <span class="fw-semibold">
+                                            @specialty.Name
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="text-muted">
+                                            @(string.IsNullOrWhiteSpace(specialty.Description)
+                                                ? "Sin descripción"
+                                                : specialty.Description)
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-dark border">
+                                            @specialty.ProfessionalsCount
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        @if (specialty.IsActive)
+                                        {
+                                            <span class="badge bg-success-subtle text-success">
+                                                Activa
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary">
+                                                Inactiva
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="text-end pe-4">
+                                        <div class="d-flex justify-content-end gap-2">
+
+                                            <a asp-area="Admin"
+                                               asp-controller="Specialties"
+                                               asp-action="Edit"
+                                               asp-route-id="@specialty.Id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+
+                                            @if (specialty.IsActive)
+                                            {
+                                                <form asp-area="Admin"
+                                                      asp-controller="Specialties"
+                                                      asp-action="Deactivate"
+                                                      asp-route-id="@specialty.Id"
+                                                      method="post"
+                                                      class="d-inline">
+
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            title="Desactivar"
+                                                            onclick="return confirm('¿Estás seguro de desactivar esta especialidad?');">
+                                                        <i class="bi bi-pause-circle"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-area="Admin"
+                                                      asp-controller="Specialties"
+                                                      asp-action="Activate"
+                                                      asp-route-id="@specialty.Id"
+                                                      method="post"
+                                                      class="d-inline">
+
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-success"
+                                                            title="Activar"
+                                                            onclick="return confirm('¿Deseás volver a activar esta especialidad?');">
+                                                        <i class="bi bi-check-circle"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <i class="bi bi-clipboard2-x fs-1 text-muted"></i>
+                                    <p class="text-muted mt-2 mb-0">
+                                        No se encontraron especialidades.
+                                    </p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+
+        <div class="card-footer bg-white border-0 py-3">
+            <small class="text-muted">
+                Mostrando @Model.Specialties.Count() especialidades.
+            </small>
+        </div>
+
+    </div>
+
+</div>

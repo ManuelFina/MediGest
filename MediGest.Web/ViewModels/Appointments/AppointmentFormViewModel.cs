@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
+using MediGest.Web.Models.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MediGest.Web.ViewModels.Appointments;
@@ -21,6 +22,12 @@ public class AppointmentFormViewModel
     [Required(ErrorMessage = "El horario es obligatorio.")]
     [Display(Name = "Horario disponible")]
     public TimeOnly StartTime { get; set; }
+
+    [Required(ErrorMessage = "El estado del turno es obligatorio.")]
+    [EnumDataType(typeof(AppointmentStatus),
+        ErrorMessage = "Seleccione un estado válido.")]
+    [Display(Name = "Estado inicial")]
+    public AppointmentStatus Status { get; set; } = AppointmentStatus.Pending;
 
     [StringLength(500, ErrorMessage = "Las observaciones no pueden superar los 500 caracteres.")]
     [Display(Name = "Observaciones")]

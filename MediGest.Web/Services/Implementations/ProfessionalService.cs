@@ -26,6 +26,7 @@ public class ProfessionalService : IProfessionalService
         return await _context.Professionals
             .AsNoTracking()
             .Include(p => p.ApplicationUser)
+            .Include(p => p.Specialty)
             .OrderBy(p => p.ApplicationUser.LastName)
             .ThenBy(p => p.ApplicationUser.FirstName)
             .ToListAsync();
@@ -34,19 +35,19 @@ public class ProfessionalService : IProfessionalService
     public async Task<IEnumerable<Professional>> SearchAsync(string searchTerm)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
-        {
             return await GetAllAsync();
-        }
 
         searchTerm = searchTerm.Trim();
 
         return await _context.Professionals
             .AsNoTracking()
             .Include(p => p.ApplicationUser)
+            .Include(p => p.Specialty)
             .Where(p =>
                 p.ApplicationUser.FirstName.Contains(searchTerm) ||
                 p.ApplicationUser.LastName.Contains(searchTerm) ||
-                p.LicenseNumber.Contains(searchTerm))
+                p.LicenseNumber.Contains(searchTerm) ||
+                p.Specialty.Name.Contains(searchTerm))
             .OrderBy(p => p.ApplicationUser.LastName)
             .ThenBy(p => p.ApplicationUser.FirstName)
             .ToListAsync();
@@ -57,6 +58,7 @@ public class ProfessionalService : IProfessionalService
         return await _context.Professionals
             .AsNoTracking()
             .Include(p => p.ApplicationUser)
+            .Include(p => p.Specialty)
             .FirstOrDefaultAsync(p => p.Id == id);
     }
 
@@ -64,13 +66,12 @@ public class ProfessionalService : IProfessionalService
         string applicationUserId)
     {
         if (string.IsNullOrWhiteSpace(applicationUserId))
-        {
             return null;
-        }
 
         return await _context.Professionals
             .AsNoTracking()
             .Include(p => p.ApplicationUser)
+            .Include(p => p.Specialty)
             .FirstOrDefaultAsync(p => p.ApplicationUserId == applicationUserId);
     }
 
@@ -80,7 +81,7 @@ public class ProfessionalService : IProfessionalService
 
         await ValidateProfessionalAsync(professional);
 
-        var licenseExists = await _context.Professionals
+        bool licenseExists = await _context.Professionals
             .AnyAsync(p => p.LicenseNumber == professional.LicenseNumber);
 
         if (licenseExists)
@@ -89,7 +90,7 @@ public class ProfessionalService : IProfessionalService
                 "Ya existe un profesional registrado con esa matrícula.");
         }
 
-        var userExists = await _context.Professionals
+        bool userExists = await _context.Professionals
             .AnyAsync(p => p.ApplicationUserId == professional.ApplicationUserId);
 
         if (userExists)
@@ -102,11 +103,9 @@ public class ProfessionalService : IProfessionalService
             professional.ApplicationUserId);
 
         if (user is null)
-        {
             throw new BusinessException("El usuario seleccionado no existe.");
-        }
 
-        var hasDoctorRole = await _userManager.IsInRoleAsync(user, "Doctor");
+        bool hasDoctorRole = await _userManager.IsInRoleAsync(user, "Doctor");
 
         if (!hasDoctorRole)
         {
@@ -131,13 +130,11 @@ public class ProfessionalService : IProfessionalService
             .FirstOrDefaultAsync(p => p.Id == professional.Id);
 
         if (existingProfessional is null)
-        {
             throw new BusinessException("El profesional no existe.");
-        }
 
         await ValidateProfessionalAsync(professional);
 
-        var licenseExists = await _context.Professionals
+        bool licenseExists = await _context.Professionals
             .AnyAsync(p =>
                 p.LicenseNumber == professional.LicenseNumber &&
                 p.Id != professional.Id);
@@ -155,6 +152,7 @@ public class ProfessionalService : IProfessionalService
         }
 
         existingProfessional.LicenseNumber = professional.LicenseNumber;
+        existingProfessional.SpecialtyId = professional.SpecialtyId;
 
         await _context.SaveChangesAsync();
     }
@@ -165,9 +163,7 @@ public class ProfessionalService : IProfessionalService
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (professional is null)
-        {
             throw new BusinessException("El profesional no existe.");
-        }
 
         if (!professional.IsActive)
         {
@@ -186,14 +182,23 @@ public class ProfessionalService : IProfessionalService
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (professional is null)
-        {
             throw new BusinessException("El profesional no existe.");
-        }
 
         if (professional.IsActive)
         {
             throw new BusinessException(
                 "El profesional ya se encuentra activo.");
+        }
+
+        bool specialtyIsActive = await _context.Specialties
+            .AnyAsync(s =>
+                s.Id == professional.SpecialtyId &&
+                s.IsActive);
+
+        if (!specialtyIsActive)
+        {
+            throw new BusinessException(
+                "No se puede activar el profesional porque su especialidad está inactiva.");
         }
 
         professional.IsActive = true;
@@ -210,7 +215,7 @@ public class ProfessionalService : IProfessionalService
             professional.LicenseNumber?.Trim() ?? string.Empty;
     }
 
-    private static Task ValidateProfessionalAsync(Professional professional)
+    private async Task ValidateProfessionalAsync(Professional professional)
     {
         if (string.IsNullOrWhiteSpace(professional.ApplicationUserId))
         {
@@ -224,6 +229,21 @@ public class ProfessionalService : IProfessionalService
                 "La matrícula profesional es obligatoria.");
         }
 
-        return Task.CompletedTask;
+        if (professional.SpecialtyId <= 0)
+        {
+            throw new BusinessException(
+                "Debe seleccionar una especialidad.");
+        }
+
+        bool specialtyExists = await _context.Specialties
+            .AnyAsync(s =>
+                s.Id == professional.SpecialtyId &&
+                s.IsActive);
+
+        if (!specialtyExists)
+        {
+            throw new BusinessException(
+                "La especialidad seleccionada no existe o está inactiva.");
+        }
     }
 }

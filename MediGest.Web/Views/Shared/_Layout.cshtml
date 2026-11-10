@@ -1,50 +1,371 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿
+@using Microsoft.AspNetCore.Identity
+@using MediGest.Web.Models.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var isAuthenticated = SignInManager.IsSignedIn(User);
+    var currentUser = isAuthenticated
+        ? await UserManager.GetUserAsync(User)
+        : null;
+
+    var userName = currentUser?.UserName ?? "Usuario";
+    var isAdmin = User.IsInRole("Administrator");
+    var isReceptionist = User.IsInRole("Receptionist");
+    var isDoctor = User.IsInRole("Doctor");
+
+    var isLoginPage = ViewContext.RouteData.Values["controller"]?.ToString() == "Account"
+                      && ViewContext.RouteData.Values["action"]?.ToString() == "Login";
+}
+
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MediGest.Web</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - MediGest</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MediGest.Web.styles.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --mg-sidebar: #172b4d;
+            --mg-sidebar-hover: #243e65;
+            --mg-primary: #3678e5;
+            --mg-background: #f4f6fa;
+            --mg-text: #263445;
+            --mg-muted: #8995a5;
+            --mg-sidebar-width: 255px;
+        }
+
+        body {
+            margin: 0;
+            background: var(--mg-background);
+            color: var(--mg-text);
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .mg-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--mg-sidebar-width);
+            background: var(--mg-sidebar);
+            color: white;
+            z-index: 1030;
+            display: flex;
+            flex-direction: column;
+            padding: 25px 16px;
+        }
+
+        .mg-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px 30px;
+            color: white;
+            text-decoration: none;
+            font-size: 23px;
+            font-weight: 700;
+        }
+
+        .mg-brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--mg-primary);
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+        }
+
+        .mg-menu-label {
+            padding: 12px 12px 8px;
+            color: #8294af;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mg-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 12px 14px;
+            margin: 3px 0;
+            border-radius: 8px;
+            color: #c5d0df;
+            text-decoration: none;
+            font-size: 14px;
+            transition: .2s;
+        }
+
+        .mg-nav-link i {
+            font-size: 18px;
+            width: 22px;
+        }
+
+        .mg-nav-link:hover,
+        .mg-nav-link.active {
+            color: white;
+            background: var(--mg-sidebar-hover);
+        }
+
+        .mg-nav-link.active {
+            box-shadow: inset 3px 0 var(--mg-primary);
+        }
+
+        .mg-sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid #344661;
+            padding-top: 18px;
+        }
+
+        .mg-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .mg-avatar {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            background: #3678e5;
+            border-radius: 50%;
+            font-weight: 700;
+        }
+
+        .mg-user-info {
+            min-width: 0;
+        }
+
+        .mg-user-info strong {
+            display: block;
+            font-size: 13px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mg-user-info small {
+            color: #aab8ca;
+            font-size: 11px;
+        }
+
+        .mg-main {
+            margin-left: var(--mg-sidebar-width);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mg-topbar {
+            height: 72px;
+            background: white;
+            border-bottom: 1px solid #e9edf3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+        }
+
+        .mg-topbar-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .mg-content {
+            padding: 30px 32px;
+            flex: 1;
+        }
+
+        .mg-footer {
+            padding: 18px 32px;
+            color: var(--mg-muted);
+            font-size: 12px;
+            border-top: 1px solid #e9edf3;
+        }
+
+        .mg-logout {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            text-align: left;
+        }
+
+        .mg-logout:hover {
+            background: #8b303b;
+        }
+
+        @@media (max-width: 768px) {
+            .mg-sidebar {
+                width: 72px;
+                padding: 20px 9px;
+            }
+
+            .mg-brand {
+                justify-content: center;
+                padding: 0 0 25px;
+            }
+
+            .mg-brand-text,
+            .mg-menu-label,
+            .mg-nav-link span,
+            .mg-user-info,
+            .mg-sidebar-footer .mg-nav-link span {
+                display: none;
+            }
+
+            .mg-nav-link {
+                justify-content: center;
+                padding: 13px 5px;
+            }
+
+            .mg-nav-link i {
+                width: auto;
+                font-size: 20px;
+            }
+
+            .mg-user {
+                justify-content: center;
+                padding: 5px 0;
+            }
+
+            .mg-main {
+                margin-left: 72px;
+            }
+
+            .mg-topbar {
+                padding: 0 16px;
+            }
+
+            .mg-content {
+                padding: 20px 15px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MediGest.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+
+@if (isAuthenticated && !isLoginPage)
+{
+    <aside class="mg-sidebar">
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="mg-brand">
+            <span class="mg-brand-icon"><i class="bi bi-heart-pulse-fill"></i></span>
+            <span class="mg-brand-text">MediGest</span>
+        </a>
+
+        <div class="mg-menu-label">Principal</div>
+
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="mg-nav-link">
+            <i class="bi bi-grid-1x2-fill"></i><span>Inicio</span>
+        </a>
+
+        @if (isAdmin || isReceptionist)
+        {
+            <div class="mg-menu-label">Gestión</div>
+
+            <a asp-area="Reception" asp-controller="Patients" asp-action="Index" class="mg-nav-link">
+                <i class="bi bi-people-fill"></i><span>Pacientes</span>
+            </a>
+        }
+
+        @if (isAdmin)
+        {
+            <a asp-area="Admin" asp-controller="Professionals" asp-action="Index" class="mg-nav-link">
+                <i class="bi bi-person-badge-fill"></i><span>Profesionales</span>
+            </a>
+
+            <a asp-area="Admin" asp-controller="Specialties" asp-action="Index" class="mg-nav-link">
+                <i class="bi bi-heart-pulse"></i><span>Especialidades</span>
+            </a>
+        }
+
+        @if (isAdmin || isReceptionist)
+        {
+            <a asp-area="Reception" asp-controller="Appointments" asp-action="Index" class="mg-nav-link">
+                <i class="bi bi-calendar-check-fill"></i><span>Turnos</span>
+            </a>
+        }
+
+        @if (isDoctor)
+        {
+            <div class="mg-menu-label">Mi espacio</div>
+
+            <a asp-area="Doctor" asp-controller="ProfessionalSchedules" asp-action="Index" class="mg-nav-link">
+                <i class="bi bi-calendar-week-fill"></i><span>Mi agenda</span>
+            </a>
+
+            <a asp-area="Doctor" asp-controller="ScheduleExceptions" asp-action="Index" class="mg-nav-link">
+                <i class="bi bi-calendar-x-fill"></i><span>Excepciones</span>
+            </a>
+        }
+
+        <div class="mg-sidebar-footer">
+            <div class="mg-user">
+                <div class="mg-avatar">
+                    @userName.Substring(0, 1).ToUpper()
+                </div>
+                <div class="mg-user-info">
+                    <strong>@userName</strong>
+                    <small>
+                        @(isAdmin ? "Administrador" : isReceptionist ? "Recepcionista" : "Profesional")
+                    </small>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                <button type="submit" class="mg-nav-link mg-logout">
+                    <i class="bi bi-box-arrow-left"></i><span>Cerrar sesión</span>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="mg-main">
+        <header class="mg-topbar">
+            <div class="mg-topbar-title">
+                Sistema de gestión de consultorio
+            </div>
+            <div class="text-muted small">
+                <i class="bi bi-shield-check me-1"></i>Acceso seguro
+            </div>
+        </header>
+
+        <main class="mg-content">
             @RenderBody()
         </main>
+
+        <footer class="mg-footer">
+            © 2026 MediGest · Sistema de gestión de consultorio médico
+        </footer>
+    </div>
+}
+else
+{
+<main class="mg-content">
+    <div class="alert alert-warning">
+        LAYOUT GLOBAL CARGADO
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MediGest.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    @RenderBody()
+</main>
+}
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

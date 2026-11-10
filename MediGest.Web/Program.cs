@@ -1,6 +1,7 @@
 using MediGest.Web.Data;
 using MediGest.Web.Data.Seed;
 using MediGest.Web.Models.Identity;
+using MediGest.Web.Services;
 using MediGest.Web.Services.Implementations;
 using MediGest.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -55,6 +56,7 @@ builder.Services.AddScoped<IAppointmentAvailabilityService, AppointmentAvailabil
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IProfessionalService, ProfessionalService>();
+builder.Services.AddScoped<ISpecialtyService, SpecialtyService>();
 
 builder.Services.AddControllersWithViews();
 

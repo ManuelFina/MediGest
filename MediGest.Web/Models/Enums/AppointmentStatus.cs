@@ -1,4 +1,5 @@
-﻿namespace MediGest.Web.Models.Enums;
+﻿
+namespace MediGest.Web.Models.Enums;
 
 public enum AppointmentStatus
 {
@@ -6,5 +7,6 @@ public enum AppointmentStatus
     Confirmed = 2,
     Cancelled = 3,
     Completed = 4,
-    NoShow = 5
+    NoShow = 5,
+    Waiting = 6
 }

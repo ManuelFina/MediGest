@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 
 namespace MediGest.Web.Areas.Admin.Controllers;
 
@@ -17,13 +16,16 @@ namespace MediGest.Web.Areas.Admin.Controllers;
 public class ProfessionalsController : Controller
 {
     private readonly IProfessionalService _professionalService;
+    private readonly ISpecialtyService _specialtyService;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public ProfessionalsController(
         IProfessionalService professionalService,
+        ISpecialtyService specialtyService,
         UserManager<ApplicationUser> userManager)
     {
         _professionalService = professionalService;
+        _specialtyService = specialtyService;
         _userManager = userManager;
     }
 
@@ -53,7 +55,7 @@ public class ProfessionalsController : Controller
     {
         var viewModel = new ProfessionalFormViewModel();
 
-        await LoadAvailableUsersAsync(viewModel);
+        await LoadFormDataAsync(viewModel);
 
         return View(viewModel);
     }
@@ -65,14 +67,15 @@ public class ProfessionalsController : Controller
     {
         if (!ModelState.IsValid)
         {
-            await LoadAvailableUsersAsync(viewModel);
+            await LoadFormDataAsync(viewModel);
             return View(viewModel);
         }
 
         var professional = new Professional
         {
             ApplicationUserId = viewModel.ApplicationUserId,
-            LicenseNumber = viewModel.LicenseNumber
+            LicenseNumber = viewModel.LicenseNumber,
+            SpecialtyId = viewModel.SpecialtyId
         };
 
         try
@@ -88,7 +91,7 @@ public class ProfessionalsController : Controller
         {
             ModelState.AddModelError(string.Empty, exception.Message);
 
-            await LoadAvailableUsersAsync(viewModel);
+            await LoadFormDataAsync(viewModel);
 
             return View(viewModel);
         }
@@ -100,19 +103,18 @@ public class ProfessionalsController : Controller
         var professional = await _professionalService.GetByIdAsync(id);
 
         if (professional is null)
-        {
             return NotFound();
-        }
 
         var viewModel = new ProfessionalFormViewModel
         {
             Id = professional.Id,
             ApplicationUserId = professional.ApplicationUserId,
             LicenseNumber = professional.LicenseNumber,
+            SpecialtyId = professional.SpecialtyId,
             IsActive = professional.IsActive
         };
 
-        await LoadAvailableUsersAsync(viewModel);
+        await LoadFormDataAsync(viewModel);
 
         return View(viewModel);
     }
@@ -124,13 +126,11 @@ public class ProfessionalsController : Controller
         ProfessionalFormViewModel viewModel)
     {
         if (id != viewModel.Id)
-        {
             return BadRequest();
-        }
 
         if (!ModelState.IsValid)
         {
-            await LoadAvailableUsersAsync(viewModel);
+            await LoadFormDataAsync(viewModel);
             return View(viewModel);
         }
 
@@ -138,7 +138,8 @@ public class ProfessionalsController : Controller
         {
             Id = viewModel.Id,
             ApplicationUserId = viewModel.ApplicationUserId,
-            LicenseNumber = viewModel.LicenseNumber
+            LicenseNumber = viewModel.LicenseNumber,
+            SpecialtyId = viewModel.SpecialtyId
         };
 
         try
@@ -154,7 +155,7 @@ public class ProfessionalsController : Controller
         {
             ModelState.AddModelError(string.Empty, exception.Message);
 
-            await LoadAvailableUsersAsync(viewModel);
+            await LoadFormDataAsync(viewModel);
 
             return View(viewModel);
         }
@@ -198,15 +199,21 @@ public class ProfessionalsController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    private async Task LoadFormDataAsync(
+        ProfessionalFormViewModel viewModel)
+    {
+        await LoadAvailableUsersAsync(viewModel);
+        await LoadAvailableSpecialtiesAsync(viewModel);
+    }
+
     private async Task LoadAvailableUsersAsync(
         ProfessionalFormViewModel viewModel)
     {
         var users = await _userManager.GetUsersInRoleAsync("Doctor");
 
-        var assignedUserIds = await _professionalService
-            .GetAllAsync();
+        var professionals = await _professionalService.GetAllAsync();
 
-        var assignedIds = assignedUserIds
+        var assignedIds = professionals
             .Select(p => p.ApplicationUserId)
             .ToHashSet();
 
@@ -220,6 +227,35 @@ public class ProfessionalsController : Controller
             {
                 Value = u.Id,
                 Text = $"{u.LastName}, {u.FirstName} ({u.Email})"
+            })
+            .ToList();
+    }
+
+    private async Task LoadAvailableSpecialtiesAsync(
+        ProfessionalFormViewModel viewModel)
+    {
+        var specialties = (await _specialtyService.GetActiveAsync())
+            .ToList();
+
+        // Include the current specialty when editing an inactive professional.
+        if (viewModel.SpecialtyId > 0 &&
+            specialties.All(s => s.Id != viewModel.SpecialtyId))
+        {
+            var currentSpecialty = await _specialtyService
+                .GetByIdAsync(viewModel.SpecialtyId);
+
+            if (currentSpecialty is not null)
+                specialties.Add(currentSpecialty);
+        }
+
+        viewModel.AvailableSpecialties = specialties
+            .OrderBy(s => s.Name)
+            .Select(s => new SelectListItem
+            {
+                Value = s.Id.ToString(),
+                Text = s.IsActive
+                    ? s.Name
+                    : $"{s.Name} (Inactiva)"
             })
             .ToList();
     }

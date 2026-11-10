@@ -1,0 +1,107 @@
+﻿
+@model MediGest.Web.ViewModels.Professionals.ProfessionalFormViewModel
+
+@{
+    ViewData["Title"] = "Registrar profesional";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Registrar profesional</h2>
+            <p class="text-muted mb-0">
+                Vinculá un usuario médico con su matrícula y especialidad.
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="Professionals"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 col-xl-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <form asp-action="Create"
+                          asp-area="Admin"
+                          method="post">
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger"
+                             role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="ApplicationUserId"
+                                   class="form-label"></label>
+
+                            <select asp-for="ApplicationUserId"
+                                    asp-items="Model.AvailableUsers"
+                                    class="form-select">
+                                <option value="">Seleccioná un usuario médico</option>
+                            </select>
+
+                            <span asp-validation-for="ApplicationUserId"
+                                  class="text-danger small"></span>
+
+                            <div class="form-text">
+                                Solo aparecen usuarios que tienen asignado el rol Doctor.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="SpecialtyId"
+                                   class="form-label"></label>
+
+                            <select asp-for="SpecialtyId"
+                                    asp-items="Model.AvailableSpecialties"
+                                    class="form-select">
+                                <option value="0">Seleccioná una especialidad</option>
+                            </select>
+
+                            <span asp-validation-for="SpecialtyId"
+                                  class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="LicenseNumber"
+                                   class="form-label"></label>
+
+                            <input asp-for="LicenseNumber"
+                                   class="form-control"
+                                   placeholder="Ej. MP-12345" />
+
+                            <span asp-validation-for="LicenseNumber"
+                                  class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-area="Admin"
+                               asp-controller="Professionals"
+                               asp-action="Index"
+                               class="btn btn-light">
+                                Cancelar
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus me-1"></i>
+                                Registrar profesional
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

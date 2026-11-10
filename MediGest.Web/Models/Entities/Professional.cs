@@ -17,6 +17,12 @@ public class Professional
     [StringLength(30, ErrorMessage = "La matrícula no puede superar los 30 caracteres.")]
     public string LicenseNumber { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "La especialidad es obligatoria.")]
+    [Display(Name = "Especialidad")]
+    public int SpecialtyId { get; set; }
+
+    public Specialty Specialty { get; set; } = null!;
+
     public bool IsActive { get; set; } = true;
 
     public ICollection<ProfessionalSchedule> Schedules { get; set; }

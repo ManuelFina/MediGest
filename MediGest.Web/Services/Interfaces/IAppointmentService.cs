@@ -23,6 +23,8 @@ public interface IAppointmentService
 
     Task ConfirmAsync(int id, string changedByUserId);
 
+    Task MarkAsWaitingAsync(int id, string changedByUserId);
+
     Task CancelAsync(
         int id,
         string reason,

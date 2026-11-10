@@ -70,14 +70,18 @@ public class AppointmentService : IAppointmentService
 
     public async Task<IEnumerable<Appointment>> GetByPatientAsync(int patientId)
     {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
         return await _context.Appointments
             .AsNoTracking()
             .Include(a => a.Patient)
             .Include(a => a.Professional)
                 .ThenInclude(p => p.ApplicationUser)
-            .Where(a => a.PatientId == patientId)
-            .OrderByDescending(a => a.AppointmentDate)
-            .ThenByDescending(a => a.StartTime)
+            .Where(a =>
+                a.PatientId == patientId &&
+                a.AppointmentDate >= today)
+            .OrderBy(a => a.AppointmentDate)
+            .ThenBy(a => a.StartTime)
             .ToListAsync();
     }
 
@@ -99,6 +103,18 @@ public class AppointmentService : IAppointmentService
     {
         ValidateUserId(changedByUserId);
         ValidateAppointmentDate(appointment.AppointmentDate);
+
+        if (appointment.Status == 0)
+        {
+            appointment.Status = AppointmentStatus.Pending;
+        }
+
+        if (appointment.Status != AppointmentStatus.Pending &&
+            appointment.Status != AppointmentStatus.Confirmed)
+        {
+            throw new BusinessException(
+                "El turno solo puede crearse como pendiente o confirmado.");
+        }
 
         await using var transaction =
             await _context.Database.BeginTransactionAsync(
@@ -156,13 +172,17 @@ public class AppointmentService : IAppointmentService
             appointment.StartTime,
             appointment.EndTime);
 
-        appointment.Status = AppointmentStatus.Pending;
         appointment.CreatedAt = DateTime.UtcNow;
         appointment.UpdatedAt = null;
 
+        var initialDescription =
+            appointment.Status == AppointmentStatus.Confirmed
+                ? "Turno creado y confirmado."
+                : "Turno creado como pendiente.";
+
         appointment.History.Add(new AppointmentHistory
         {
-            Description = "Turno creado.",
+            Description = initialDescription,
             ChangedAt = DateTime.UtcNow,
             ChangedByUserId = changedByUserId
         });
@@ -182,7 +202,20 @@ public class AppointmentService : IAppointmentService
             AppointmentStatus.Confirmed,
             "Turno confirmado.",
             changedByUserId,
+            false,
             AppointmentStatus.Pending);
+    }
+
+    public async Task MarkAsWaitingAsync(int id, string changedByUserId)
+    {
+        await ChangeStatusAsync(
+            id,
+            AppointmentStatus.Waiting,
+            "El paciente llegó al consultorio. Se encuentra en espera.",
+            changedByUserId,
+            false,
+            AppointmentStatus.Pending,
+            AppointmentStatus.Confirmed);
     }
 
     public async Task CancelAsync(
@@ -211,27 +244,8 @@ public class AppointmentService : IAppointmentService
             AppointmentStatus.Cancelled,
             $"Turno cancelado. Motivo: {reason}",
             changedByUserId,
+            false,
             AppointmentStatus.Pending,
-            AppointmentStatus.Confirmed);
-    }
-
-    public async Task CompleteAsync(int id, string changedByUserId)
-    {
-        await ChangeStatusAsync(
-            id,
-            AppointmentStatus.Completed,
-            "Turno marcado como completado.",
-            changedByUserId,
-            AppointmentStatus.Confirmed);
-    }
-
-    public async Task MarkAsNoShowAsync(int id, string changedByUserId)
-    {
-        await ChangeStatusAsync(
-            id,
-            AppointmentStatus.NoShow,
-            "Paciente ausente.",
-            changedByUserId,
             AppointmentStatus.Confirmed);
     }
 
@@ -260,7 +274,7 @@ public class AppointmentService : IAppointmentService
             appointment.Status != AppointmentStatus.Confirmed)
         {
             throw new BusinessException(
-                "No se puede reprogramar un turno que ya fue cancelado, completado o marcado como ausente.");
+                "No se puede reprogramar un turno que ya fue cancelado, completado, puesto en espera o marcado como ausente.");
         }
 
         if (appointment.AppointmentDate == newDate &&
@@ -325,11 +339,34 @@ public class AppointmentService : IAppointmentService
         await transaction.CommitAsync();
     }
 
+    public async Task CompleteAsync(int id, string changedByUserId)
+    {
+        await ChangeStatusAsync(
+            id,
+            AppointmentStatus.Completed,
+            "Atención médica completada.",
+            changedByUserId,
+            false,
+            AppointmentStatus.Waiting);
+    }
+
+    public async Task MarkAsNoShowAsync(int id, string changedByUserId)
+    {
+        await ChangeStatusAsync(
+            id,
+            AppointmentStatus.NoShow,
+            "Paciente ausente.",
+            changedByUserId,
+            true,
+            AppointmentStatus.Confirmed);
+    }
+
     private async Task ChangeStatusAsync(
         int id,
         AppointmentStatus newStatus,
         string description,
         string changedByUserId,
+        bool requireAppointmentEndPassed = false,
         params AppointmentStatus[] allowedStatuses)
     {
         ValidateUserId(changedByUserId);
@@ -350,6 +387,23 @@ public class AppointmentService : IAppointmentService
         {
             throw new BusinessException(
                 "No se puede realizar esta operación con el estado actual del turno.");
+        }
+
+        if (requireAppointmentEndPassed)
+        {
+            var currentDate = DateOnly.FromDateTime(DateTime.Now);
+            var currentTime = TimeOnly.FromDateTime(DateTime.Now);
+
+            var appointmentHasEnded =
+                appointment.AppointmentDate < currentDate ||
+                (appointment.AppointmentDate == currentDate &&
+                 appointment.EndTime <= currentTime);
+
+            if (!appointmentHasEnded)
+            {
+                throw new BusinessException(
+                    "No se puede marcar como ausente a un paciente antes de finalizar el horario del turno.");
+            }
         }
 
         appointment.Status = newStatus;

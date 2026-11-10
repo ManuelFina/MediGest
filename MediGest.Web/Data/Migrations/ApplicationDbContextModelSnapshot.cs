@@ -173,6 +173,9 @@ namespace MediGest.Web.Data.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<int>("SpecialtyId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ApplicationUserId")
@@ -180,6 +183,8 @@ namespace MediGest.Web.Data.Migrations
 
                     b.HasIndex("LicenseNumber")
                         .IsUnique();
+
+                    b.HasIndex("SpecialtyId");
 
                     b.ToTable("Professionals");
                 });
@@ -284,6 +289,34 @@ namespace MediGest.Web.Data.Migrations
                     b.HasIndex("ProfessionalId", "StartDate", "EndDate");
 
                     b.ToTable("ScheduleExceptions");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Specialty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Specialties");
                 });
 
             modelBuilder.Entity("MediGest.Web.Models.Identity.ApplicationUser", b =>
@@ -550,7 +583,15 @@ namespace MediGest.Web.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("MediGest.Web.Models.Entities.Specialty", "Specialty")
+                        .WithMany("Professionals")
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("ApplicationUser");
+
+                    b.Navigation("Specialty");
                 });
 
             modelBuilder.Entity("MediGest.Web.Models.Entities.ProfessionalSchedule", b =>
@@ -671,6 +712,11 @@ namespace MediGest.Web.Data.Migrations
             modelBuilder.Entity("MediGest.Web.Models.Entities.ScheduleDay", b =>
                 {
                     b.Navigation("ScheduleDays");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Specialty", b =>
+                {
+                    b.Navigation("Professionals");
                 });
 #pragma warning restore 612, 618
         }
