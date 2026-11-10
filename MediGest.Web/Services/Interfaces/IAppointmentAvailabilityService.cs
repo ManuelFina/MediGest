@@ -5,5 +5,6 @@ public interface IAppointmentAvailabilityService
 {
     Task<IEnumerable<TimeOnly>> GetAvailableSlotsAsync(
         int professionalId,
-        DateOnly date);
+        DateOnly date,
+        int? excludedAppointmentId = null);
 }

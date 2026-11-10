@@ -54,6 +54,7 @@ builder.Services.AddScoped<IScheduleExceptionService, ScheduleExceptionService>(
 builder.Services.AddScoped<IAppointmentAvailabilityService, AppointmentAvailabilityService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IProfessionalService, ProfessionalService>();
 
 builder.Services.AddControllersWithViews();
 
@@ -77,8 +78,14 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Rutas para las Areas
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+// Ruta convencional
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Login}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

@@ -2,6 +2,7 @@
 using MediGest.Web.Data;
 using MediGest.Web.Exceptions;
 using MediGest.Web.Models.Entities;
+using MediGest.Web.Models.Enums;
 using MediGest.Web.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,7 +43,9 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
         ValidateAppointmentDuration(schedule);
 
         var professionalExists = await _context.Professionals
-            .AnyAsync(p => p.Id == schedule.ProfessionalId && p.IsActive);
+            .AnyAsync(p =>
+                p.Id == schedule.ProfessionalId &&
+                p.IsActive);
 
         if (!professionalExists)
         {
@@ -50,17 +53,9 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
                 "El profesional no existe o se encuentra inactivo.");
         }
 
-        var hasOverlappingSchedule = await _context.ProfessionalSchedules
-            .AnyAsync(s =>
-                s.ProfessionalId == schedule.ProfessionalId &&
-                schedule.StartDate <= s.EndDate &&
-                schedule.EndDate >= s.StartDate);
+        await ValidateOverlappingSchedulesAsync(schedule);
 
-        if (hasOverlappingSchedule)
-        {
-            throw new BusinessException(
-                "El profesional ya tiene una agenda configurada para ese período.");
-        }
+        schedule.ScheduleDays = new List<ScheduleDay>();
 
         _context.ProfessionalSchedules.Add(schedule);
 
@@ -75,27 +70,23 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
         ValidateAppointmentDuration(schedule);
 
         var existingSchedule = await _context.ProfessionalSchedules
-            .Include(s => s.ScheduleDays)
             .FirstOrDefaultAsync(s => s.Id == schedule.Id);
 
         if (existingSchedule is null)
         {
             throw new BusinessException(
-                "No se encontró la agenda que intentás modificar.");
+                "La agenda no existe.");
         }
 
-        var hasOverlappingSchedule = await _context.ProfessionalSchedules
-            .AnyAsync(s =>
-                s.Id != schedule.Id &&
-                s.ProfessionalId == schedule.ProfessionalId &&
-                schedule.StartDate <= s.EndDate &&
-                schedule.EndDate >= s.StartDate);
-
-        if (hasOverlappingSchedule)
+        if (existingSchedule.ProfessionalId != schedule.ProfessionalId)
         {
             throw new BusinessException(
-                "El profesional ya tiene otra agenda configurada para ese período.");
+                "No se puede cambiar el profesional asociado a una agenda.");
         }
+
+        await ValidateOverlappingSchedulesAsync(schedule);
+
+        await ValidateExistingAppointmentsAsync(schedule);
 
         existingSchedule.Name = schedule.Name;
         existingSchedule.StartDate = schedule.StartDate;
@@ -103,7 +94,6 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
         existingSchedule.AppointmentDurationMinutes =
             schedule.AppointmentDurationMinutes;
         existingSchedule.IsActive = schedule.IsActive;
-        existingSchedule.ProfessionalId = schedule.ProfessionalId;
 
         await _context.SaveChangesAsync();
     }
@@ -111,24 +101,26 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
     public async Task DeleteAsync(int id)
     {
         var schedule = await _context.ProfessionalSchedules
+            .Include(s => s.ScheduleDays)
             .FirstOrDefaultAsync(s => s.Id == id);
 
         if (schedule is null)
         {
             throw new BusinessException(
-                "No se encontró la agenda que intentás eliminar.");
+                "La agenda no existe.");
         }
 
         var hasAppointments = await _context.Appointments
             .AnyAsync(a =>
                 a.ProfessionalId == schedule.ProfessionalId &&
                 a.AppointmentDate >= schedule.StartDate &&
-                a.AppointmentDate <= schedule.EndDate);
+                a.AppointmentDate <= schedule.EndDate &&
+                a.Status != AppointmentStatus.Cancelled);
 
         if (hasAppointments)
         {
             throw new BusinessException(
-                "No se puede eliminar la agenda porque existen turnos asociados a ese período.");
+                "No se puede eliminar la agenda porque tiene turnos asignados.");
         }
 
         _context.ProfessionalSchedules.Remove(schedule);
@@ -136,26 +128,72 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
         await _context.SaveChangesAsync();
     }
 
+    private async Task ValidateOverlappingSchedulesAsync(
+        ProfessionalSchedule schedule)
+    {
+        var hasOverlap = await _context.ProfessionalSchedules
+            .AnyAsync(s =>
+                s.ProfessionalId == schedule.ProfessionalId &&
+                s.Id != schedule.Id &&
+                schedule.StartDate <= s.EndDate &&
+                schedule.EndDate >= s.StartDate);
+
+        if (hasOverlap)
+        {
+            throw new BusinessException(
+                "El período de la agenda se superpone con otra agenda del profesional.");
+        }
+    }
+
+    private async Task ValidateExistingAppointmentsAsync(
+        ProfessionalSchedule schedule)
+    {
+        var appointments = await _context.Appointments
+            .AsNoTracking()
+            .Where(a =>
+                a.ProfessionalId == schedule.ProfessionalId &&
+                a.Status != AppointmentStatus.Cancelled &&
+                a.AppointmentDate >= DateOnly.FromDateTime(DateTime.Today))
+            .ToListAsync();
+
+        foreach (var appointment in appointments)
+        {
+            if (appointment.AppointmentDate < schedule.StartDate ||
+                appointment.AppointmentDate > schedule.EndDate)
+            {
+                var belongsToAnotherSchedule =
+                    await _context.ProfessionalSchedules.AnyAsync(s =>
+                        s.Id != schedule.Id &&
+                        s.ProfessionalId == schedule.ProfessionalId &&
+                        s.IsActive &&
+                        appointment.AppointmentDate >= s.StartDate &&
+                        appointment.AppointmentDate <= s.EndDate);
+
+                if (!belongsToAnotherSchedule)
+                {
+                    throw new BusinessException(
+                        "No se puede modificar el período de la agenda porque existen turnos asignados fuera del nuevo rango de fechas.");
+                }
+            }
+        }
+    }
+
     private static void ValidateScheduleDates(
         ProfessionalSchedule schedule)
     {
-        if (schedule.StartDate == default)
+        if (schedule.StartDate == default ||
+            schedule.EndDate <= schedule.StartDate)
         {
             throw new BusinessException(
-                "La fecha de inicio es obligatoria.");
-        }
-
-        if (schedule.EndDate <= schedule.StartDate)
-        {
-            throw new BusinessException(
-                "La fecha de finalización debe ser posterior a la fecha de inicio.");
+                "El período de la agenda no es válido.");
         }
     }
 
     private static void ValidateAppointmentDuration(
         ProfessionalSchedule schedule)
     {
-        if (schedule.AppointmentDurationMinutes is < 5 or > 240)
+        if (schedule.AppointmentDurationMinutes < 5 ||
+            schedule.AppointmentDurationMinutes > 240)
         {
             throw new BusinessException(
                 "La duración del turno debe estar entre 5 y 240 minutos.");

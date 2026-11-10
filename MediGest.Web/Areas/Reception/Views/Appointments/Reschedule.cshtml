@@ -1,0 +1,154 @@
+﻿
+@model MediGest.Web.ViewModels.Appointments.RescheduleAppointmentViewModel
+
+@{
+    ViewData["Title"] = "Reprogramar turno";
+}
+
+<div class="container-fluid">
+
+    <h2 class="mb-2">Reprogramar turno</h2>
+
+    <p class="text-muted mb-4">
+        Seleccioná una nueva fecha y un horario disponible.
+    </p>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Paciente</label>
+                    <p class="fw-semibold">@Model.PatientName</p>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Profesional</label>
+                    <p class="fw-semibold">@Model.ProfessionalName</p>
+                </div>
+            </div>
+
+            <form asp-action="Reschedule" method="post">
+
+                <input type="hidden" asp-for="AppointmentId" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger">
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="NewDate" class="form-label"></label>
+
+                        <input asp-for="NewDate"
+                               type="date"
+                               class="form-control"
+                               id="newDate" />
+
+                        <span asp-validation-for="NewDate"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="NewStartTime"
+                               class="form-label"></label>
+
+                        <select asp-for="NewStartTime"
+                                asp-items="Model.AvailableSlots"
+                                class="form-select"
+                                id="newStartTime">
+                            <option value="">Seleccionar horario</option>
+                        </select>
+
+                        <span asp-validation-for="NewStartTime"
+                              class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Guardar cambios
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+const dateInput = document.getElementById("newDate");
+const timeSelect = document.getElementById("newStartTime");
+
+const appointmentId = @Model.AppointmentId;
+
+const slotsUrl =
+    '@Url.Action("GetRescheduleSlots", "Appointments", new { area = "Reception" })';
+
+async function loadAvailableSlots() {
+    const date = dateInput.value;
+
+    timeSelect.innerHTML =
+        '<option value="">Seleccionar horario</option>';
+
+    timeSelect.disabled = true;
+
+    if (!date) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${slotsUrl}?appointmentId=${appointmentId}&date=${encodeURIComponent(date)}`
+        );
+
+        if (!response.ok) {
+            throw new Error("No se pudieron cargar los horarios.");
+        }
+
+        const slots = await response.json();
+
+        if (slots.length === 0) {
+            timeSelect.innerHTML =
+                '<option value="">No hay horarios disponibles</option>';
+
+            return;
+        }
+
+        slots.forEach(slot => {
+            const option = document.createElement("option");
+
+            option.value = slot.value;
+            option.textContent = slot.text;
+
+            timeSelect.appendChild(option);
+        });
+
+        timeSelect.disabled = false;
+    }
+    catch (error) {
+        console.error(error);
+
+        timeSelect.innerHTML =
+            '<option value="">Error al cargar horarios</option>';
+    }
+}
+
+dateInput.addEventListener("change", loadAvailableSlots);
+
+    </script>
+}

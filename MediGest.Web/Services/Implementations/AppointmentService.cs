@@ -98,6 +98,7 @@ public class AppointmentService : IAppointmentService
         string changedByUserId)
     {
         ValidateUserId(changedByUserId);
+        ValidateAppointmentDate(appointment.AppointmentDate);
 
         await using var transaction =
             await _context.Database.BeginTransactionAsync(
@@ -105,7 +106,8 @@ public class AppointmentService : IAppointmentService
 
         var patient = await _context.Patients
             .FirstOrDefaultAsync(p =>
-                p.Id == appointment.PatientId && p.IsActive);
+                p.Id == appointment.PatientId &&
+                p.IsActive);
 
         if (patient is null)
         {
@@ -115,7 +117,8 @@ public class AppointmentService : IAppointmentService
 
         var professional = await _context.Professionals
             .FirstOrDefaultAsync(p =>
-                p.Id == appointment.ProfessionalId && p.IsActive);
+                p.Id == appointment.ProfessionalId &&
+                p.IsActive);
 
         if (professional is null)
         {
@@ -187,16 +190,26 @@ public class AppointmentService : IAppointmentService
         string reason,
         string changedByUserId)
     {
+        ValidateUserId(changedByUserId);
+
         if (string.IsNullOrWhiteSpace(reason))
         {
             throw new BusinessException(
                 "Debe indicar el motivo de cancelación.");
         }
 
+        reason = reason.Trim();
+
+        if (reason.Length > 250)
+        {
+            throw new BusinessException(
+                "El motivo de cancelación no puede superar los 250 caracteres.");
+        }
+
         await ChangeStatusAsync(
             id,
             AppointmentStatus.Cancelled,
-            $"Turno cancelado. Motivo: {reason.Trim()}",
+            $"Turno cancelado. Motivo: {reason}",
             changedByUserId,
             AppointmentStatus.Pending,
             AppointmentStatus.Confirmed);
@@ -229,6 +242,7 @@ public class AppointmentService : IAppointmentService
         string changedByUserId)
     {
         ValidateUserId(changedByUserId);
+        ValidateAppointmentDate(newDate);
 
         await using var transaction =
             await _context.Database.BeginTransactionAsync(
@@ -266,10 +280,12 @@ public class AppointmentService : IAppointmentService
                 "El profesional no tiene una agenda activa para esa fecha.");
         }
 
+        // Excluimos únicamente el turno que estamos reprogramando.
         var availableSlots =
             await _availabilityService.GetAvailableSlotsAsync(
                 appointment.ProfessionalId,
-                newDate);
+                newDate,
+                appointment.Id);
 
         if (!availableSlots.Contains(newStartTime))
         {
@@ -298,7 +314,9 @@ public class AppointmentService : IAppointmentService
         appointment.History.Add(new AppointmentHistory
         {
             Description =
-                $"Turno reprogramado de {oldDate:dd/MM/yyyy} {oldStartTime:HH:mm} a {newDate:dd/MM/yyyy} {newStartTime:HH:mm}.",
+                $"Turno reprogramado de {oldDate:dd/MM/yyyy} {oldStartTime:HH:mm} " +
+                $"a {newDate:dd/MM/yyyy} {newStartTime:HH:mm}.",
+
             ChangedAt = DateTime.UtcNow,
             ChangedByUserId = changedByUserId
         });
@@ -352,6 +370,16 @@ public class AppointmentService : IAppointmentService
         int professionalId,
         DateOnly date)
     {
+        var professionalIsActive = await _context.Professionals
+            .AnyAsync(p =>
+                p.Id == professionalId &&
+                p.IsActive);
+
+        if (!professionalIsActive)
+        {
+            return null;
+        }
+
         return await _context.ProfessionalSchedules
             .Include(s => s.ScheduleDays)
             .FirstOrDefaultAsync(s =>
@@ -381,6 +409,23 @@ public class AppointmentService : IAppointmentService
         {
             throw new BusinessException(
                 "El paciente ya tiene otro turno en ese horario.");
+        }
+    }
+
+    private static void ValidateAppointmentDate(DateOnly date)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (date == default)
+        {
+            throw new BusinessException(
+                "Debe indicar una fecha válida para el turno.");
+        }
+
+        if (date < today)
+        {
+            throw new BusinessException(
+                "No se pueden asignar o reprogramar turnos en fechas pasadas.");
         }
     }
 

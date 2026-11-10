@@ -1,0 +1,1123 @@
+﻿@using MediGest.Web.Models.Enums
+@model MediGest.Web.ViewModels.Appointments.AppointmentCalendarViewModel
+
+@{
+    ViewData["Title"] = "Agenda de turnos";
+
+    var monthStart = new DateOnly(
+        Model.SelectedDate.Year,
+        Model.SelectedDate.Month,
+        1);
+
+    var calendarStart = monthStart.AddDays(
+        -(((int)monthStart.DayOfWeek + 6) % 7));
+
+    var monthDays = Enumerable.Range(0, 42)
+        .Select(i => calendarStart.AddDays(i))
+        .ToList();
+
+    var previousWeek = Model.SelectedDate.AddDays(-7);
+    var nextWeek = Model.SelectedDate.AddDays(7);
+    var today = DateOnly.FromDateTime(DateTime.Today);
+
+    var weekDayNames = new[]
+    {
+        "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"
+    };
+
+    var halfHourRows = (Model.EndHour - Model.StartHour) * 2;
+    var trackHeight = halfHourRows * 45;
+}
+
+<style>
+    .medigest-calendar {
+        position: relative;
+        isolation: isolate;
+        min-height: calc(100vh - 70px);
+        padding: 25px;
+        color: #263b59;
+        background: #edf4ff;
+        overflow: hidden;
+    }
+
+    /* Fondo médico difuminado */
+    .medigest-calendar::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -2;
+        background-image: url('@Url.Content("~/images/medical-background.jpg")');
+        background-size: cover;
+        background-position: center;
+        filter: blur(5px);
+        opacity: .23;
+        transform: scale(1.04);
+    }
+
+    .medigest-calendar::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(
+            115deg,
+            rgba(244, 248, 255, .94),
+            rgba(235, 243, 255, .78)
+        );
+    }
+
+    /* Encabezado */
+    .medigest-calendar .page-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin: 5px 0 25px;
+    }
+
+    .medigest-calendar .heading-title {
+        display: flex;
+        align-items: center;
+        gap: 17px;
+    }
+
+    .medigest-calendar .heading-icon {
+        width: 57px;
+        height: 57px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,.75);
+        color: #3976ef;
+        border-radius: 15px;
+        font-size: 1.8rem;
+    }
+
+    .medigest-calendar h2 {
+        color: #1760c9;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .medigest-calendar .heading-subtitle {
+        color: #536c91;
+        margin: 5px 0 0;
+        font-size: .95rem;
+    }
+
+    .medigest-calendar .heading-actions {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex-wrap: wrap;
+    }
+
+    .medigest-calendar .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 17px;
+        border-radius: 30px;
+        border: 1px solid rgba(255,255,255,.8);
+        background: rgba(255,255,255,.85);
+        color: #24549b;
+        text-decoration: none;
+        font-size: .85rem;
+        font-weight: 650;
+        transition: .2s;
+        box-shadow: 0 3px 10px rgba(45, 80, 130, .05);
+    }
+
+    .medigest-calendar .action-button:hover {
+        background: white;
+        color: #1760c9;
+        transform: translateY(-1px);
+    }
+
+    .medigest-calendar .action-button.primary {
+        color: white;
+        background: #2674ed;
+        border-color: #2674ed;
+        box-shadow: 0 5px 14px rgba(38, 116, 237, .2);
+    }
+
+    .medigest-calendar .action-button.primary:hover {
+        background: #155fcf;
+        color: white;
+    }
+
+    /* Contenedor principal */
+    .medigest-calendar .calendar-layout {
+        display: grid;
+        grid-template-columns: 300px minmax(0, 1fr);
+        gap: 17px;
+        align-items: stretch;
+    }
+
+    .medigest-calendar .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .medigest-calendar .side-card,
+    .medigest-calendar .calendar-card,
+    .medigest-calendar .legend-card {
+        background: rgba(255,255,255,.91);
+        border: 1px solid rgba(255,255,255,.95);
+        border-radius: 17px;
+        box-shadow: 0 5px 20px rgba(37, 71, 120, .08);
+        backdrop-filter: blur(12px);
+    }
+
+    .medigest-calendar .side-card {
+        padding: 19px;
+    }
+
+    .medigest-calendar .side-card-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #254574;
+        font-size: 1rem;
+        font-weight: 750;
+        margin-bottom: 17px;
+    }
+
+    /* Mini calendario */
+    .medigest-calendar .month-navigation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    .medigest-calendar .month-navigation strong {
+        color: #254574;
+        font-size: 1.05rem;
+        text-transform: capitalize;
+    }
+
+    .medigest-calendar .month-navigation a {
+        color: #3976ef;
+        text-decoration: none;
+        font-size: 1.1rem;
+        padding: 3px 7px;
+    }
+
+    .medigest-calendar .month-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px 2px;
+        text-align: center;
+    }
+
+    .medigest-calendar .weekday {
+        color: #8493aa;
+        font-size: .7rem;
+        font-weight: 750;
+        padding: 5px 0;
+    }
+
+    .medigest-calendar .month-day {
+        height: 34px;
+        width: 34px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: #405675;
+        text-decoration: none;
+        font-size: .8rem;
+        transition: .15s;
+    }
+
+    .medigest-calendar .month-day:hover {
+        background: #edf3ff;
+        color: #2674ed;
+    }
+
+    .medigest-calendar .month-day.other-month {
+        color: #b7c1d0;
+    }
+
+    .medigest-calendar .month-day.selected {
+        background: #2674ed;
+        color: white;
+        font-weight: 750;
+        box-shadow: 0 3px 9px rgba(38,116,237,.25);
+    }
+
+    .medigest-calendar .month-day.today:not(.selected) {
+        border: 1px solid #2674ed;
+        color: #2674ed;
+        font-weight: 750;
+    }
+
+    /* Profesionales */
+    .medigest-calendar .professional-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .medigest-calendar .professional-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .medigest-calendar .professional-avatar {
+        flex-shrink: 0;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e5efff;
+        color: #2674ed;
+        font-weight: 800;
+        font-size: .9rem;
+    }
+
+    .medigest-calendar .professional-name {
+        color: #304c75;
+        font-size: .84rem;
+        font-weight: 750;
+    }
+
+    .medigest-calendar .professional-role {
+        color: #7e91ae;
+        font-size: .75rem;
+        margin-top: 3px;
+    }
+
+    /* Resumen */
+    .medigest-calendar .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 11px;
+        color: #536987;
+        font-size: .84rem;
+    }
+
+    .medigest-calendar .summary-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .medigest-calendar .summary-row strong {
+        color: #243d64;
+        font-size: .9rem;
+    }
+
+    .medigest-calendar .summary-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .medigest-calendar .summary-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+    }
+
+    /* Calendario semanal */
+    .medigest-calendar .calendar-main {
+        min-width: 0;
+    }
+
+    .medigest-calendar .calendar-card {
+        overflow: hidden;
+    }
+
+    .medigest-calendar .week-toolbar {
+        min-height: 66px;
+        padding: 14px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid #e6edf6;
+        flex-wrap: wrap;
+    }
+
+    .medigest-calendar .week-title {
+        color: #253e65;
+        font-size: 1rem;
+        font-weight: 750;
+    }
+
+    .medigest-calendar .week-navigation {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .medigest-calendar .week-navigation a {
+        width: 37px;
+        height: 37px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        background: #f1f5fc;
+        color: #345c98;
+        text-decoration: none;
+        font-size: 1rem;
+        transition: .2s;
+    }
+
+    .medigest-calendar .week-navigation a:hover {
+        background: #e1ebff;
+        color: #1760c9;
+    }
+
+    .medigest-calendar .calendar-scroll {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .medigest-calendar .calendar-grid {
+        min-width: 850px;
+        display: grid;
+        grid-template-columns: 66px repeat(7, minmax(0, 1fr));
+    }
+
+    .medigest-calendar .day-header {
+        min-height: 69px;
+        text-align: center;
+        padding: 11px 3px;
+        border-bottom: 1px solid #e6edf6;
+        border-left: 1px solid #e6edf6;
+        background: rgba(255,255,255,.5);
+    }
+
+    .medigest-calendar .day-header .day-name {
+        color: #7185a5;
+        font-size: .7rem;
+        font-weight: 750;
+    }
+
+    .medigest-calendar .day-header .day-number {
+        color: #263e64;
+        font-size: 1.05rem;
+        font-weight: 750;
+        margin-top: 4px;
+    }
+
+    .medigest-calendar .day-header.selected {
+        background: #eaf2ff;
+    }
+
+    .medigest-calendar .day-header.selected .day-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 29px;
+        height: 29px;
+        border-radius: 50%;
+        background: #2674ed;
+        color: white;
+    }
+
+    .medigest-calendar .day-header.today:not(.selected) .day-number {
+        color: #2674ed;
+    }
+
+    .medigest-calendar .time-axis {
+        height: @(trackHeight)px;
+        display: grid;
+        grid-template-rows: repeat(@(halfHourRows), 45px);
+    }
+
+    .medigest-calendar .time-label {
+        color: #7185a5;
+        font-size: .72rem;
+        text-align: right;
+        padding-right: 9px;
+        transform: translateY(-7px);
+    }
+
+    .medigest-calendar .day-track {
+        height: @(trackHeight)px;
+        position: relative;
+        border-left: 1px solid #e6edf6;
+        background-image: repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 44px,
+            #e6edf6 44px,
+            #e6edf6 45px
+        );
+    }
+
+    /* Turnos */
+    .medigest-calendar .calendar-event {
+        position: absolute;
+        left: 4px;
+        right: 4px;
+        min-height: 32px;
+        padding: 6px 7px;
+        border-radius: 7px;
+        overflow: hidden;
+        z-index: 2;
+        font-size: .68rem;
+        line-height: 1.3;
+        border-left: 4px solid;
+    }
+
+    .medigest-calendar .calendar-event strong {
+        display: block;
+        font-size: .72rem;
+        font-weight: 750;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        padding-right: 13px;
+    }
+
+    .medigest-calendar .calendar-event small {
+        display: block;
+        font-size: .65rem;
+        margin-top: 3px;
+    }
+
+    .medigest-calendar .event-pending {
+        background: #fff4d9;
+        border-color: #f4aa24;
+        color: #86580d;
+    }
+
+    .medigest-calendar .event-confirmed {
+        background: #e4efff;
+        border-color: #4385f5;
+        color: #2059ac;
+    }
+
+    .medigest-calendar .event-cancelled {
+        background: #ffe7eb;
+        border-color: #ed6477;
+        color: #a83e51;
+    }
+
+    .medigest-calendar .event-completed {
+        background: #ddf7e9;
+        border-color: #22b66b;
+        color: #176e44;
+    }
+
+    .medigest-calendar .event-absent {
+        background: #e9edf3;
+        border-color: #8292a9;
+        color: #46566d;
+    }
+
+    .medigest-calendar .event-menu {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+    }
+
+    .medigest-calendar .event-menu .dropdown-toggle {
+        border: 0;
+        padding: 0 3px;
+        color: inherit;
+        background: transparent;
+        font-size: .8rem;
+    }
+
+    .medigest-calendar .event-menu .dropdown-toggle::after {
+        display: none;
+    }
+
+    .medigest-calendar .dropdown-menu {
+        z-index: 30;
+        font-size: .8rem;
+        box-shadow: 0 5px 20px rgba(30,50,80,.12);
+        border: 1px solid #edf0f5;
+    }
+
+    /* Referencias */
+    .medigest-calendar .legend-card {
+        margin-top: 14px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .medigest-calendar .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #536987;
+        font-size: .78rem;
+    }
+
+    .medigest-calendar .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    @@media (max-width: 1050px) {
+        .medigest-calendar .calendar-layout {
+            grid-template-columns: 250px minmax(0, 1fr);
+        }
+    }
+
+    @@media (max-width: 800px) {
+        .medigest-calendar {
+            padding: 14px;
+        }
+
+        .medigest-calendar .calendar-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .medigest-calendar .sidebar {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .medigest-calendar .sidebar-card:last-child {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @@media (max-width: 560px) {
+        .medigest-calendar .sidebar {
+            display: flex;
+        }
+
+        .medigest-calendar .page-heading {
+            align-items: flex-start;
+        }
+
+        .medigest-calendar .heading-actions {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="medigest-calendar">
+
+    @if (TempData["Success"] is not null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] is not null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Encabezado -->
+    <div class="page-heading">
+        <div class="heading-title">
+            <div class="heading-icon">
+                <i class="bi bi-calendar-week"></i>
+            </div>
+
+            <div>
+                <h2>Agenda de turnos</h2>
+                <p class="heading-subtitle">
+                    Organizá las consultas médicas de tu consultorio.
+                </p>
+            </div>
+        </div>
+
+        <div class="heading-actions">
+            <a asp-action="Index"
+               asp-route-date="@today.ToString("yyyy-MM-dd")"
+               class="action-button">
+                <i class="bi bi-calendar-check"></i>
+                Hoy
+            </a>
+
+            <a asp-action="Index"
+               asp-route-date="@previousWeek.ToString("yyyy-MM-dd")"
+               class="action-button">
+                <i class="bi bi-chevron-left"></i>
+                Semana anterior
+            </a>
+
+            <a asp-action="Index"
+               asp-route-date="@nextWeek.ToString("yyyy-MM-dd")"
+               class="action-button">
+                <i class="bi bi-chevron-right"></i>
+                Semana siguiente
+            </a>
+
+            <a asp-action="Create" class="action-button primary">
+                <i class="bi bi-plus-lg"></i>
+                Asignar turno
+            </a>
+        </div>
+    </div>
+
+    <div class="calendar-layout">
+
+        <!-- Panel lateral -->
+        <aside class="sidebar">
+
+            <!-- Mini calendario -->
+            <div class="side-card">
+                <div class="month-navigation">
+                    <strong>
+                        @Model.SelectedDate.ToString("MMMM yyyy")
+                    </strong>
+
+                    <div>
+                        <a asp-action="Index"
+                           asp-route-date="@Model.SelectedDate.AddMonths(-1).ToString("yyyy-MM-dd")"
+                           title="Mes anterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+
+                        <a asp-action="Index"
+                           asp-route-date="@Model.SelectedDate.AddMonths(1).ToString("yyyy-MM-dd")"
+                           title="Mes siguiente">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="month-grid">
+                    @foreach (var dayName in weekDayNames)
+                    {
+                        <div class="weekday">@dayName.Substring(0, 1)</div>
+                    }
+
+                    @foreach (var day in monthDays)
+                    {
+                        var dayClass = "month-day";
+
+                        if (day.Month != Model.SelectedDate.Month)
+                        {
+                            dayClass += " other-month";
+                        }
+
+                        if (day == Model.SelectedDate)
+                        {
+                            dayClass += " selected";
+                        }
+                        else if (day == today)
+                        {
+                            dayClass += " today";
+                        }
+
+                        <a asp-action="Index"
+                           asp-route-date="@day.ToString("yyyy-MM-dd")"
+                           class="@dayClass">
+                            @day.Day
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Profesionales -->
+            <div class="side-card">
+                <div class="side-card-title">
+                    <span>Profesionales</span>
+                    <span>@Model.Professionals.Count()</span>
+                </div>
+
+                @if (!Model.Professionals.Any())
+                {
+                    <p class="text-muted small mb-0">
+                        No hay profesionales activos.
+                    </p>
+                }
+                else
+                {
+                    @foreach (var professional in Model.Professionals)
+                    {
+                        var firstName = professional.ApplicationUser.FirstName;
+                        var lastName = professional.ApplicationUser.LastName;
+
+                        <div class="professional-item">
+                            <div class="professional-avatar">
+                                @firstName.Substring(0, 1)@lastName.Substring(0, 1)
+                            </div>
+
+                            <div>
+                                <div class="professional-name">
+                                    @lastName, @firstName
+                                </div>
+                                <div class="professional-role">
+                                    Profesional médico
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Resumen semanal -->
+            <div class="side-card">
+                <div class="side-card-title">
+                    <span>Resumen semanal</span>
+                    <i class="bi bi-bar-chart-line"></i>
+                </div>
+
+                <div class="summary-row">
+                    <span>Total</span>
+                    <strong>@Model.TotalAppointments</strong>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">
+                        <span class="summary-dot" style="background:#f4aa24;"></span>
+                        Pendientes
+                    </span>
+                    <strong style="color:#e49b18;">
+                        @Model.PendingAppointments
+                    </strong>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">
+                        <span class="summary-dot" style="background:#4385f5;"></span>
+                        Confirmados
+                    </span>
+                    <strong style="color:#2674ed;">
+                        @Model.ConfirmedAppointments
+                    </strong>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">
+                        <span class="summary-dot" style="background:#ed6477;"></span>
+                        Cancelados
+                    </span>
+                    <strong style="color:#df5268;">
+                        @Model.CancelledAppointments
+                    </strong>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Calendario principal -->
+        <main class="calendar-main">
+
+            <div class="calendar-card">
+
+                <div class="week-toolbar">
+                    <div class="week-title">
+                        <i class="bi bi-calendar3 me-2 text-primary"></i>
+                        @Model.WeekStartDate.ToString("dd/MM/yyyy")
+                        -
+                        @Model.WeekEndDate.ToString("dd/MM/yyyy")
+                    </div>
+
+                    <div class="week-navigation">
+                        <a asp-action="Index"
+                           asp-route-date="@previousWeek.ToString("yyyy-MM-dd")"
+                           title="Semana anterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+
+                        <a asp-action="Index"
+                           asp-route-date="@today.ToString("yyyy-MM-dd")"
+                           title="Ir a hoy">
+                            <i class="bi bi-calendar-day"></i>
+                        </a>
+
+                        <a asp-action="Index"
+                           asp-route-date="@nextWeek.ToString("yyyy-MM-dd")"
+                           title="Semana siguiente">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="calendar-scroll">
+                    <div class="calendar-grid">
+
+                        <!-- Encabezado de hora -->
+                        <div class="day-header">
+                            <div class="day-name">HORA</div>
+                        </div>
+
+                        <!-- Días -->
+                        @for (var i = 0; i < Model.WeekDays.Count(); i++)
+                        {
+                            var day = Model.WeekDays.ElementAt(i);
+                            var headerClass = "day-header";
+
+                            if (day == Model.SelectedDate)
+                            {
+                                headerClass += " selected";
+                            }
+
+                            if (day == today)
+                            {
+                                headerClass += " today";
+                            }
+
+                            <div class="@headerClass">
+                                <div class="day-name">@weekDayNames[i]</div>
+                                <div class="day-number">@day.Day</div>
+                            </div>
+                        }
+
+                        <!-- Eje de horarios -->
+                        <div class="time-axis">
+                            @for (var i = 0; i < halfHourRows; i++)
+                            {
+                                if (i % 2 == 0)
+                                {
+                                    <div class="time-label">
+                                        @(TimeOnly.FromTimeSpan(
+                                            TimeSpan.FromHours(Model.StartHour + i / 2))
+                                            .ToString("HH:mm"))
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div></div>
+                                }
+                            }
+                        </div>
+
+                        <!-- Columnas de días -->
+                        @foreach (var day in Model.WeekDays)
+                        {
+                            <div class="day-track">
+
+                                @foreach (var appointment in Model.Appointments
+                                    .Where(a => a.AppointmentDate == day)
+                                    .OrderBy(a => a.StartTime))
+                                {
+                                    var startMinutes =
+                                        appointment.StartTime.Hour * 60 +
+                                        appointment.StartTime.Minute -
+                                        Model.StartHour * 60;
+
+                                    var durationMinutes =
+                                        (appointment.EndTime.Hour * 60 +
+                                         appointment.EndTime.Minute) -
+                                        (appointment.StartTime.Hour * 60 +
+                                         appointment.StartTime.Minute);
+
+                                    var top = startMinutes * 45.0 / 30.0;
+                                    var height = Math.Max(
+                                        32,
+                                        durationMinutes * 45.0 / 30.0 - 4);
+
+                                    var eventClass = appointment.Status switch
+                                    {
+                                        AppointmentStatus.Pending => "event-pending",
+                                        AppointmentStatus.Confirmed => "event-confirmed",
+                                        AppointmentStatus.Cancelled => "event-cancelled",
+                                        AppointmentStatus.Completed => "event-completed",
+                                        AppointmentStatus.NoShow => "event-absent",
+                                        _ => "event-confirmed"
+                                    };
+
+                                    <div class="calendar-event @eventClass"
+                                         style="top:@(top)px; height:@(height)px;"
+                                         title="@appointment.Patient.LastName, @appointment.Patient.FirstName">
+
+                                        <strong>
+                                            @appointment.Patient.LastName,
+                                            @appointment.Patient.FirstName
+                                        </strong>
+
+                                        <small>
+                                            @appointment.StartTime.ToString("HH:mm")
+                                            -
+                                            @appointment.EndTime.ToString("HH:mm")
+                                        </small>
+
+                                        <div class="dropdown event-menu">
+                                            <button type="button"
+                                                    class="dropdown-toggle"
+                                                    data-bs-toggle="dropdown"
+                                                    aria-expanded="false"
+                                                    title="Acciones">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <a class="dropdown-item"
+                                                       asp-action="History"
+                                                       asp-route-id="@appointment.Id">
+                                                        <i class="bi bi-clock-history me-2"></i>
+                                                        Historial
+                                                    </a>
+                                                </li>
+
+                                                @if (appointment.Status is AppointmentStatus.Pending or AppointmentStatus.Confirmed)
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           asp-action="Reschedule"
+                                                           asp-route-id="@appointment.Id">
+                                                            <i class="bi bi-calendar2-week me-2"></i>
+                                                            Reprogramar
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                @if (appointment.Status == AppointmentStatus.Pending)
+                                                {
+                                                    <li>
+                                                        <form asp-action="Confirm"
+                                                              asp-route-id="@appointment.Id"
+                                                              method="post">
+                                                            @Html.AntiForgeryToken()
+
+                                                            <button type="submit" class="dropdown-item">
+                                                                <i class="bi bi-check-circle me-2"></i>
+                                                                Confirmar
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                }
+
+                                                @if (appointment.Status is AppointmentStatus.Pending or AppointmentStatus.Confirmed)
+                                                {
+                                                    <li><hr class="dropdown-divider" /></li>
+                                                    <li>
+                                                        <button type="button"
+                                                                class="dropdown-item text-danger"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#cancelModal"
+                                                                data-appointment-id="@appointment.Id">
+                                                            <i class="bi bi-x-circle me-2"></i>
+                                                            Cancelar
+                                                        </button>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                }
+
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Referencias -->
+            <div class="legend-card">
+                <span class="legend-item">
+                    <span class="legend-dot" style="background:#f4aa24;"></span>
+                    Pendiente
+                </span>
+
+                <span class="legend-item">
+                    <span class="legend-dot" style="background:#4385f5;"></span>
+                    Confirmado
+                </span>
+
+                <span class="legend-item">
+                    <span class="legend-dot" style="background:#ed6477;"></span>
+                    Cancelado
+                </span>
+
+                <span class="legend-item">
+                    <span class="legend-dot" style="background:#22b66b;"></span>
+                    Completado
+                </span>
+
+                <span class="legend-item">
+                    <span class="legend-dot" style="background:#8292a9;"></span>
+                    Ausente
+                </span>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- Modal de cancelación -->
+<div class="modal fade" id="cancelModal" tabindex="-1"
+     aria-labelledby="cancelModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius:14px;">
+
+            <form asp-action="Cancel" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header border-0 px-4 pt-4">
+                    <div>
+                        <h5 class="modal-title fw-bold" id="cancelModalLabel">
+                            Cancelar turno
+                        </h5>
+                        <p class="text-muted small mb-0">
+                            Indicá el motivo de la cancelación.
+                        </p>
+                    </div>
+
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body px-4">
+                    <input type="hidden" name="id" id="cancelAppointmentId" />
+
+                    <label for="cancelReason" class="form-label">
+                        Motivo de cancelación
+                    </label>
+
+                    <textarea id="cancelReason"
+                              name="reason"
+                              class="form-control"
+                              maxlength="250"
+                              rows="4"
+                              placeholder="Escribí el motivo..."
+                              required></textarea>
+                </div>
+
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light border"
+                            data-bs-dismiss="modal">
+                        Volver
+                    </button>
+
+                    <button type="submit" class="btn btn-danger">
+                        Confirmar cancelación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const cancelModal = document.getElementById("cancelModal");
+
+        cancelModal.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+
+            document.getElementById("cancelAppointmentId").value =
+                button.getAttribute("data-appointment-id");
+        });
+    </script>
+}

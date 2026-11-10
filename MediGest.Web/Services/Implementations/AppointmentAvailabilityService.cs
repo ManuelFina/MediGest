@@ -1,5 +1,6 @@
 ﻿
 using MediGest.Web.Data;
+using MediGest.Web.Models.Entities;
 using MediGest.Web.Models.Enums;
 using MediGest.Web.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -15,12 +16,21 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
         _context = context;
     }
 
+
     public async Task<IEnumerable<TimeOnly>> GetAvailableSlotsAsync(
         int professionalId,
-        DateOnly date)
+        DateOnly date,
+        int? excludedAppointmentId = null)
     {
-        // 1. Obtener la agenda vigente del profesional.
-        var schedule = await _context.ProfessionalSchedules
+        var professionalExists = await _context.Professionals
+            .AnyAsync(p => p.Id == professionalId && p.IsActive);
+
+        if (!professionalExists)
+        {
+            return Enumerable.Empty<TimeOnly>();
+        }
+
+        var schedules = await _context.ProfessionalSchedules
             .AsNoTracking()
             .Include(s => s.ScheduleDays)
             .Where(s =>
@@ -28,30 +38,29 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
                 s.IsActive &&
                 s.StartDate <= date &&
                 s.EndDate >= date)
-            .FirstOrDefaultAsync();
+            .ToListAsync();
 
-        if (schedule is null)
+        if (schedules.Count == 0)
+        {
             return Enumerable.Empty<TimeOnly>();
+        }
 
-        // 2. Obtener las franjas horarias del día solicitado.
-        var daySchedules = schedule.ScheduleDays
+        var scheduleDays = schedules
+            .SelectMany(s => s.ScheduleDays)
             .Where(d => d.DayOfWeek == date.DayOfWeek)
             .OrderBy(d => d.StartTime)
             .ToList();
 
-        if (daySchedules.Count == 0)
-            return Enumerable.Empty<TimeOnly>();
-
-        // 3. Obtener los turnos que no están cancelados.
         var appointments = await _context.Appointments
             .AsNoTracking()
             .Where(a =>
                 a.ProfessionalId == professionalId &&
                 a.AppointmentDate == date &&
-                a.Status != AppointmentStatus.Cancelled)
+                a.Status != AppointmentStatus.Cancelled &&
+                (!excludedAppointmentId.HasValue ||
+                 a.Id != excludedAppointmentId.Value))
             .ToListAsync();
 
-        // 4. Obtener las excepciones correspondientes a esa fecha.
         var exceptions = await _context.ScheduleExceptions
             .AsNoTracking()
             .Where(e =>
@@ -60,21 +69,21 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
                 e.EndDate >= date)
             .ToListAsync();
 
-        // 5. Generar y filtrar los horarios disponibles.
         var availableSlots = new List<TimeOnly>();
 
-        foreach (var daySchedule in daySchedules)
+        foreach (var scheduleDay in scheduleDays)
         {
-            var currentTime = daySchedule.StartTime;
+            var duration = schedules
+                .First(s => s.Id == scheduleDay.ProfessionalScheduleId)
+                .AppointmentDurationMinutes;
 
-            while (currentTime.AddMinutes(
-                       schedule.AppointmentDurationMinutes)
-                   <= daySchedule.EndTime)
+            var currentTime = scheduleDay.StartTime;
+
+            while (currentTime.AddMinutes(duration) <= scheduleDay.EndTime)
             {
-                var slotEnd = currentTime.AddMinutes(
-                    schedule.AppointmentDurationMinutes);
+                var slotEnd = currentTime.AddMinutes(duration);
 
-                var hasAppointment = appointments.Any(a =>
+                var hasAppointmentConflict = appointments.Any(a =>
                     currentTime < a.EndTime &&
                     slotEnd > a.StartTime);
 
@@ -83,7 +92,7 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
                     (currentTime < e.EndTime!.Value &&
                      slotEnd > e.StartTime.Value));
 
-                if (!hasAppointment && !hasException)
+                if (!hasAppointmentConflict && !hasException)
                 {
                     availableSlots.Add(currentTime);
                 }
@@ -94,7 +103,7 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
 
         return availableSlots
             .Distinct()
-            .OrderBy(t => t)
+            .OrderBy(slot => slot)
             .ToList();
     }
 }

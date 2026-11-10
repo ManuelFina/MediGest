@@ -6,21 +6,19 @@ namespace MediGest.Web.ViewModels.Appointments;
 
 public class AppointmentFormViewModel
 {
-    [Required(ErrorMessage = "Debe seleccionar un paciente.")]
+    [Required(ErrorMessage = "El paciente es obligatorio.")]
     [Display(Name = "Paciente")]
     public int PatientId { get; set; }
 
-    [Required(ErrorMessage = "Debe seleccionar un profesional.")]
+    [Required(ErrorMessage = "El profesional es obligatorio.")]
     [Display(Name = "Profesional")]
     public int ProfessionalId { get; set; }
 
     [Required(ErrorMessage = "La fecha del turno es obligatoria.")]
-    [DataType(DataType.Date)]
     [Display(Name = "Fecha del turno")]
     public DateOnly AppointmentDate { get; set; }
 
-    [Required(ErrorMessage = "Debe seleccionar un horario.")]
-    [DataType(DataType.Time)]
+    [Required(ErrorMessage = "El horario es obligatorio.")]
     [Display(Name = "Horario disponible")]
     public TimeOnly StartTime { get; set; }
 

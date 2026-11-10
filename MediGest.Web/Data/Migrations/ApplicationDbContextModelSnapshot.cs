@@ -22,6 +22,270 @@ namespace MediGest.Web.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Appointment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("AppointmentDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProfessionalId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PatientId", "AppointmentDate");
+
+                    b.HasIndex("ProfessionalId", "AppointmentDate", "StartTime");
+
+                    b.ToTable("Appointments");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.AppointmentHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AppointmentHistoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AppointmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ChangedByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentHistoryId");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("ChangedByUserId");
+
+                    b.ToTable("AppointmentHistories");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Patient", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentNumber")
+                        .IsUnique();
+
+                    b.ToTable("Patients");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Professional", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LicenseNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId")
+                        .IsUnique();
+
+                    b.HasIndex("LicenseNumber")
+                        .IsUnique();
+
+                    b.ToTable("Professionals");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.ProfessionalSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AppointmentDurationMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ProfessionalId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionalId", "StartDate", "EndDate");
+
+                    b.ToTable("ProfessionalSchedules");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.ScheduleDay", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("ProfessionalScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ScheduleDayId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScheduleDayId");
+
+                    b.HasIndex("ProfessionalScheduleId", "DayOfWeek", "StartTime");
+
+                    b.ToTable("ScheduleDays");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.ScheduleException", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly?>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("ProfessionalId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<TimeOnly?>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionalId", "StartDate", "EndDate");
+
+                    b.ToTable("ScheduleExceptions");
+                });
+
             modelBuilder.Entity("MediGest.Web.Models.Identity.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -236,6 +500,96 @@ namespace MediGest.Web.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Appointment", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.Patient", "Patient")
+                        .WithMany("Appointments")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MediGest.Web.Models.Entities.Professional", "Professional")
+                        .WithMany()
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("Professional");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.AppointmentHistory", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.AppointmentHistory", null)
+                        .WithMany("History")
+                        .HasForeignKey("AppointmentHistoryId");
+
+                    b.HasOne("MediGest.Web.Models.Entities.Appointment", "Appointment")
+                        .WithMany("History")
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MediGest.Web.Models.Identity.ApplicationUser", "ChangedByUser")
+                        .WithMany()
+                        .HasForeignKey("ChangedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("ChangedByUser");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Professional", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Identity.ApplicationUser", "ApplicationUser")
+                        .WithOne()
+                        .HasForeignKey("MediGest.Web.Models.Entities.Professional", "ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.ProfessionalSchedule", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.Professional", "Professional")
+                        .WithMany("Schedules")
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Professional");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.ScheduleDay", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.ProfessionalSchedule", "ProfessionalSchedule")
+                        .WithMany("ScheduleDays")
+                        .HasForeignKey("ProfessionalScheduleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MediGest.Web.Models.Entities.ScheduleDay", null)
+                        .WithMany("ScheduleDays")
+                        .HasForeignKey("ScheduleDayId");
+
+                    b.Navigation("ProfessionalSchedule");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.ScheduleException", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.Professional", "Professional")
+                        .WithMany("ScheduleExceptions")
+                        .HasForeignKey("ProfessionalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Professional");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -285,6 +639,38 @@ namespace MediGest.Web.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Appointment", b =>
+                {
+                    b.Navigation("History");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.AppointmentHistory", b =>
+                {
+                    b.Navigation("History");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Patient", b =>
+                {
+                    b.Navigation("Appointments");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Professional", b =>
+                {
+                    b.Navigation("ScheduleExceptions");
+
+                    b.Navigation("Schedules");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.ProfessionalSchedule", b =>
+                {
+                    b.Navigation("ScheduleDays");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.ScheduleDay", b =>
+                {
+                    b.Navigation("ScheduleDays");
                 });
 #pragma warning restore 612, 618
         }
