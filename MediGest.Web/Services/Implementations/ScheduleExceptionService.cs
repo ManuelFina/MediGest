@@ -2,6 +2,7 @@
 using MediGest.Web.Data;
 using MediGest.Web.Exceptions;
 using MediGest.Web.Models.Entities;
+using MediGest.Web.Models.Enums;
 using MediGest.Web.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,13 +57,21 @@ public class ScheduleExceptionService : IScheduleExceptionService
                 "No se encontró la excepción que intentás modificar.");
         }
 
-        await ValidateExceptionAsync(scheduleException, scheduleException.Id);
+        if (existingException.ProfessionalId != scheduleException.ProfessionalId)
+        {
+            throw new BusinessException(
+                "No se puede cambiar el profesional asociado a una excepción.");
+        }
+
+        await ValidateExceptionAsync(
+            scheduleException,
+            existingException.Id);
 
         existingException.StartDate = scheduleException.StartDate;
         existingException.EndDate = scheduleException.EndDate;
         existingException.StartTime = scheduleException.StartTime;
         existingException.EndTime = scheduleException.EndTime;
-        existingException.Reason = scheduleException.Reason;
+        existingException.Reason = scheduleException.Reason.Trim();
 
         await _context.SaveChangesAsync();
     }
@@ -88,6 +97,7 @@ public class ScheduleExceptionService : IScheduleExceptionService
         int? excludedId = null)
     {
         if (scheduleException.StartDate == default ||
+            scheduleException.EndDate == default ||
             scheduleException.EndDate < scheduleException.StartDate)
         {
             throw new BusinessException(
@@ -102,7 +112,7 @@ public class ScheduleExceptionService : IScheduleExceptionService
         }
 
         if (scheduleException.StartTime.HasValue &&
-            scheduleException.StartTime >= scheduleException.EndTime)
+            scheduleException.StartTime.Value >= scheduleException.EndTime!.Value)
         {
             throw new BusinessException(
                 "La hora de finalización debe ser posterior a la hora de inicio.");
@@ -112,6 +122,14 @@ public class ScheduleExceptionService : IScheduleExceptionService
         {
             throw new BusinessException(
                 "El motivo de la excepción es obligatorio.");
+        }
+
+        scheduleException.Reason = scheduleException.Reason.Trim();
+
+        if (scheduleException.Reason.Length > 250)
+        {
+            throw new BusinessException(
+                "El motivo de la excepción no puede superar los 250 caracteres.");
         }
 
         var professionalExists = await _context.Professionals
@@ -125,15 +143,40 @@ public class ScheduleExceptionService : IScheduleExceptionService
                 "El profesional no existe o se encuentra inactivo.");
         }
 
+        var hasOverlappingException = await _context.ScheduleExceptions
+            .AnyAsync(e =>
+                e.ProfessionalId == scheduleException.ProfessionalId &&
+                (!excludedId.HasValue || e.Id != excludedId.Value) &&
+                scheduleException.StartDate <= e.EndDate &&
+                scheduleException.EndDate >= e.StartDate &&
+                (
+                    !scheduleException.StartTime.HasValue ||
+                    !e.StartTime.HasValue ||
+                    (
+                        scheduleException.StartTime.Value < e.EndTime!.Value &&
+                        scheduleException.EndTime!.Value > e.StartTime.Value
+                    )
+                ));
+
+        if (hasOverlappingException)
+        {
+            throw new BusinessException(
+                "La excepción se superpone con otra excepción existente del profesional.");
+        }
+
         var hasAppointments = await _context.Appointments
             .AnyAsync(a =>
                 a.ProfessionalId == scheduleException.ProfessionalId &&
                 a.AppointmentDate >= scheduleException.StartDate &&
                 a.AppointmentDate <= scheduleException.EndDate &&
-                a.Status != Models.Enums.AppointmentStatus.Cancelled &&
-                (!scheduleException.StartTime.HasValue ||
-                 (a.StartTime < scheduleException.EndTime &&
-                  a.EndTime > scheduleException.StartTime)));
+                a.Status != AppointmentStatus.Cancelled &&
+                (
+                    !scheduleException.StartTime.HasValue ||
+                    (
+                        a.StartTime < scheduleException.EndTime!.Value &&
+                        a.EndTime > scheduleException.StartTime.Value
+                    )
+                ));
 
         if (hasAppointments)
         {

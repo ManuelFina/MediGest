@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace MediGest.Web.Areas.Reception.Controllers;
 
 [Area("Reception")]
-[Authorize(Roles = "Administrator,Receptionist")]
+[Authorize(Roles = "Receptionist")]
 public class PatientsController : Controller
 {
     private readonly IPatientService _patientService;

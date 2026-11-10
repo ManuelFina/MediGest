@@ -1,0 +1,134 @@
+﻿
+@model MediGest.Web.ViewModels.Schedules.ProfessionalScheduleFormViewModel
+
+@{
+    ViewData["Title"] = "Nueva agenda";
+}
+
+<div class="container-fluid">
+
+    <div class="mb-4">
+        <a asp-action="Index" class="text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i>
+            Volver a mis horarios
+        </a>
+
+        <h2 class="fw-bold mt-3 mb-1">Nueva agenda</h2>
+        <p class="text-muted">
+            Configurá el período de vigencia y la duración de tus turnos.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-semibold">Datos de la agenda</h5>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Create" method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger"
+                     role="alert"></div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-12">
+                        <label asp-for="Name" class="form-label">
+                            Nombre de la agenda
+                        </label>
+
+                        <input asp-for="Name"
+                               class="form-control"
+                               placeholder="Ej.: Agenda de consultorio 2026" />
+
+                        <span asp-validation-for="Name"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="StartDate" class="form-label">
+                            Fecha de inicio
+                        </label>
+
+                        <input asp-for="StartDate"
+                               type="date"
+                               class="form-control" />
+
+                        <span asp-validation-for="StartDate"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="EndDate" class="form-label">
+                            Fecha de finalización
+                        </label>
+
+                        <input asp-for="EndDate"
+                               type="date"
+                               class="form-control" />
+
+                        <span asp-validation-for="EndDate"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="AppointmentDurationMinutes"
+                               class="form-label">
+                            Duración de cada turno
+                        </label>
+
+                        <select asp-for="AppointmentDurationMinutes"
+                                class="form-select">
+                            <option value="15">15 minutos</option>
+                            <option value="20">20 minutos</option>
+                            <option value="30">30 minutos</option>
+                            <option value="45">45 minutos</option>
+                            <option value="60">60 minutos</option>
+                        </select>
+
+                        <span asp-validation-for="AppointmentDurationMinutes"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 d-flex align-items-center">
+                        <div class="form-check mt-4">
+                            <input asp-for="IsActive"
+                                   class="form-check-input" />
+
+                            <label asp-for="IsActive"
+                                   class="form-check-label">
+                                Agenda activa
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Crear agenda
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

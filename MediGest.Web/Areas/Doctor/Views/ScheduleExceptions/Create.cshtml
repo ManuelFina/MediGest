@@ -1,0 +1,120 @@
+﻿
+@model MediGest.Web.ViewModels.Schedules.ScheduleExceptionFormViewModel
+
+@{
+    ViewData["Title"] = "Nueva excepción de agenda";
+}
+
+<div class="container-fluid">
+
+    <div class="mb-4">
+        <a asp-action="Index" class="text-decoration-none">
+            <i class="bi bi-arrow-left me-1"></i>
+            Volver a mis excepciones
+        </a>
+
+        <h2 class="mt-3 mb-1">Nueva excepción de agenda</h2>
+        <p class="text-muted mb-0">
+            Registrá vacaciones, licencias o bloqueos de horarios.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            <form asp-action="Create" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger"
+                     role="alert"></div>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="StartDate" class="form-label">
+                            Fecha desde
+                        </label>
+                        <input asp-for="StartDate"
+                               type="date"
+                               class="form-control" />
+                        <span asp-validation-for="StartDate"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="EndDate" class="form-label">
+                            Fecha hasta
+                        </label>
+                        <input asp-for="EndDate"
+                               type="date"
+                               class="form-control" />
+                        <span asp-validation-for="EndDate"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="StartTime" class="form-label">
+                            Hora desde
+                        </label>
+                        <input asp-for="StartTime"
+                               type="time"
+                               class="form-control" />
+                        <span asp-validation-for="StartTime"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="EndTime" class="form-label">
+                            Hora hasta
+                        </label>
+                        <input asp-for="EndTime"
+                               type="time"
+                               class="form-control" />
+                        <span asp-validation-for="EndTime"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Reason" class="form-label">
+                            Motivo
+                        </label>
+                        <textarea asp-for="Reason"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Ej.: Vacaciones, licencia médica, trámite personal..."></textarea>
+                        <span asp-validation-for="Reason"
+                              class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <div class="alert alert-info mt-4 mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Si dejás las horas vacías, la excepción bloqueará
+                    la jornada completa durante las fechas indicadas.
+                    Si completás ambas horas, solamente se bloqueará
+                    ese intervalo horario.
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Guardar excepción
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

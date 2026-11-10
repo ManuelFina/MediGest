@@ -104,6 +104,7 @@ public class ScheduleDayService : IScheduleDayService
 
         var schedule = await _context.ProfessionalSchedules
             .AsNoTracking()
+            .Include(s => s.Professional)
             .FirstOrDefaultAsync(s =>
                 s.Id == scheduleDay.ProfessionalScheduleId);
 
@@ -111,6 +112,12 @@ public class ScheduleDayService : IScheduleDayService
         {
             throw new BusinessException(
                 "La agenda seleccionada no existe.");
+        }
+
+        if (!schedule.IsActive || !schedule.Professional.IsActive)
+        {
+            throw new BusinessException(
+                "No se pueden configurar horarios en una agenda o profesional inactivo.");
         }
 
         var hasOverlap = await _context.ScheduleDays

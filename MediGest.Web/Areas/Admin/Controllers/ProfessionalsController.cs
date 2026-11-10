@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace MediGest.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Administrator")]
+[Authorize(Roles = ApplicationRoles.Administrator)]
 public class ProfessionalsController : Controller
 {
     private readonly IProfessionalService _professionalService;
@@ -103,7 +103,9 @@ public class ProfessionalsController : Controller
         var professional = await _professionalService.GetByIdAsync(id);
 
         if (professional is null)
+        {
             return NotFound();
+        }
 
         var viewModel = new ProfessionalFormViewModel
         {
@@ -126,7 +128,9 @@ public class ProfessionalsController : Controller
         ProfessionalFormViewModel viewModel)
     {
         if (id != viewModel.Id)
+        {
             return BadRequest();
+        }
 
         if (!ModelState.IsValid)
         {
@@ -209,7 +213,8 @@ public class ProfessionalsController : Controller
     private async Task LoadAvailableUsersAsync(
         ProfessionalFormViewModel viewModel)
     {
-        var users = await _userManager.GetUsersInRoleAsync("Doctor");
+        var users = await _userManager.GetUsersInRoleAsync(
+            ApplicationRoles.Doctor);
 
         var professionals = await _professionalService.GetAllAsync();
 
@@ -245,7 +250,9 @@ public class ProfessionalsController : Controller
                 .GetByIdAsync(viewModel.SpecialtyId);
 
             if (currentSpecialty is not null)
+            {
                 specialties.Add(currentSpecialty);
+            }
         }
 
         viewModel.AvailableSpecialties = specialties

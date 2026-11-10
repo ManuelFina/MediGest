@@ -1,6 +1,5 @@
 ﻿
 using MediGest.Web.Data;
-using MediGest.Web.Models.Entities;
 using MediGest.Web.Models.Enums;
 using MediGest.Web.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +15,18 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
         _context = context;
     }
 
-
     public async Task<IEnumerable<TimeOnly>> GetAvailableSlotsAsync(
         int professionalId,
         DateOnly date,
         int? excludedAppointmentId = null)
     {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (date < today)
+        {
+            return Enumerable.Empty<TimeOnly>();
+        }
+
         var professionalExists = await _context.Professionals
             .AnyAsync(p => p.Id == professionalId && p.IsActive);
 
@@ -73,9 +78,10 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
 
         foreach (var scheduleDay in scheduleDays)
         {
-            var duration = schedules
-                .First(s => s.Id == scheduleDay.ProfessionalScheduleId)
-                .AppointmentDurationMinutes;
+            var schedule = schedules.First(
+                s => s.Id == scheduleDay.ProfessionalScheduleId);
+
+            var duration = schedule.AppointmentDurationMinutes;
 
             var currentTime = scheduleDay.StartTime;
 
@@ -101,6 +107,7 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
             }
         }
 
+        // Remove duplicated slots when multiple active schedules overlap.
         return availableSlots
             .Distinct()
             .OrderBy(slot => slot)

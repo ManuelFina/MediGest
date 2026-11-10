@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace MediGest.Web.Areas.Reception.Controllers;
 
 [Area("Reception")]
-[Authorize(Roles = "Administrator,Receptionist")]
+[Authorize(Roles = "Receptionist")]
 public class AppointmentsController : Controller
 {
     private readonly IAppointmentService _appointmentService;
@@ -38,19 +38,16 @@ public class AppointmentsController : Controller
     {
         var selectedDate = date ?? DateOnly.FromDateTime(DateTime.Today);
 
-        // Calcular el lunes de la semana seleccionada.
         var daysSinceMonday =
             ((int)selectedDate.DayOfWeek + 6) % 7;
 
         var weekStart = selectedDate.AddDays(-daysSinceMonday);
         var weekEnd = weekStart.AddDays(6);
 
-        // Obtener los siete días de la semana.
         var weekDays = Enumerable.Range(0, 7)
             .Select(offset => weekStart.AddDays(offset))
             .ToList();
 
-        // Consultar los turnos reales de cada día.
         var appointments = new List<Appointment>();
 
         foreach (var day in weekDays)
@@ -61,7 +58,6 @@ public class AppointmentsController : Controller
             appointments.AddRange(dailyAppointments);
         }
 
-        // Obtener los profesionales activos.
         var professionals = (await _professionalService.GetAllAsync())
             .Where(p => p.IsActive)
             .ToList();
@@ -116,7 +112,6 @@ public class AppointmentsController : Controller
     public async Task<IActionResult> Create(
         AppointmentFormViewModel viewModel)
     {
-        // Recepción solamente puede crear turnos pendientes o confirmados.
         if (viewModel.Status != AppointmentStatus.Pending &&
             viewModel.Status != AppointmentStatus.Confirmed)
         {
@@ -335,7 +330,6 @@ public class AppointmentsController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        // Estos datos siempre se obtienen desde la base de datos.
         viewModel.ProfessionalId = appointment.ProfessionalId;
 
         viewModel.PatientName =
@@ -415,19 +409,6 @@ public class AppointmentsController : Controller
             value = slot.ToString("HH:mm"),
             text = slot.ToString("HH:mm")
         }));
-    }
-
-    // POST: Reception/Appointments/Complete/5
-    // Se conserva temporalmente hasta trasladar esta operación al área Doctor.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public Task<IActionResult> Complete(int id)
-    {
-        return ExecuteAppointmentActionAsync(
-            () => _appointmentService.CompleteAsync(
-                id,
-                GetCurrentUserId()),
-            "Turno marcado como completado.");
     }
 
     // POST: Reception/Appointments/MarkAsNoShow/5

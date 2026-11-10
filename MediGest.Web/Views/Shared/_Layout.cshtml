@@ -1,22 +1,33 @@
 ﻿
 @using Microsoft.AspNetCore.Identity
 @using MediGest.Web.Models.Identity
+
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
 @{
     var isAuthenticated = SignInManager.IsSignedIn(User);
+
     var currentUser = isAuthenticated
         ? await UserManager.GetUserAsync(User)
         : null;
 
     var userName = currentUser?.UserName ?? "Usuario";
-    var isAdmin = User.IsInRole("Administrator");
-    var isReceptionist = User.IsInRole("Receptionist");
-    var isDoctor = User.IsInRole("Doctor");
 
-    var isLoginPage = ViewContext.RouteData.Values["controller"]?.ToString() == "Account"
-                      && ViewContext.RouteData.Values["action"]?.ToString() == "Login";
+    var isAdmin = User.IsInRole(ApplicationRoles.Administrator);
+    var isReceptionist = User.IsInRole(ApplicationRoles.Receptionist);
+    var isDoctor = User.IsInRole(ApplicationRoles.Doctor);
+
+    var isLoginPage =
+        ViewContext.RouteData.Values["controller"]?.ToString() == "Account"
+        && ViewContext.RouteData.Values["action"]?.ToString() == "Login";
+
+    var currentArea = ViewContext.RouteData.Values["area"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+
+    var avatarLetter = !string.IsNullOrWhiteSpace(userName)
+        ? userName.Substring(0, 1).ToUpper()
+        : "U";
 }
 
 <!DOCTYPE html>
@@ -24,6 +35,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - MediGest</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -260,16 +272,26 @@
 @if (isAuthenticated && !isLoginPage)
 {
     <aside class="mg-sidebar">
-        <a asp-area="" asp-controller="Home" asp-action="Index" class="mg-brand">
+
+        <a asp-area=""
+           asp-controller="Home"
+           asp-action="Index"
+           class="mg-brand">
+
             <span class="mg-brand-icon">
                 <i class="bi bi-heart-pulse-fill"></i>
             </span>
+
             <span class="mg-brand-text">MediGest</span>
         </a>
 
         <div class="mg-menu-label">Principal</div>
 
-        <a asp-area="" asp-controller="Home" asp-action="Index" class="mg-nav-link">
+        <a asp-area=""
+           asp-controller="Home"
+           asp-action="Index"
+           class="mg-nav-link">
+
             <i class="bi bi-grid-1x2-fill"></i>
             <span>Inicio</span>
         </a>
@@ -285,6 +307,7 @@
                asp-controller="Users"
                asp-action="Index"
                class="mg-nav-link">
+
                 <i class="bi bi-people-fill"></i>
                 <span>Usuarios</span>
             </a>
@@ -293,6 +316,7 @@
                asp-controller="Professionals"
                asp-action="Index"
                class="mg-nav-link">
+
                 <i class="bi bi-person-badge-fill"></i>
                 <span>Profesionales</span>
             </a>
@@ -301,6 +325,7 @@
                asp-controller="Specialties"
                asp-action="Index"
                class="mg-nav-link">
+
                 <i class="bi bi-heart-pulse"></i>
                 <span>Especialidades</span>
             </a>
@@ -312,6 +337,7 @@
                asp-controller="Patients"
                asp-action="Index"
                class="mg-nav-link">
+
                 <i class="bi bi-person-lines-fill"></i>
                 <span>Pacientes</span>
             </a>
@@ -320,6 +346,7 @@
                asp-controller="Appointments"
                asp-action="Index"
                class="mg-nav-link">
+
                 <i class="bi bi-calendar-check-fill"></i>
                 <span>Turnos</span>
             </a>
@@ -330,38 +357,55 @@
             <div class="mg-menu-label">Mi espacio</div>
 
             <a asp-area="Doctor"
+               asp-controller="Appointments"
+               asp-action="Index"
+               class="mg-nav-link">
+
+                <i class="bi bi-calendar-check-fill"></i>
+                <span>Mi agenda</span>
+            </a>
+
+            <a asp-area="Doctor"
                asp-controller="ProfessionalSchedules"
                asp-action="Index"
                class="mg-nav-link">
+
                 <i class="bi bi-calendar-week-fill"></i>
-                <span>Mi agenda</span>
+                <span>Mis horarios</span>
             </a>
 
             <a asp-area="Doctor"
                asp-controller="ScheduleExceptions"
                asp-action="Index"
                class="mg-nav-link">
+
                 <i class="bi bi-calendar-x-fill"></i>
                 <span>Excepciones</span>
             </a>
         }
 
         <div class="mg-sidebar-footer">
+
             <div class="mg-user">
+
                 <div class="mg-avatar">
-                    @userName.Substring(0, 1).ToUpper()
+                    @avatarLetter
                 </div>
 
                 <div class="mg-user-info">
                     <strong>@userName</strong>
+
                     <small>
                         @(isAdmin
                             ? "Administrador"
                             : isReceptionist
                                 ? "Recepcionista"
-                                : "Profesional")
+                                : isDoctor
+                                    ? "Profesional"
+                                    : "Usuario")
                     </small>
                 </div>
+
             </div>
 
             <form asp-area=""
@@ -373,12 +417,17 @@
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Cerrar sesión</span>
                 </button>
+
             </form>
+
         </div>
+
     </aside>
 
     <div class="mg-main">
+
         <header class="mg-topbar">
+
             <div class="mg-topbar-title">
                 Sistema de gestión de consultorio
             </div>
@@ -387,6 +436,7 @@
                 <i class="bi bi-shield-check me-1"></i>
                 Acceso seguro
             </div>
+
         </header>
 
         <main class="mg-content">
@@ -396,6 +446,7 @@
         <footer class="mg-footer">
             © 2026 MediGest · Sistema de gestión de consultorio médico
         </footer>
+
     </div>
 }
 else

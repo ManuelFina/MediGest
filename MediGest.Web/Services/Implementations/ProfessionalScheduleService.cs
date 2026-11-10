@@ -131,9 +131,16 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
     private async Task ValidateOverlappingSchedulesAsync(
         ProfessionalSchedule schedule)
     {
+        // Las agendas inactivas no bloquean períodos.
+        if (!schedule.IsActive)
+        {
+            return;
+        }
+
         var hasOverlap = await _context.ProfessionalSchedules
             .AnyAsync(s =>
                 s.ProfessionalId == schedule.ProfessionalId &&
+                s.IsActive &&
                 s.Id != schedule.Id &&
                 schedule.StartDate <= s.EndDate &&
                 schedule.EndDate >= s.StartDate);
@@ -141,40 +148,53 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
         if (hasOverlap)
         {
             throw new BusinessException(
-                "El período de la agenda se superpone con otra agenda del profesional.");
+                "El período de la agenda se superpone con otra agenda activa del profesional.");
         }
     }
 
     private async Task ValidateExistingAppointmentsAsync(
         ProfessionalSchedule schedule)
     {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
         var appointments = await _context.Appointments
             .AsNoTracking()
             .Where(a =>
                 a.ProfessionalId == schedule.ProfessionalId &&
                 a.Status != AppointmentStatus.Cancelled &&
-                a.AppointmentDate >= DateOnly.FromDateTime(DateTime.Today))
+                a.AppointmentDate >= today &&
+                (a.AppointmentDate < schedule.StartDate ||
+                 a.AppointmentDate > schedule.EndDate))
             .ToListAsync();
 
-        foreach (var appointment in appointments)
+        if (appointments.Count == 0)
         {
-            if (appointment.AppointmentDate < schedule.StartDate ||
-                appointment.AppointmentDate > schedule.EndDate)
-            {
-                var belongsToAnotherSchedule =
-                    await _context.ProfessionalSchedules.AnyAsync(s =>
-                        s.Id != schedule.Id &&
-                        s.ProfessionalId == schedule.ProfessionalId &&
-                        s.IsActive &&
-                        appointment.AppointmentDate >= s.StartDate &&
-                        appointment.AppointmentDate <= s.EndDate);
+            return;
+        }
 
-                if (!belongsToAnotherSchedule)
-                {
-                    throw new BusinessException(
-                        "No se puede modificar el período de la agenda porque existen turnos asignados fuera del nuevo rango de fechas.");
-                }
-            }
+        var otherActiveSchedules = await _context.ProfessionalSchedules
+            .AsNoTracking()
+            .Where(s =>
+                s.Id != schedule.Id &&
+                s.ProfessionalId == schedule.ProfessionalId &&
+                s.IsActive)
+            .Select(s => new
+            {
+                s.StartDate,
+                s.EndDate
+            })
+            .ToListAsync();
+
+        var hasAppointmentsOutsideAvailablePeriods = appointments.Any(
+            appointment =>
+                !otherActiveSchedules.Any(other =>
+                    appointment.AppointmentDate >= other.StartDate &&
+                    appointment.AppointmentDate <= other.EndDate));
+
+        if (hasAppointmentsOutsideAvailablePeriods)
+        {
+            throw new BusinessException(
+                "No se puede modificar el período de la agenda porque existen turnos asignados fuera del nuevo rango de fechas.");
         }
     }
 
@@ -182,7 +202,8 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
         ProfessionalSchedule schedule)
     {
         if (schedule.StartDate == default ||
-            schedule.EndDate <= schedule.StartDate)
+            schedule.EndDate == default ||
+            schedule.EndDate < schedule.StartDate)
         {
             throw new BusinessException(
                 "El período de la agenda no es válido.");

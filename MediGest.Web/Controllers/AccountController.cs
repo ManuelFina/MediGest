@@ -1,6 +1,7 @@
 ﻿
 using MediGest.Web.Services.Interfaces;
 using MediGest.Web.ViewModels.Account;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediGest.Web.Controllers;
@@ -15,24 +16,39 @@ public class AccountController : Controller
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true)
+        {
+            if (!string.IsNullOrWhiteSpace(returnUrl) &&
+                Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             return RedirectToAction("Index", "Home");
+        }
 
         ViewData["ReturnUrl"] = returnUrl;
 
         return View();
     }
+
     [HttpPost]
+    [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(
         LoginViewModel model,
         string? returnUrl = null)
     {
+        ViewData["ReturnUrl"] = returnUrl;
+
         if (!ModelState.IsValid)
+        {
             return View(model);
-        
+        }
+
         var user = await _accountService.FindActiveUserAsync(model.Email);
 
         if (user is null)
@@ -53,7 +69,9 @@ public class AccountController : Controller
         {
             if (!string.IsNullOrWhiteSpace(returnUrl) &&
                 Url.IsLocalUrl(returnUrl))
+            {
                 return Redirect(returnUrl);
+            }
 
             return RedirectToAction("Index", "Home");
         }
@@ -68,6 +86,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
+    [Authorize]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
@@ -77,6 +96,7 @@ public class AccountController : Controller
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult AccessDenied()
     {
         return View();

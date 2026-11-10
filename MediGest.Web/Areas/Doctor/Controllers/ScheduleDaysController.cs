@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using MediGest.Web.Exceptions;
 using MediGest.Web.Models.Entities;
+using MediGest.Web.Models.Identity;
 using MediGest.Web.Services.Interfaces;
 using MediGest.Web.ViewModels.Schedules;
 using Microsoft.AspNetCore.Authorization;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace MediGest.Web.Areas.Doctor.Controllers;
 
 [Area("Doctor")]
-[Authorize(Roles = "Doctor")]
+[Authorize(Roles = ApplicationRoles.Doctor)]
 public class ScheduleDaysController : Controller
 {
     private readonly IScheduleDayService _scheduleDayService;

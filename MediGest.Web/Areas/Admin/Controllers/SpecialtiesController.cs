@@ -1,6 +1,7 @@
 ﻿
 using MediGest.Web.Exceptions;
 using MediGest.Web.Models.Entities;
+using MediGest.Web.Models.Identity;
 using MediGest.Web.Services.Interfaces;
 using MediGest.Web.ViewModels.Specialties;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace MediGest.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
-[Authorize(Roles = "Administrator")]
+[Authorize(Roles = ApplicationRoles.Administrator)]
 public class SpecialtiesController : Controller
 {
     private readonly ISpecialtyService _specialtyService;
@@ -19,16 +20,17 @@ public class SpecialtiesController : Controller
         _specialtyService = specialtyService;
     }
 
-
+    [HttpGet]
     public async Task<IActionResult> Index(string? searchTerm)
     {
-        var allSpecialties = (await _specialtyService.GetAllAsync()).ToList();
+        var allSpecialties = (await _specialtyService.GetAllAsync())
+            .ToList();
 
         var filteredSpecialties = allSpecialties.AsEnumerable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            string normalizedSearch = searchTerm.Trim();
+            var normalizedSearch = searchTerm.Trim();
 
             filteredSpecialties = filteredSpecialties.Where(s =>
                 s.Name.Contains(
@@ -39,26 +41,24 @@ public class SpecialtiesController : Controller
         var viewModel = new SpecialtyListViewModel
         {
             SearchTerm = searchTerm,
-
             TotalSpecialties = allSpecialties.Count,
-
             ActiveSpecialties = allSpecialties.Count(s => s.IsActive),
-
             InactiveSpecialties = allSpecialties.Count(s => !s.IsActive),
 
-            Specialties = filteredSpecialties.Select(s => new SpecialtyItemViewModel
-            {
-                Id = s.Id,
-                Name = s.Name,
-                Description = s.Description,
-                IsActive = s.IsActive,
-                ProfessionalsCount = s.Professionals.Count
-            }).ToList()
+            Specialties = filteredSpecialties
+                .Select(s => new SpecialtyItemViewModel
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Description = s.Description,
+                    IsActive = s.IsActive,
+                    ProfessionalsCount = s.Professionals.Count
+                })
+                .ToList()
         };
 
         return View(viewModel);
     }
-
 
     [HttpGet]
     public IActionResult Create()
@@ -68,10 +68,13 @@ public class SpecialtiesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(SpecialtyFormViewModel viewModel)
+    public async Task<IActionResult> Create(
+        SpecialtyFormViewModel viewModel)
     {
         if (!ModelState.IsValid)
+        {
             return View(viewModel);
+        }
 
         try
         {
@@ -83,7 +86,8 @@ public class SpecialtiesController : Controller
 
             await _specialtyService.CreateAsync(specialty);
 
-            TempData["Success"] = "La especialidad se creó correctamente.";
+            TempData["Success"] =
+                "La especialidad se creó correctamente.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -100,7 +104,9 @@ public class SpecialtiesController : Controller
         var specialty = await _specialtyService.GetByIdAsync(id);
 
         if (specialty is null)
+        {
             return NotFound();
+        }
 
         var viewModel = new SpecialtyFormViewModel
         {
@@ -119,22 +125,28 @@ public class SpecialtiesController : Controller
         SpecialtyFormViewModel viewModel)
     {
         if (id != viewModel.Id)
+        {
             return BadRequest();
+        }
 
         if (!ModelState.IsValid)
+        {
             return View(viewModel);
+        }
 
         try
         {
             var specialty = new Specialty
             {
+                Id = id,
                 Name = viewModel.Name,
                 Description = viewModel.Description
             };
 
             await _specialtyService.UpdateAsync(id, specialty);
 
-            TempData["Success"] = "La especialidad se actualizó correctamente.";
+            TempData["Success"] =
+                "La especialidad se actualizó correctamente.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -153,7 +165,8 @@ public class SpecialtiesController : Controller
         {
             await _specialtyService.DeactivateAsync(id);
 
-            TempData["Success"] = "La especialidad se desactivó correctamente.";
+            TempData["Success"] =
+                "La especialidad se desactivó correctamente.";
         }
         catch (BusinessException ex)
         {
@@ -171,7 +184,8 @@ public class SpecialtiesController : Controller
         {
             await _specialtyService.ActivateAsync(id);
 
-            TempData["Success"] = "La especialidad se activó correctamente.";
+            TempData["Success"] =
+                "La especialidad se activó correctamente.";
         }
         catch (BusinessException ex)
         {

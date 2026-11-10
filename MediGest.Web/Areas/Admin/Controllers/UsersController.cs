@@ -1,10 +1,8 @@
 ﻿
-using MediGest.Web.Exceptions;
 using MediGest.Web.Models.Identity;
 using MediGest.Web.Services.Interfaces;
 using MediGest.Web.ViewModels.Users;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -15,16 +13,14 @@ namespace MediGest.Web.Areas.Admin.Controllers;
 public class UsersController : Controller
 {
     private readonly IUserManagementService _userManagementService;
-    private readonly UserManager<ApplicationUser> _userManager;
 
     public UsersController(
-        IUserManagementService userManagementService,
-        UserManager<ApplicationUser> userManager)
+        IUserManagementService userManagementService)
     {
         _userManagementService = userManagementService;
-        _userManager = userManager;
     }
 
+    [HttpGet]
     public async Task<IActionResult> Index(string? searchTerm)
     {
         var users = await _userManagementService.SearchAsync(searchTerm);
@@ -97,7 +93,8 @@ public class UsersController : Controller
                     model.Password!,
                     model.Role);
 
-                TempData["Success"] = "El usuario fue creado correctamente.";
+                TempData["Success"] =
+                    "El usuario fue creado correctamente.";
 
                 return RedirectToAction(nameof(Index));
             }
@@ -179,7 +176,8 @@ public class UsersController : Controller
                 model.Role,
                 model.Password);
 
-            TempData["Success"] = "El usuario fue actualizado correctamente.";
+            TempData["Success"] =
+                "El usuario fue actualizado correctamente.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -201,7 +199,8 @@ public class UsersController : Controller
         {
             await _userManagementService.DeactivateAsync(id);
 
-            TempData["Success"] = "El usuario fue desactivado correctamente.";
+            TempData["Success"] =
+                "El usuario fue desactivado correctamente.";
         }
         catch (InvalidOperationException ex)
         {
@@ -219,7 +218,8 @@ public class UsersController : Controller
         {
             await _userManagementService.ActivateAsync(id);
 
-            TempData["Success"] = "El usuario fue activado correctamente.";
+            TempData["Success"] =
+                "El usuario fue activado correctamente.";
         }
         catch (InvalidOperationException ex)
         {
@@ -229,7 +229,7 @@ public class UsersController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    private async Task LoadRolesAsync(UserFormViewModel model)
+    private Task LoadRolesAsync(UserFormViewModel model)
     {
         model.AvailableRoles = new[]
         {
@@ -244,5 +244,7 @@ public class UsersController : Controller
                 Text = "Profesional"
             }
         };
+
+        return Task.CompletedTask;
     }
 }
