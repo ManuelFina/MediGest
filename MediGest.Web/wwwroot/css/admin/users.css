@@ -1,0 +1,491 @@
+﻿
+/* =========================================
+   MEDIGEST - ADMINISTRACIÓN DE USUARIOS
+   ========================================= */
+
+.admin-page {
+    color: #243247;
+}
+
+.page-subtitle {
+    color: #8491a5;
+    font-size: .95rem;
+}
+
+.page-title {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: #243247;
+    letter-spacing: -.4px;
+}
+
+/* Estadísticas */
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #edf0f5;
+    border-radius: 14px;
+    padding: 22px;
+    height: 100%;
+    box-shadow: 0 3px 12px rgba(30, 45, 70, .035);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(30, 45, 70, .07);
+    }
+
+.stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+    .stat-icon.primary {
+        background: #eaf1ff;
+        color: #3765c5;
+    }
+
+    .stat-icon.success {
+        background: #e7f7ef;
+        color: #23965b;
+    }
+
+    .stat-icon.danger {
+        background: #fff0ef;
+        color: #dc5555;
+    }
+
+.stat-label {
+    color: #8491a5;
+    font-size: .85rem;
+    font-weight: 500;
+}
+
+.stat-value {
+    color: #243247;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-top: 5px;
+}
+
+/* Tarjetas de contenido */
+
+.content-card {
+    background: #fff;
+    border: 1px solid #edf0f5;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(30, 45, 70, .035);
+    overflow: hidden;
+}
+
+.content-card-header {
+    padding: 20px 22px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #243247;
+    margin-bottom: 3px;
+}
+
+.section-description {
+    color: #8491a5;
+    font-size: .85rem;
+    margin-bottom: 0;
+}
+
+/* Buscador y botones */
+
+.search-input {
+    min-height: 43px;
+    border-color: #e4e9f0;
+    border-radius: 8px;
+    font-size: .9rem;
+}
+
+    .search-input:focus {
+        border-color: #7799df;
+        box-shadow: 0 0 0 .2rem rgba(55, 101, 197, .1);
+    }
+
+.btn-admin-primary {
+    background: #3765c5;
+    color: #fff;
+    border: 1px solid #3765c5;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-weight: 600;
+    font-size: .88rem;
+}
+
+    .btn-admin-primary:hover {
+        background: #2c54a8;
+        border-color: #2c54a8;
+        color: #fff;
+    }
+
+.btn-admin-light {
+    background: #fff;
+    color: #64748b;
+    border: 1px solid #e1e7ef;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-weight: 500;
+    font-size: .88rem;
+}
+
+    .btn-admin-light:hover {
+        background: #f6f8fb;
+        color: #334155;
+    }
+
+/* Tabla */
+
+.users-table {
+    margin-bottom: 0;
+}
+
+    .users-table thead th {
+        background: #f8f9fc;
+        color: #8491a5;
+        font-size: .75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .45px;
+        padding: 15px 18px;
+        border-bottom: 1px solid #edf0f5;
+        white-space: nowrap;
+    }
+
+    .users-table tbody td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #f0f2f6;
+        color: #536176;
+        font-size: .88rem;
+        vertical-align: middle;
+    }
+
+    .users-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .users-table tbody tr:hover {
+        background: #fafbfe;
+    }
+
+.user-name {
+    color: #243247;
+    font-weight: 650;
+}
+
+.user-email {
+    color: #64748b;
+}
+
+/* Roles y estados */
+
+.status-badge,
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: .76rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-active {
+    color: #218653;
+    background: #e8f7ef;
+}
+
+.status-inactive {
+    color: #c34d4d;
+    background: #fff0ef;
+}
+
+.role-admin {
+    color: #46546a;
+    background: #edf0f5;
+}
+
+.role-reception {
+    color: #2878a7;
+    background: #e8f5fc;
+}
+
+.role-doctor {
+    color: #3765c5;
+    background: #eaf1ff;
+}
+
+.role-default {
+    color: #64748b;
+    background: #f0f2f5;
+}
+
+/* Acciones */
+
+.action-btn {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 1px solid #e3e8f0;
+    background: #fff;
+    color: #64748b;
+    transition: all .15s ease;
+}
+
+.action-edit:hover {
+    background: #eaf1ff;
+    border-color: #cbd9f7;
+    color: #3765c5;
+}
+
+.action-deactivate:hover {
+    background: #fff0ef;
+    border-color: #f5cecb;
+    color: #d34f4f;
+}
+
+.action-activate:hover {
+    background: #e8f7ef;
+    border-color: #c5ead5;
+    color: #218653;
+}
+
+/* Estado vacío */
+
+.empty-state {
+    padding: 55px 20px;
+    text-align: center;
+}
+
+.empty-state-icon {
+    width: 65px;
+    height: 65px;
+    border-radius: 18px;
+    background: #f1f4f9;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin: 0 auto 16px;
+}
+
+.empty-state h5 {
+    color: #334155;
+    font-weight: 700;
+}
+
+.empty-state p {
+    color: #94a3b8;
+    font-size: .9rem;
+}
+
+/* Adaptación a pantallas pequeñas */
+
+@media (max-width: 767px) {
+    .page-header {
+        align-items: flex-start !important;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+        .page-header .btn {
+            width: 100%;
+        }
+}
+
+
+/* =========================================
+   FORMULARIOS DE USUARIOS
+   ========================================= */
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    color: #718096;
+    font-size: .9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color .2s ease;
+}
+
+    .back-link:hover {
+        color: var(--mg-primary);
+    }
+
+.form-section {
+    margin-bottom: 1rem;
+}
+
+.form-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.form-section-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: rgba(55, 101, 197, .10);
+    color: var(--mg-primary);
+    font-size: 1.2rem;
+}
+
+    .form-section-icon.access-icon {
+        background: rgba(35, 150, 91, .10);
+        color: var(--mg-success);
+    }
+
+.form-section-title {
+    color: var(--mg-text);
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.form-section-description {
+    color: var(--mg-muted);
+    font-size: .82rem;
+    margin-bottom: 0;
+}
+
+.form-divider {
+    border-color: var(--mg-border);
+    opacity: 1;
+    margin: 1.8rem 0;
+}
+
+.admin-page .form-label {
+    color: #46556b;
+    font-size: .88rem;
+    font-weight: 600;
+    margin-bottom: .45rem;
+}
+
+.admin-page .form-control,
+.admin-page .form-select {
+    min-height: 43px;
+    border: 1px solid #dfe5ed;
+    border-radius: 8px;
+    font-size: .9rem;
+}
+
+    .admin-page .form-control:focus,
+    .admin-page .form-select:focus {
+        border-color: #7799df;
+        box-shadow: 0 0 0 .2rem rgba(55, 101, 197, .1);
+    }
+
+    .admin-page .form-control::placeholder {
+        color: #a5afbd;
+    }
+
+.form-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px 17px;
+    border: 1px solid #dce8fb;
+    border-radius: 10px;
+    background: #f3f7fe;
+    color: #3765a5;
+    font-size: .88rem;
+}
+
+    .form-info > i {
+        font-size: 1.1rem;
+        margin-top: 2px;
+    }
+
+    .form-info strong {
+        display: block;
+        margin-bottom: 3px;
+    }
+
+    .form-info p {
+        color: #647c9d;
+        line-height: 1.5;
+    }
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 1.7rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--mg-border);
+}
+
+    .form-actions .btn {
+        min-height: 40px;
+        padding: 9px 18px;
+        font-size: .88rem;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+.validation-summary:empty {
+    display: none;
+}
+
+@media (max-width: 576px) {
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+        .form-actions .btn {
+            width: 100%;
+        }
+
+    .content-card .p-4 {
+        padding: 1.2rem !important;
+    }
+}
+
+
+/* Estado de la cuenta en el formulario */
+
+.form-status-box {
+    min-height: 72px;
+    padding: 12px 15px;
+    border: 1px solid #e5eaf1;
+    border-radius: 9px;
+    background: #f8fafd;
+}
+
+    .form-status-box .form-check {
+        margin-bottom: 5px;
+    }
+
+    .form-status-box .form-check-input {
+        cursor: pointer;
+    }
+
+        .form-status-box .form-check-input:checked {
+            background-color: var(--mg-success);
+            border-color: var(--mg-success);
+        }
+
+    .form-status-box .form-check-label {
+        cursor: pointer;
+    }

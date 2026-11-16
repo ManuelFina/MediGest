@@ -1,0 +1,182 @@
+﻿
+/* BÚSQUEDA DE PROFESIONALES */
+
+.professional-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: min(100%, 390px);
+}
+
+    .professional-search .form-control {
+        min-height: 40px;
+        border: 1px solid #dfe5ed;
+        border-radius: 8px;
+        font-size: .88rem;
+    }
+
+        .professional-search .form-control:focus {
+            border-color: #7799df;
+            box-shadow: 0 0 0 .2rem rgba(55, 101, 197, .1);
+        }
+
+    .professional-search .btn {
+        min-height: 40px;
+        min-width: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+/* ESTADÍSTICAS */
+
+.stat-icon-primary {
+    background: rgba(55, 101, 197, .10);
+    color: var(--mg-primary);
+}
+
+.stat-icon-success {
+    background: rgba(35, 150, 91, .10);
+    color: var(--mg-success);
+}
+
+.stat-icon-secondary {
+    background: rgba(108, 117, 125, .12);
+    color: #6c757d;
+}
+
+/* TABLA */
+
+.professionals-table {
+    min-width: 760px;
+}
+
+.specialty-name {
+    color: #46556b;
+    font-weight: 500;
+    font-size: .88rem;
+}
+
+.license-number {
+    color: #718096;
+    font-size: .88rem;
+    font-weight: 500;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 576px) {
+    .professional-search {
+        width: 100%;
+    }
+
+        .professional-search .form-control {
+            min-width: 0;
+        }
+}
+
+
+/* FORMULARIO DE PROFESIONALES */
+
+.professional-form-section {
+    margin-bottom: 1rem;
+}
+
+    .professional-form-section .form-label {
+        color: #46556b;
+        font-size: .88rem;
+        font-weight: 600;
+        margin-bottom: .45rem;
+    }
+
+    .professional-form-section .form-control,
+    .professional-form-section .form-select {
+        min-height: 43px;
+        border: 1px solid #dfe5ed;
+        border-radius: 8px;
+        font-size: .9rem;
+    }
+
+        .professional-form-section .form-control:focus,
+        .professional-form-section .form-select:focus {
+            border-color: #7799df;
+            box-shadow: 0 0 0 .2rem rgba(55, 101, 197, .1);
+        }
+
+.form-hint {
+    margin-top: 7px;
+    color: #718096;
+    font-size: .82rem;
+}
+
+.professional-form-section .form-divider {
+    border-color: var(--mg-border);
+    opacity: 1;
+}
+
+@media (max-width: 576px) {
+    .content-card .p-4 {
+        padding: 1.2rem !important;
+    }
+}
+
+
+/* CUENTA VINCULADA */
+
+.linked-user-box {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafd;
+}
+
+.linked-user-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(55, 101, 197, .10);
+    color: var(--mg-primary);
+    font-size: 1.2rem;
+}
+
+.linked-user-box strong {
+    display: block;
+    color: var(--mg-text);
+    font-size: .9rem;
+    margin-bottom: 3px;
+}
+
+.linked-user-box p {
+    color: var(--mg-muted);
+    font-size: .82rem;
+}
+
+.linked-user-badge {
+    margin-left: auto;
+    white-space: nowrap;
+    color: #64748b;
+    background: #e9eef5;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+@media (max-width: 576px) {
+    .linked-user-box {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .linked-user-badge {
+        margin-left: 55px;
+    }
+}
+

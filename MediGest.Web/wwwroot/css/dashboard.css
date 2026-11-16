@@ -1,0 +1,423 @@
+﻿
+/* =========================================
+   MEDIGEST - DASHBOARD
+   ========================================= */
+
+.dashboard-heading {
+    margin-bottom: 1.8rem;
+}
+
+    .dashboard-heading h3 {
+        font-weight: 700;
+        letter-spacing: -.5px;
+        color: #172b4d;
+    }
+
+.dashboard-stat {
+    border: 1px solid #edf0f5;
+    border-radius: 16px;
+    background: #fff;
+    height: 100%;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+    .dashboard-stat:hover,
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(30, 50, 80, .09) !important;
+    }
+
+    .dashboard-stat .card-body {
+        padding: 1.35rem;
+    }
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+.stat-value {
+    font-size: 1.9rem;
+    font-weight: 750;
+    color: #172b4d;
+    line-height: 1.2;
+}
+
+.stat-label {
+    color: #718096;
+    font-size: .85rem;
+    font-weight: 500;
+}
+
+.dashboard-card {
+    border: 1px solid #edf0f5;
+    border-radius: 16px;
+    background: white;
+    height: 100%;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+    .dashboard-card .card-body {
+        padding: 1.4rem;
+    }
+
+.dashboard-section-title {
+    color: #172b4d;
+    font-weight: 700;
+}
+
+.dashboard-table th {
+    color: #718096;
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    border-bottom: 1px solid #edf0f5;
+    padding: .9rem .75rem;
+}
+
+.dashboard-table td {
+    padding: .95rem .75rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f3f7;
+    color: #46556b;
+    font-size: .9rem;
+}
+
+.dashboard-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dashboard-access-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard-access-link {
+    text-decoration: none;
+    font-size: .88rem;
+    font-weight: 600;
+}
+
+    .dashboard-access-link:hover {
+        text-decoration: underline;
+    }
+
+.dashboard-muted {
+    color: #8290a5;
+}
+
+.session-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eaf1ff;
+    color: #3168c5;
+    font-size: 1.35rem;
+}
+
+/* ENCABEZADO DEL DASHBOARD */
+
+.dashboard-heading {
+    margin-bottom: 42px;
+}
+
+.dashboard-welcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 12px 0 28px;
+}
+
+.dashboard-eyebrow {
+    display: block;
+    margin-bottom: 12px;
+    color: var(--mg-primary);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.dashboard-title {
+    margin: 0;
+    color: var(--mg-text);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.dashboard-user-name {
+    margin: 5px 0 8px;
+    color: var(--mg-primary);
+    font-size: 1.15rem;
+    font-weight: 500;
+}
+
+.dashboard-description {
+    margin: 0;
+    color: var(--mg-muted);
+    font-size: .88rem;
+}
+
+.dashboard-heading-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+    border-radius: 18px;
+    background: rgba(55, 101, 197, .09);
+    color: var(--mg-primary);
+    font-size: 1.8rem;
+}
+
+.dashboard-date {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding-top: 17px;
+    border-top: 1px solid var(--mg-border);
+    color: var(--mg-muted);
+    font-size: .78rem;
+}
+
+/* TÍTULOS DE SECCIÓN */
+
+.dashboard-section-heading {
+    margin-bottom: 24px;
+}
+
+    .dashboard-section-heading h3 {
+        margin: 0 0 7px;
+        color: var(--mg-text);
+        font-size: 1.12rem;
+        font-weight: 600;
+    }
+
+    .dashboard-section-heading p {
+        margin: 0;
+        color: var(--mg-muted);
+        font-size: .82rem;
+    }
+
+@media (max-width: 576px) {
+    .dashboard-heading {
+        margin-bottom: 30px;
+    }
+
+    .dashboard-welcome {
+        align-items: flex-start;
+    }
+
+    .dashboard-title {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-heading-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.3rem;
+    }
+}
+
+/* =========================================
+   TARJETA DE SESIÓN EN EL ENCABEZADO
+========================================= */
+
+.dashboard-session-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 265px;
+    padding: 16px 18px;
+    background: #fff;
+    border: 1px solid var(--mg-border);
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(30, 50, 80, .04);
+}
+
+.dashboard-session-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: rgba(55, 101, 197, .10);
+    color: var(--mg-primary);
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.dashboard-session-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 2px;
+}
+
+.dashboard-session-label {
+    color: var(--mg-muted);
+    font-size: .63rem;
+    font-weight: 600;
+    letter-spacing: .8px;
+}
+
+.dashboard-session-info strong {
+    overflow: hidden;
+    color: var(--mg-text);
+    font-size: .83rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashboard-session-info small {
+    color: var(--mg-muted);
+    font-size: .72rem;
+}
+
+.dashboard-session-status {
+    margin-left: auto;
+    color: var(--mg-success);
+    font-size: .55rem;
+}
+
+@media (max-width: 576px) {
+    .dashboard-session-card {
+        min-width: 0;
+        width: 100%;
+        margin-top: 18px;
+    }
+
+    .dashboard-welcome {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* =========================================
+   TARJETA DE FECHA - COMPACTA
+========================================= */
+
+.dashboard-calendar-card {
+    width: 220px;
+    flex-shrink: 0;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid var(--mg-border);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(30, 50, 80, .04);
+}
+
+.dashboard-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+    .dashboard-calendar-header > span {
+        color: var(--mg-muted);
+        font-size: .58rem;
+        font-weight: 600;
+        letter-spacing: .7px;
+    }
+
+.dashboard-calendar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    color: var(--mg-primary);
+    background: rgba(55, 101, 197, .10);
+    border-radius: 8px;
+    font-size: .85rem;
+}
+
+.dashboard-calendar-date {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dashboard-calendar-day {
+    color: var(--mg-primary);
+    font-size: 2.35rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.dashboard-calendar-month {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+    .dashboard-calendar-month strong {
+        color: var(--mg-text);
+        font-size: .73rem;
+        font-weight: 600;
+        letter-spacing: .4px;
+    }
+
+    .dashboard-calendar-month span {
+        color: var(--mg-muted);
+        font-size: .68rem;
+    }
+
+.dashboard-calendar-footer {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding-top: 10px;
+    border-top: 1px solid var(--mg-border);
+}
+
+    .dashboard-calendar-footer > i {
+        color: var(--mg-success);
+        font-size: .95rem;
+    }
+
+    .dashboard-calendar-footer div {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+
+    .dashboard-calendar-footer strong {
+        color: var(--mg-text);
+        font-size: .7rem;
+        font-weight: 600;
+    }
+
+    .dashboard-calendar-footer small {
+        color: var(--mg-muted);
+        font-size: .63rem;
+    }
+
+@media (max-width: 768px) {
+    .dashboard-calendar-card {
+        width: 100%;
+        max-width: 260px;
+        margin-top: 16px;
+    }
+}

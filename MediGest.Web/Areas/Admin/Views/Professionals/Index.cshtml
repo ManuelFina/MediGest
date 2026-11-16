@@ -5,20 +5,23 @@
     ViewData["Title"] = "Profesionales";
 }
 
-<div class="alert alert-success">
-    Bootstrap está funcionando en Profesionales.
-</div>
+@section Styles {
+    <link rel="stylesheet"
+          href="~/css/admin/users.css"
+          asp-append-version="true" />
 
-<button class="btn btn-primary">
-    Botón de prueba
-</button>
+    <link rel="stylesheet"
+          href="~/css/admin/professionals.css"
+          asp-append-version="true" />
+}
+<div class="container-fluid admin-page">
 
-<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="mb-1">Profesionales</h2>
-            <p class="text-muted mb-0">
+            <h2 class="page-title mb-1">Profesionales</h2>
+            <p class="page-subtitle mb-0">
                 Administrá los médicos y sus especialidades.
             </p>
         </div>
@@ -26,18 +29,23 @@
         <a asp-area="Admin"
            asp-controller="Professionals"
            asp-action="Create"
-           class="btn btn-primary">
+           class="btn btn-admin-primary">
             <i class="bi bi-person-plus me-1"></i>
             Registrar profesional
         </a>
+
     </div>
 
+    <!-- Mensajes -->
     @if (TempData["Success"] is not null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-check-circle me-2"></i>
             @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar"></button>
         </div>
     }
 
@@ -46,81 +54,92 @@
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-circle me-2"></i>
             @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar"></button>
         </div>
     }
 
+    <!-- Estadísticas -->
     <div class="row g-3 mb-4">
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Total de profesionales</p>
-                            <h3 class="mb-0">@Model.TotalProfessionals</h3>
-                        </div>
-                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
-                            <i class="bi bi-people fs-4 text-primary"></i>
-                        </div>
-                    </div>
+            <div class="stat-card h-100">
+                <div>
+                    <p class="stat-label">Total de profesionales</p>
+                    <h3 class="stat-value">@Model.TotalProfessionals</h3>
+                </div>
+
+                <div class="stat-icon stat-icon-primary">
+                    <i class="bi bi-people"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Profesionales activos</p>
-                            <h3 class="mb-0 text-success">@Model.ActiveProfessionals</h3>
-                        </div>
-                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
-                            <i class="bi bi-person-check fs-4 text-success"></i>
-                        </div>
-                    </div>
+            <div class="stat-card h-100">
+                <div>
+                    <p class="stat-label">Profesionales activos</p>
+                    <h3 class="stat-value text-success">
+                        @Model.ActiveProfessionals
+                    </h3>
+                </div>
+
+                <div class="stat-icon stat-icon-success">
+                    <i class="bi bi-person-check"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Profesionales inactivos</p>
-                            <h3 class="mb-0 text-secondary">@Model.InactiveProfessionals</h3>
-                        </div>
-                        <div class="rounded-circle bg-secondary bg-opacity-10 p-3">
-                            <i class="bi bi-person-dash fs-4 text-secondary"></i>
-                        </div>
-                    </div>
+            <div class="stat-card h-100">
+                <div>
+                    <p class="stat-label">Profesionales inactivos</p>
+                    <h3 class="stat-value text-secondary">
+                        @Model.InactiveProfessionals
+                    </h3>
+                </div>
+
+                <div class="stat-icon stat-icon-secondary">
+                    <i class="bi bi-person-dash"></i>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 py-3">
+    <!-- Listado -->
+    <div class="content-card">
+
+        <div class="content-card-header">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                <h5 class="mb-0">Listado de profesionales</h5>
+
+                <div>
+                    <h5 class="section-title mb-1">
+                        Listado de profesionales
+                    </h5>
+                    <p class="section-description mb-0">
+                        Consultá y administrá los profesionales registrados.
+                    </p>
+                </div>
 
                 <form asp-area="Admin"
                       asp-controller="Professionals"
                       asp-action="Index"
                       method="get"
-                      class="d-flex gap-2">
+                      class="professional-search">
 
                     <input type="search"
                            name="searchTerm"
                            value="@Model.SearchTerm"
                            class="form-control"
                            placeholder="Buscar profesional..."
-                           style="min-width: 230px;" />
+                           aria-label="Buscar profesional" />
 
-                    <button type="submit" class="btn btn-outline-primary">
+                    <button type="submit"
+                            class="btn btn-admin-primary"
+                            title="Buscar">
                         <i class="bi bi-search"></i>
                     </button>
 
@@ -129,36 +148,50 @@
                         <a asp-area="Admin"
                            asp-controller="Professionals"
                            asp-action="Index"
-                           class="btn btn-outline-secondary">
+                           class="btn btn-admin-light"
+                           title="Limpiar búsqueda">
                             <i class="bi bi-x-lg"></i>
                         </a>
                     }
+
                 </form>
+
             </div>
         </div>
 
-        <div class="card-body p-0">
+        <div class="content-card-body p-0">
+
             @if (!Model.Professionals.Any())
             {
-                <div class="text-center py-5">
-                    <i class="bi bi-person-vcard display-4 text-muted"></i>
-                    <h5 class="mt-3">No hay profesionales registrados</h5>
-                    <p class="text-muted mb-3">
+                <div class="empty-state">
+
+                    <div class="empty-state-icon">
+                        <i class="bi bi-person-vcard"></i>
+                    </div>
+
+                    <h5>No hay profesionales registrados</h5>
+
+                    <p>
                         Todavía no se encontraron profesionales para mostrar.
                     </p>
+
                     <a asp-area="Admin"
                        asp-controller="Professionals"
                        asp-action="Create"
-                       class="btn btn-primary">
+                       class="btn btn-admin-primary">
+                        <i class="bi bi-person-plus me-1"></i>
                         Registrar primer profesional
                     </a>
+
                 </div>
             }
             else
             {
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
+
+                    <table class="table users-table professionals-table mb-0">
+
+                        <thead>
                             <tr>
                                 <th class="ps-4">Profesional</th>
                                 <th>Especialidad</th>
@@ -167,26 +200,32 @@
                                 <th class="text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
+
                         <tbody>
+
                             @foreach (var professional in Model.Professionals)
                             {
                                 <tr>
+
                                     <td class="ps-4">
-                                        <div class="fw-semibold">
+                                        <div class="user-name">
                                             @professional.ApplicationUser.LastName,
                                             @professional.ApplicationUser.FirstName
                                         </div>
-                                        <small class="text-muted">
+
+                                        <div class="user-email">
                                             @professional.ApplicationUser.Email
-                                        </small>
+                                        </div>
                                     </td>
 
                                     <td>
-                                        @professional.Specialty.Name
+                                        <span class="specialty-name">
+                                            @professional.Specialty.Name
+                                        </span>
                                     </td>
 
                                     <td>
-                                        <span class="text-muted">
+                                        <span class="license-number">
                                             @professional.LicenseNumber
                                         </span>
                                     </td>
@@ -194,27 +233,31 @@
                                     <td>
                                         @if (professional.IsActive)
                                         {
-                                            <span class="badge bg-success-subtle text-success">
+                                            <span class="status-badge status-active">
+                                                <i class="bi bi-check-circle me-1"></i>
                                                 Activo
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary-subtle text-secondary">
+                                            <span class="status-badge status-inactive">
+                                                <i class="bi bi-dash-circle me-1"></i>
                                                 Inactivo
                                             </span>
                                         }
                                     </td>
 
                                     <td class="text-end pe-4">
+
                                         <div class="d-inline-flex gap-2">
 
                                             <a asp-area="Admin"
                                                asp-controller="Professionals"
                                                asp-action="Edit"
                                                asp-route-id="@professional.Id"
-                                               class="btn btn-sm btn-outline-primary"
-                                               title="Editar">
+                                               class="action-btn action-edit"
+                                               title="Editar profesional"
+                                               aria-label="Editar profesional">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
 
@@ -228,10 +271,12 @@
                                                       onsubmit="return confirm('¿Desactivar este profesional?');">
 
                                                     <button type="submit"
-                                                            class="btn btn-sm btn-outline-danger"
-                                                            title="Desactivar">
+                                                            class="action-btn action-deactivate"
+                                                            title="Desactivar profesional"
+                                                            aria-label="Desactivar profesional">
                                                         <i class="bi bi-person-dash"></i>
                                                     </button>
+
                                                 </form>
                                             }
                                             else
@@ -244,22 +289,31 @@
                                                       onsubmit="return confirm('¿Activar este profesional?');">
 
                                                     <button type="submit"
-                                                            class="btn btn-sm btn-outline-success"
-                                                            title="Activar">
+                                                            class="action-btn action-activate"
+                                                            title="Activar profesional"
+                                                            aria-label="Activar profesional">
                                                         <i class="bi bi-person-check"></i>
                                                     </button>
+
                                                 </form>
                                             }
 
                                         </div>
+
                                     </td>
+
                                 </tr>
                             }
+
                         </tbody>
+
                     </table>
+
                 </div>
             }
+
         </div>
+
     </div>
 
 </div>

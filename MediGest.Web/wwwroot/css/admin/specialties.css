@@ -1,0 +1,113 @@
+﻿
+/* BÚSQUEDA */
+
+.specialty-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: min(100%, 390px);
+}
+
+    .specialty-search .form-control {
+        min-height: 40px;
+        border: 1px solid #dfe5ed;
+        border-radius: 8px;
+        font-size: .88rem;
+    }
+
+        .specialty-search .form-control:focus {
+            border-color: #7799df;
+            box-shadow: 0 0 0 .2rem rgba(55, 101, 197, .1);
+        }
+
+    .specialty-search .btn {
+        min-height: 40px;
+        min-width: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+/* ESTADÍSTICAS */
+
+.stat-icon-primary {
+    background: rgba(55, 101, 197, .10);
+    color: var(--mg-primary);
+}
+
+.stat-icon-success {
+    background: rgba(35, 150, 91, .10);
+    color: var(--mg-success);
+}
+
+.stat-icon-secondary {
+    background: rgba(108, 117, 125, .12);
+    color: #6c757d;
+}
+
+/* ESPECIALIDAD */
+
+.specialties-table {
+    min-width: 850px;
+}
+
+.specialty-title {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--mg-text);
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.specialty-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 9px;
+    background: rgba(55, 101, 197, .09);
+    color: var(--mg-primary);
+    font-size: 1rem;
+}
+
+.specialty-description {
+    color: var(--mg-muted);
+    font-size: .85rem;
+}
+
+.professional-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: #f1f4f8;
+    color: #53647a;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+/* PIE DEL LISTADO */
+
+.content-card-footer {
+    padding: 13px 20px;
+    border-top: 1px solid var(--mg-border);
+    background: #fff;
+    color: var(--mg-muted);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 576px) {
+    .specialty-search {
+        width: 100%;
+    }
+
+        .specialty-search .form-control {
+            min-width: 0;
+        }
+}

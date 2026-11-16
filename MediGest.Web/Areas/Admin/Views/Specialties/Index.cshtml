@@ -5,12 +5,24 @@
     ViewData["Title"] = "Especialidades";
 }
 
-<div class="container-fluid">
+@section Styles {
+    <link rel="stylesheet"
+          href="~/css/admin/users.css"
+          asp-append-version="true" />
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <link rel="stylesheet"
+          href="~/css/admin/specialties.css"
+          asp-append-version="true" />
+}
+
+<div class="container-fluid admin-page">
+
+    <!-- Encabezado -->
+    <div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
         <div>
-            <h2 class="fw-bold mb-1">Especialidades médicas</h2>
-            <p class="text-muted mb-0">
+            <h2 class="page-title mb-1">Especialidades médicas</h2>
+            <p class="page-subtitle mb-0">
                 Administrá las especialidades disponibles en MediGest.
             </p>
         </div>
@@ -18,18 +30,23 @@
         <a asp-area="Admin"
            asp-controller="Specialties"
            asp-action="Create"
-           class="btn btn-primary">
+           class="btn btn-admin-primary">
             <i class="bi bi-plus-lg me-1"></i>
             Nueva especialidad
         </a>
+
     </div>
 
+    <!-- Mensajes -->
     @if (TempData["Success"] is not null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-check-circle me-2"></i>
             @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar"></button>
         </div>
     }
 
@@ -38,69 +55,94 @@
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-circle me-2"></i>
             @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar"></button>
         </div>
     }
 
+    <!-- Estadísticas -->
     <div class="row g-3 mb-4">
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="text-muted mb-1">Total de especialidades</p>
-                        <h3 class="fw-bold mb-0">@Model.TotalSpecialties</h3>
-                    </div>
-                    <i class="bi bi-clipboard2-pulse fs-1 text-primary"></i>
+            <div class="stat-card h-100">
+                <div>
+                    <p class="stat-label">Total de especialidades</p>
+                    <h3 class="stat-value">@Model.TotalSpecialties</h3>
+                </div>
+
+                <div class="stat-icon stat-icon-primary">
+                    <i class="bi bi-clipboard2-pulse"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="text-muted mb-1">Activas</p>
-                        <h3 class="fw-bold text-success mb-0">@Model.ActiveSpecialties</h3>
-                    </div>
-                    <i class="bi bi-check-circle fs-1 text-success"></i>
+            <div class="stat-card h-100">
+                <div>
+                    <p class="stat-label">Especialidades activas</p>
+                    <h3 class="stat-value text-success">
+                        @Model.ActiveSpecialties
+                    </h3>
+                </div>
+
+                <div class="stat-icon stat-icon-success">
+                    <i class="bi bi-check-circle"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="text-muted mb-1">Inactivas</p>
-                        <h3 class="fw-bold text-secondary mb-0">@Model.InactiveSpecialties</h3>
-                    </div>
-                    <i class="bi bi-pause-circle fs-1 text-secondary"></i>
+            <div class="stat-card h-100">
+                <div>
+                    <p class="stat-label">Especialidades inactivas</p>
+                    <h3 class="stat-value text-secondary">
+                        @Model.InactiveSpecialties
+                    </h3>
+                </div>
+
+                <div class="stat-icon stat-icon-secondary">
+                    <i class="bi bi-pause-circle"></i>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <div class="card border-0 shadow-sm">
+    <!-- Listado -->
+    <div class="content-card">
 
-        <div class="card-header bg-white border-0 py-3">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <h5 class="fw-bold mb-0">Listado de especialidades</h5>
+        <div class="content-card-header">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+                    <h5 class="section-title mb-1">
+                        Listado de especialidades
+                    </h5>
+
+                    <p class="section-description mb-0">
+                        Consultá las especialidades y los profesionales asociados.
+                    </p>
+                </div>
 
                 <form asp-area="Admin"
                       asp-controller="Specialties"
                       asp-action="Index"
                       method="get"
-                      class="d-flex gap-2">
+                      class="specialty-search">
 
-                    <input type="text"
+                    <input type="search"
                            name="searchTerm"
                            value="@Model.SearchTerm"
                            class="form-control"
-                           placeholder="Buscar especialidad..." />
+                           placeholder="Buscar especialidad..."
+                           aria-label="Buscar especialidad" />
 
-                    <button type="submit" class="btn btn-outline-primary">
+                    <button type="submit"
+                            class="btn btn-admin-primary"
+                            title="Buscar">
                         <i class="bi bi-search"></i>
                     </button>
 
@@ -109,43 +151,81 @@
                         <a asp-area="Admin"
                            asp-controller="Specialties"
                            asp-action="Index"
-                           class="btn btn-outline-secondary">
+                           class="btn btn-admin-light"
+                           title="Limpiar búsqueda">
                             <i class="bi bi-x-lg"></i>
                         </a>
                     }
+
                 </form>
+
             </div>
+
         </div>
 
-        <div class="card-body p-0">
+        <div class="content-card-body p-0">
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+            @if (!Model.Specialties.Any())
+            {
+                <div class="empty-state">
 
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4">Especialidad</th>
-                            <th>Descripción</th>
-                            <th class="text-center">Médicos</th>
-                            <th class="text-center">Estado</th>
-                            <th class="text-end pe-4">Acciones</th>
-                        </tr>
-                    </thead>
+                    <div class="empty-state-icon">
+                        <i class="bi bi-clipboard2-x"></i>
+                    </div>
 
-                    <tbody>
-                        @if (Model.Specialties.Any())
-                        {
+                    <h5>No se encontraron especialidades</h5>
+
+                    <p>
+                        Todavía no hay especialidades para mostrar con esta búsqueda.
+                    </p>
+
+                    @if (string.IsNullOrWhiteSpace(Model.SearchTerm))
+                    {
+                        <a asp-area="Admin"
+                           asp-controller="Specialties"
+                           asp-action="Create"
+                           class="btn btn-admin-primary">
+                            <i class="bi bi-plus-lg me-1"></i>
+                            Registrar primera especialidad
+                        </a>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table users-table specialties-table mb-0">
+
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Especialidad</th>
+                                <th>Descripción</th>
+                                <th class="text-center">Médicos</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
                             @foreach (var specialty in Model.Specialties)
                             {
                                 <tr>
+
                                     <td class="ps-4">
-                                        <span class="fw-semibold">
-                                            @specialty.Name
-                                        </span>
+                                        <div class="specialty-title">
+                                            <div class="specialty-icon">
+                                                <i class="bi bi-clipboard2-pulse"></i>
+                                            </div>
+
+                                            <span>@specialty.Name</span>
+                                        </div>
                                     </td>
 
                                     <td>
-                                        <span class="text-muted">
+                                        <span class="specialty-description">
                                             @(string.IsNullOrWhiteSpace(specialty.Description)
                                                 ? "Sin descripción"
                                                 : specialty.Description)
@@ -153,7 +233,8 @@
                                     </td>
 
                                     <td class="text-center">
-                                        <span class="badge bg-light text-dark border">
+                                        <span class="professional-count">
+                                            <i class="bi bi-people me-1"></i>
                                             @specialty.ProfessionalsCount
                                         </span>
                                     </td>
@@ -161,27 +242,31 @@
                                     <td class="text-center">
                                         @if (specialty.IsActive)
                                         {
-                                            <span class="badge bg-success-subtle text-success">
+                                            <span class="status-badge status-active">
+                                                <i class="bi bi-check-circle me-1"></i>
                                                 Activa
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary-subtle text-secondary">
+                                            <span class="status-badge status-inactive">
+                                                <i class="bi bi-pause-circle me-1"></i>
                                                 Inactiva
                                             </span>
                                         }
                                     </td>
 
                                     <td class="text-end pe-4">
-                                        <div class="d-flex justify-content-end gap-2">
+
+                                        <div class="d-inline-flex gap-2">
 
                                             <a asp-area="Admin"
                                                asp-controller="Specialties"
                                                asp-action="Edit"
                                                asp-route-id="@specialty.Id"
-                                               class="btn btn-sm btn-outline-primary"
-                                               title="Editar">
+                                               class="action-btn action-edit"
+                                               title="Editar especialidad"
+                                               aria-label="Editar especialidad">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
 
@@ -192,14 +277,15 @@
                                                       asp-action="Deactivate"
                                                       asp-route-id="@specialty.Id"
                                                       method="post"
-                                                      class="d-inline">
+                                                      onsubmit="return confirm('¿Estás seguro de desactivar esta especialidad?');">
 
                                                     <button type="submit"
-                                                            class="btn btn-sm btn-outline-danger"
-                                                            title="Desactivar"
-                                                            onclick="return confirm('¿Estás seguro de desactivar esta especialidad?');">
+                                                            class="action-btn action-deactivate"
+                                                            title="Desactivar especialidad"
+                                                            aria-label="Desactivar especialidad">
                                                         <i class="bi bi-pause-circle"></i>
                                                     </button>
+
                                                 </form>
                                             }
                                             else
@@ -209,42 +295,36 @@
                                                       asp-action="Activate"
                                                       asp-route-id="@specialty.Id"
                                                       method="post"
-                                                      class="d-inline">
+                                                      onsubmit="return confirm('¿Deseás volver a activar esta especialidad?');">
 
                                                     <button type="submit"
-                                                            class="btn btn-sm btn-outline-success"
-                                                            title="Activar"
-                                                            onclick="return confirm('¿Deseás volver a activar esta especialidad?');">
+                                                            class="action-btn action-activate"
+                                                            title="Activar especialidad"
+                                                            aria-label="Activar especialidad">
                                                         <i class="bi bi-check-circle"></i>
                                                     </button>
+
                                                 </form>
                                             }
 
                                         </div>
+
                                     </td>
+
                                 </tr>
                             }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <i class="bi bi-clipboard2-x fs-1 text-muted"></i>
-                                    <p class="text-muted mt-2 mb-0">
-                                        No se encontraron especialidades.
-                                    </p>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
 
-                </table>
-            </div>
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
 
         </div>
 
-        <div class="card-footer bg-white border-0 py-3">
-            <small class="text-muted">
+        <div class="content-card-footer">
+            <small>
                 Mostrando @Model.Specialties.Count() especialidades.
             </small>
         </div>

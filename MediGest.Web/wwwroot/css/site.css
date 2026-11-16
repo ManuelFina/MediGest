@@ -1,31 +1,380 @@
+
+/* =========================================
+   MEDIGEST - ESTILOS GENERALES
+   ========================================= */
+
+/* Variables globales */
+/* =========================================
+   TIPOGRAFÍA GLOBAL - POPPINS
+========================================= */
+
+:root {
+    --mg-font-family: 'Poppins', sans-serif;
+}
+
+html,
+body {
+    font-family: var(--mg-font-family);
+}
+
+body,
+button,
+input,
+select,
+textarea,
+optgroup,
+option,
+label,
+a,
+table,
+th,
+td,
+small,
+strong,
+.form-control,
+.form-select,
+.btn,
+.dropdown-menu,
+.modal,
+.tooltip,
+.popover {
+    font-family: var(--mg-font-family) !important;
+}
+
+:root {
+    --mg-sidebar: #172b4d;
+    --mg-sidebar-hover: #243e65;
+    --mg-primary: #3765c5;
+    --mg-primary-hover: #2c54a8;
+    --mg-background: #f4f6fa;
+    --mg-surface: #ffffff;
+    --mg-text: #263445;
+    --mg-muted: #8995a5;
+    --mg-border: #e9edf3;
+    --mg-success: #23965b;
+    --mg-danger: #dc5555;
+    --mg-warning: #d69a32;
+    --mg-sidebar-width: 255px;
+    --mg-radius: 12px;
+    --mg-radius-sm: 8px;
+    --mg-shadow: 0 3px 12px rgba(30, 45, 70, .035);
+}
+
+/* Base */
+
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin: 0;
+    min-height: 100vh;
+    background: var(--mg-background);
+    color: var(--mg-text);
+    font-family: "Segoe UI", sans-serif;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+a {
+    text-decoration: none;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* =========================================
+   SIDEBAR
+   ========================================= */
+
+.mg-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--mg-sidebar-width);
+    background: var(--mg-sidebar);
+    color: #fff;
+    z-index: 1030;
+    display: flex;
+    flex-direction: column;
+    padding: 25px 16px;
+    overflow-y: auto;
+}
+
+.mg-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px 30px;
+    color: #fff;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+    .mg-brand:hover {
+        color: #fff;
+    }
+
+.mg-brand-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: var(--mg-primary);
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+}
+
+.mg-menu-label {
+    padding: 12px 12px 8px;
+    color: #8294af;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Enlaces del menú */
+
+.mg-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 12px 14px;
+    margin: 3px 0;
+    border-radius: 8px;
+    color: #c5d0df;
+    font-size: 14px;
+    transition: background .2s ease, color .2s ease;
+}
+
+    .mg-nav-link i {
+        width: 22px;
+        flex-shrink: 0;
+        font-size: 18px;
+    }
+
+    .mg-nav-link:hover,
+    .mg-nav-link.active {
+        color: #fff;
+        background: var(--mg-sidebar-hover);
+    }
+
+    .mg-nav-link.active {
+        box-shadow: inset 3px 0 var(--mg-primary);
+    }
+
+/* =========================================
+   USUARIO Y CIERRE DE SESIÓN
+   ========================================= */
+
+.mg-sidebar-footer {
+    margin-top: auto;
+    border-top: 1px solid #344661;
+    padding-top: 18px;
+}
+
+.mg-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.mg-avatar {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    background: var(--mg-primary);
+    border-radius: 50%;
+    color: #fff;
+    font-weight: 700;
+}
+
+.mg-user-info {
+    min-width: 0;
+}
+
+    .mg-user-info strong {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    .mg-user-info small {
+        color: #aab8ca;
+        font-size: 11px;
+    }
+
+/* Botón cerrar sesión */
+
+.mg-logout {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+}
+
+    .mg-logout:hover {
+        background: #8b303b;
+    }
+
+/* =========================================
+   CONTENIDO PRINCIPAL
+   ========================================= */
+
+.mg-main {
+    min-height: 100vh;
+    margin-left: var(--mg-sidebar-width);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Barra superior */
+
+.mg-topbar {
+    height: 72px;
+    flex-shrink: 0;
+    background: var(--mg-surface);
+    border-bottom: 1px solid var(--mg-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+}
+
+.mg-topbar-title {
+    color: var(--mg-text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Área de contenido */
+
+.mg-content {
+    flex: 1;
+    min-width: 0;
+    padding: 30px 32px;
+}
+
+/* Footer */
+
+.mg-footer {
+    padding: 18px 32px;
+    color: var(--mg-muted);
+    font-size: 12px;
+    border-top: 1px solid var(--mg-border);
+}
+
+/* Contenido de páginas públicas, como Login */
+
+.mg-public-content {
+    min-height: 100vh;
+}
+
+/* =========================================
+   ELEMENTOS GENERALES REUTILIZABLES
+   ========================================= */
+
+/* Botón principal */
+
+.btn-mg-primary {
+    background: var(--mg-primary);
+    color: #fff;
+    border: 1px solid var(--mg-primary);
+    border-radius: var(--mg-radius-sm);
+    font-weight: 600;
+}
+
+    .btn-mg-primary:hover {
+        background: var(--mg-primary-hover);
+        border-color: var(--mg-primary-hover);
+        color: #fff;
+    }
+
+/* Campos de formulario */
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #7799df;
+    box-shadow: 0 0 0 .2rem rgba(55, 101, 197, .1);
+}
+
+/* Tarjetas */
+
+.card-mg {
+    background: var(--mg-surface);
+    border: 1px solid #edf0f5;
+    border-radius: var(--mg-radius);
+    box-shadow: var(--mg-shadow);
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 768px) {
+
+    .mg-sidebar {
+        width: 72px;
+        padding: 20px 9px;
+    }
+
+    .mg-brand {
+        justify-content: center;
+        padding: 0 0 25px;
+    }
+
+    .mg-brand-text,
+    .mg-menu-label,
+    .mg-nav-link span,
+    .mg-user-info,
+    .mg-sidebar-footer .mg-nav-link span {
+        display: none;
+    }
+
+    .mg-nav-link {
+        justify-content: center;
+        padding: 13px 5px;
+    }
+
+        .mg-nav-link i {
+            width: auto;
+            font-size: 20px;
+        }
+
+    .mg-user {
+        justify-content: center;
+        padding: 5px 0;
+    }
+
+    .mg-main {
+        margin-left: 72px;
+    }
+
+    .mg-topbar {
+        padding: 0 16px;
+    }
+
+    .mg-content {
+        padding: 20px 15px;
+    }
+
+    .mg-footer {
+        padding: 16px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .mg-topbar-title {
+        font-size: 12px;
+    }
+
+    .mg-topbar .small {
+        font-size: 10px;
+    }
 }
