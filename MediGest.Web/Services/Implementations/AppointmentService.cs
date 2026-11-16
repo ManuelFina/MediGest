@@ -34,17 +34,27 @@ public class AppointmentService : IAppointmentService
             .ToListAsync();
     }
 
+
     public async Task<IEnumerable<Appointment>> GetByDateAsync(DateOnly date)
     {
+        var appointmentIds = await _context.Database
+            .SqlQuery<int>(
+                $"EXEC sp_GetAppointmentsByDate @AppointmentDate = {date.ToDateTime(TimeOnly.MinValue)}")
+            .ToListAsync();
+
+        if (appointmentIds.Count == 0)
+            return Enumerable.Empty<Appointment>();
+
         return await _context.Appointments
             .AsNoTracking()
             .Include(a => a.Patient)
             .Include(a => a.Professional)
                 .ThenInclude(p => p.ApplicationUser)
-            .Where(a => a.AppointmentDate == date)
+            .Where(a => appointmentIds.Contains(a.Id))
             .OrderBy(a => a.StartTime)
             .ToListAsync();
     }
+
 
     public async Task<IEnumerable<Appointment>> GetByProfessionalAsync(
         int professionalId,
