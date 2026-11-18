@@ -1,0 +1,262 @@
+﻿
+@model MediGest.Web.ViewModels.Patients.PatientFormViewModel
+
+@{
+    ViewData["Title"] = "Editar paciente";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- ENCABEZADO -->
+    <div class="mb-4">
+        <a asp-area="Reception"
+           asp-controller="Patients"
+           asp-action="Index"
+           class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left me-1"></i>
+            Volver a pacientes
+        </a>
+
+        <div class="mt-3">
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="bi bi-person-gear text-primary me-2"></i>
+                Editar paciente
+            </h2>
+            <p class="text-muted mb-0">
+                Actualizá la información personal y los datos de contacto del paciente.
+            </p>
+        </div>
+    </div>
+
+    <!-- FORMULARIO -->
+    <div class="card patient-form-card">
+
+        <div class="card-header bg-white border-0 px-4 pt-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="form-heading-icon">
+                    <i class="bi bi-person-vcard-fill"></i>
+                </div>
+
+                <div>
+                    <h5 class="fw-bold mb-1">Información del paciente</h5>
+                    <p class="text-muted small mb-0">
+                        Modificá los campos necesarios y guardá los cambios.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+
+            <form asp-area="Reception"
+                  asp-controller="Patients"
+                  asp-action="Edit"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input asp-for="Id" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="alert alert-danger"
+                     role="alert"></div>
+
+                <!-- DATOS PERSONALES -->
+                <h6 class="form-section-title">
+                    <i class="bi bi-person me-2"></i>
+                    Datos personales
+                </h6>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6">
+                        <label asp-for="FirstName" class="form-label">
+                            Nombre <span class="text-danger">*</span>
+                        </label>
+
+                        <input asp-for="FirstName"
+                               class="form-control"
+                               placeholder="Ingresá el nombre" />
+
+                        <span asp-validation-for="FirstName"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LastName" class="form-label">
+                            Apellido <span class="text-danger">*</span>
+                        </label>
+
+                        <input asp-for="LastName"
+                               class="form-control"
+                               placeholder="Ingresá el apellido" />
+
+                        <span asp-validation-for="LastName"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DocumentNumber" class="form-label">
+                            Documento <span class="text-danger">*</span>
+                        </label>
+
+                        <input asp-for="DocumentNumber"
+                               class="form-control"
+                               maxlength="15"
+                               placeholder="Número de documento" />
+
+                        <span asp-validation-for="DocumentNumber"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="DateOfBirth" class="form-label">
+                            Fecha de nacimiento <span class="text-danger">*</span>
+                        </label>
+
+                        <input asp-for="DateOfBirth"
+                               type="date"
+                               class="form-control" />
+
+                        <span asp-validation-for="DateOfBirth"
+                              class="text-danger small"></span>
+                    </div>
+
+                </div>
+
+                <!-- DATOS DE CONTACTO -->
+                <h6 class="form-section-title">
+                    <i class="bi bi-telephone me-2"></i>
+                    Datos de contacto
+                </h6>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label"></label>
+
+                        <input asp-for="PhoneNumber"
+                               class="form-control"
+                               maxlength="25"
+                               placeholder="Ej.: 2954 123456" />
+
+                        <span asp-validation-for="PhoneNumber"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label"></label>
+
+                        <input asp-for="Email"
+                               type="email"
+                               class="form-control"
+                               maxlength="150"
+                               placeholder="correo@ejemplo.com" />
+
+                        <span asp-validation-for="Email"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Address" class="form-label"></label>
+
+                        <input asp-for="Address"
+                               class="form-control"
+                               maxlength="200"
+                               placeholder="Calle, número, localidad..." />
+
+                        <span asp-validation-for="Address"
+                              class="text-danger small"></span>
+                    </div>
+
+                </div>
+
+                <!-- ACCIONES -->
+                <div class="d-flex flex-wrap justify-content-end gap-2 pt-3 border-top">
+
+                    <a asp-area="Reception"
+                       asp-controller="Patients"
+                       asp-action="Index"
+                       class="btn btn-light border px-4">
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-save me-2"></i>
+                        Guardar cambios
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .patient-form-card {
+        border: 1px solid #e8eef6;
+        border-radius: 16px;
+        box-shadow: 0 4px 18px rgba(31, 55, 90, 0.045);
+        overflow: hidden;
+        max-width: 1100px;
+    }
+
+    .form-heading-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        background: #eaf2ff;
+        color: #2674ed;
+        font-size: 1.3rem;
+    }
+
+    .form-section-title {
+        color: #334155;
+        font-weight: 700;
+        font-size: .95rem;
+        padding-bottom: .8rem;
+        margin-bottom: 1.2rem;
+        border-bottom: 1px solid #edf1f6;
+    }
+
+    .patient-form-card .form-label {
+        color: #475569;
+        font-size: .88rem;
+        font-weight: 600;
+        margin-bottom: .45rem;
+    }
+
+    .patient-form-card .form-control {
+        min-height: 44px;
+        border-color: #dce4ee;
+        border-radius: 9px;
+        font-size: .9rem;
+    }
+
+    .patient-form-card .form-control:focus {
+        border-color: #2674ed;
+        box-shadow: 0 0 0 .2rem rgba(38, 116, 237, .12);
+    }
+
+    .patient-form-card .btn {
+        min-height: 42px;
+        border-radius: 9px;
+        font-weight: 600;
+    }
+
+    .patient-form-card .text-danger {
+        display: block;
+        margin-top: .3rem;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

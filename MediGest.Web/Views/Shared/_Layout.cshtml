@@ -303,7 +303,45 @@ else
 
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script src="~/js/site.js" asp-append-version="true"></script>
+
+<!-- NOTIFICACIONES GLOBALES -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const successMessage = @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(TempData["Success"])
+        );
+
+        const errorMessage = @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(TempData["Error"])
+        );
+
+        if (successMessage) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Operación exitosa!',
+                text: successMessage,
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#2674ed'
+            });
+        }
+
+        if (errorMessage) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo completar la operación',
+                text: errorMessage,
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#2674ed'
+            });
+        }
+
+    });
+</script>
 
 @await RenderSectionAsync("Scripts", required: false)
 
