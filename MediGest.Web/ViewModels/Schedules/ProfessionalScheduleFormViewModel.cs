@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MediGest.Web.ViewModels.Schedules;
@@ -34,6 +33,8 @@ public class ProfessionalScheduleFormViewModel
 
     [Display(Name = "Agenda activa")]
     public bool IsActive { get; set; } = true;
+
+    public List<ScheduleDayFormViewModel> ScheduleDays { get; set; } = new();
 
     public IEnumerable<SelectListItem> AvailableProfessionals { get; set; }
         = new List<SelectListItem>();

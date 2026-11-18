@@ -53,9 +53,23 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
                 "El profesional no existe o se encuentra inactivo.");
         }
 
-        await ValidateOverlappingSchedulesAsync(schedule);
+        if (schedule.ScheduleDays is null ||
+            schedule.ScheduleDays.Count == 0)
+        {
+            throw new BusinessException(
+                "La agenda debe tener al menos un día y horario configurado.");
+        }
 
-        schedule.ScheduleDays = new List<ScheduleDay>();
+        foreach (var day in schedule.ScheduleDays)
+        {
+            if (day.StartTime >= day.EndTime)
+            {
+                throw new BusinessException(
+                    $"El horario del día {day.DayOfWeek} no es válido.");
+            }
+        }
+
+        await ValidateOverlappingSchedulesAsync(schedule);
 
         _context.ProfessionalSchedules.Add(schedule);
 

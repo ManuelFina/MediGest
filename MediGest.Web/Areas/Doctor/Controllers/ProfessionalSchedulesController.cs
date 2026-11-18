@@ -47,7 +47,15 @@ public class ProfessionalSchedulesController : Controller
         {
             StartDate = DateOnly.FromDateTime(DateTime.Today),
             EndDate = DateOnly.FromDateTime(DateTime.Today.AddMonths(6)),
-            AppointmentDurationMinutes = 30
+            AppointmentDurationMinutes = 30,
+            ScheduleDays = Enumerable
+                .Range(0, 7)
+                .Select(i => new ScheduleDayFormViewModel
+                {
+                    DayOfWeek = (DayOfWeek)((i + 1) % 7),
+                    IsEnabled = false
+                })
+                .ToList()
         });
     }
 
@@ -63,6 +71,28 @@ public class ProfessionalSchedulesController : Controller
             return Forbid();
         }
 
+        var enabledDays = viewModel.ScheduleDays
+            .Where(day => day.IsEnabled)
+            .ToList();
+
+        if (enabledDays.Count == 0)
+        {
+            ModelState.AddModelError(
+                nameof(viewModel.ScheduleDays),
+                "Debés seleccionar al menos un día de atención.");
+        }
+
+        foreach (var day in enabledDays)
+        {
+            if (day.StartTime >= day.EndTime)
+            {
+                ModelState.AddModelError(
+                    nameof(viewModel.ScheduleDays),
+                    $"El horario de {day.DayOfWeek} no es válido. " +
+                    "La hora de inicio debe ser anterior a la hora de finalización.");
+            }
+        }
+
         if (!ModelState.IsValid)
         {
             return View(viewModel);
@@ -76,7 +106,15 @@ public class ProfessionalSchedulesController : Controller
             AppointmentDurationMinutes =
                 viewModel.AppointmentDurationMinutes,
             ProfessionalId = professional.Id,
-            IsActive = viewModel.IsActive
+            IsActive = viewModel.IsActive,
+            ScheduleDays = enabledDays
+                .Select(day => new ScheduleDay
+                {
+                    DayOfWeek = day.DayOfWeek,
+                    StartTime = day.StartTime,
+                    EndTime = day.EndTime
+                })
+                .ToList()
         };
 
         try
