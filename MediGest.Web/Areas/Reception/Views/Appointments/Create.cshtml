@@ -140,91 +140,107 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
 
-            const professionalSelect =
-                document.getElementById("professionalSelect");
+document.addEventListener("DOMContentLoaded", function () {
 
-            const appointmentDate =
-                document.getElementById("appointmentDate");
+    const professionalSelect =
+        document.getElementById("professionalSelect");
 
-            const availableSlots =
-                document.getElementById("availableSlots");
+    const appointmentDate =
+        document.getElementById("appointmentDate");
 
-            const availabilityMessage =
-                document.getElementById("availabilityMessage");
+    const availableSlots =
+        document.getElementById("availableSlots");
 
-            async function loadAvailableSlots() {
+    const availabilityMessage =
+        document.getElementById("availabilityMessage");
 
-                const professionalId = professionalSelect.value;
-                const date = appointmentDate.value;
+    // Preserve the time received from the agenda.
+    const initialStartTime = '@Model.StartTime.ToString("HH:mm")';
 
-                availableSlots.innerHTML =
-                    '<option value="">Seleccionar horario</option>';
+    async function loadAvailableSlots(preferredStartTime = null) {
 
-                if (!professionalId || !date) {
-                    availabilityMessage.textContent =
-                        "Seleccioná un profesional y una fecha.";
-                    return;
-                }
+        const professionalId = professionalSelect.value;
+        const date = appointmentDate.value;
 
+        availableSlots.innerHTML =
+            '<option value="">Seleccionar horario</option>';
+
+        if (!professionalId || !date) {
+            availabilityMessage.textContent =
+                "Seleccioná un profesional y una fecha.";
+            return;
+        }
+
+        availabilityMessage.textContent =
+            "Consultando disponibilidad...";
+
+        try {
+
+            const url =
+                '@Url.Action("GetAvailableSlots", "Appointments", new { area = "Reception" })'
+                + '?professionalId=' + encodeURIComponent(professionalId)
+                + '&date=' + encodeURIComponent(date);
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(
+                    "No se pudo consultar la disponibilidad."
+                );
+            }
+
+            const slots = await response.json();
+
+            if (slots.length === 0) {
                 availabilityMessage.textContent =
-                    "Consultando disponibilidad...";
+                    "No hay horarios disponibles para esta fecha.";
+                return;
+            }
 
-                try {
+            slots.forEach(slot => {
 
-                    const url =
-                        '@Url.Action("GetAvailableSlots", "Appointments", new { area = "Reception" })'
-                        + '?professionalId=' + encodeURIComponent(professionalId)
-                        + '&date=' + encodeURIComponent(date);
+                const option = document.createElement("option");
 
-                    const response = await fetch(url);
+                option.value = slot.value;
+                option.textContent = slot.text;
 
-                    if (!response.ok) {
-                        throw new Error(
-                            "No se pudo consultar la disponibilidad."
-                        );
-                    }
+                availableSlots.appendChild(option);
+            });
 
-                    const slots = await response.json();
+            // Restore the requested time when opening the form.
+            if (preferredStartTime) {
+                const matchingSlot = Array.from(availableSlots.options)
+                    .find(option => option.value === preferredStartTime);
 
-                    if (slots.length === 0) {
-                        availabilityMessage.textContent =
-                            "No hay horarios disponibles para esta fecha.";
-                        return;
-                    }
-
-                    slots.forEach(slot => {
-
-                        const option = document.createElement("option");
-
-                        option.value = slot.value;
-                        option.textContent = slot.text;
-
-                        availableSlots.appendChild(option);
-                    });
-
-                    availabilityMessage.textContent =
-                        "Seleccioná uno de los horarios disponibles.";
-
-                } catch (error) {
-
-                    availabilityMessage.textContent =
-                        "Ocurrió un error al consultar los horarios.";
+                if (matchingSlot) {
+                    availableSlots.value = preferredStartTime;
                 }
             }
 
-            professionalSelect.addEventListener(
-                "change",
-                loadAvailableSlots
-            );
+            availabilityMessage.textContent =
+                "Seleccioná uno de los horarios disponibles.";
 
-            appointmentDate.addEventListener(
-                "change",
-                loadAvailableSlots
-            );
+        } catch (error) {
 
-            loadAvailableSlots();
-        });
+            availabilityMessage.textContent =
+                "Ocurrió un error al consultar los horarios.";
+        }
+    }
+
+    professionalSelect.addEventListener(
+        "change",
+        () => loadAvailableSlots()
+    );
+
+    appointmentDate.addEventListener(
+        "change",
+        () => loadAvailableSlots()
+    );
+
+    // Initial load preserves the time selected in the agenda.
+    loadAvailableSlots(initialStartTime);
+});
+
     </script>
 }

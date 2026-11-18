@@ -91,13 +91,20 @@ public class AppointmentsController : Controller
         return View(viewModel);
     }
 
+
     // GET: Reception/Appointments/Create
     [HttpGet]
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Create(
+        int? professionalId,
+        DateOnly? appointmentDate,
+        TimeOnly? startTime)
     {
         var viewModel = new AppointmentFormViewModel
         {
-            AppointmentDate = DateOnly.FromDateTime(DateTime.Today),
+            ProfessionalId = professionalId ?? 0,
+            AppointmentDate = appointmentDate ??
+                DateOnly.FromDateTime(DateTime.Today),
+            StartTime = startTime ?? default,
             Status = AppointmentStatus.Pending
         };
 

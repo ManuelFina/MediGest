@@ -20,11 +20,24 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
         DateOnly date,
         int? excludedAppointmentId = null)
     {
+        var slots = await GetAvailableTimeSlotsAsync(
+            professionalId,
+            date,
+            excludedAppointmentId);
+
+        return slots.Select(slot => slot.StartTime).ToList();
+    }
+
+    public async Task<IEnumerable<AvailableTimeSlot>> GetAvailableTimeSlotsAsync(
+        int professionalId,
+        DateOnly date,
+        int? excludedAppointmentId = null)
+    {
         var today = DateOnly.FromDateTime(DateTime.Today);
 
         if (date < today)
         {
-            return Enumerable.Empty<TimeOnly>();
+            return Enumerable.Empty<AvailableTimeSlot>();
         }
 
         var professionalExists = await _context.Professionals
@@ -32,7 +45,7 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
 
         if (!professionalExists)
         {
-            return Enumerable.Empty<TimeOnly>();
+            return Enumerable.Empty<AvailableTimeSlot>();
         }
 
         var schedules = await _context.ProfessionalSchedules
@@ -47,7 +60,7 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
 
         if (schedules.Count == 0)
         {
-            return Enumerable.Empty<TimeOnly>();
+            return Enumerable.Empty<AvailableTimeSlot>();
         }
 
         var scheduleDays = schedules
@@ -74,7 +87,7 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
                 e.EndDate >= date)
             .ToListAsync();
 
-        var availableSlots = new List<TimeOnly>();
+        var availableSlots = new List<AvailableTimeSlot>();
 
         foreach (var scheduleDay in scheduleDays)
         {
@@ -82,7 +95,6 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
                 s => s.Id == scheduleDay.ProfessionalScheduleId);
 
             var duration = schedule.AppointmentDurationMinutes;
-
             var currentTime = scheduleDay.StartTime;
 
             while (currentTime.AddMinutes(duration) <= scheduleDay.EndTime)
@@ -95,22 +107,27 @@ public class AppointmentAvailabilityService : IAppointmentAvailabilityService
 
                 var hasException = exceptions.Any(e =>
                     !e.StartTime.HasValue ||
-                    (currentTime < e.EndTime!.Value &&
+                    (e.EndTime.HasValue &&
+                     currentTime < e.EndTime.Value &&
                      slotEnd > e.StartTime.Value));
 
                 if (!hasAppointmentConflict && !hasException)
                 {
-                    availableSlots.Add(currentTime);
+                    availableSlots.Add(new AvailableTimeSlot
+                    {
+                        StartTime = currentTime,
+                        EndTime = slotEnd
+                    });
                 }
 
                 currentTime = slotEnd;
             }
         }
 
-        // Remove duplicated slots when multiple active schedules overlap.
         return availableSlots
-            .Distinct()
-            .OrderBy(slot => slot)
+            .GroupBy(slot => new { slot.StartTime, slot.EndTime })
+            .Select(group => group.First())
+            .OrderBy(slot => slot.StartTime)
             .ToList();
     }
 }
