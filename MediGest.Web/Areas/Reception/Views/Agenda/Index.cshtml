@@ -1,0 +1,730 @@
+﻿
+@model MediGest.Web.ViewModels.Appointments.DailyAgendaViewModel
+
+@{
+    ViewData["Title"] = "Agenda diaria";
+
+    var previousDate = Model.SelectedDate.AddDays(-1);
+    var nextDate = Model.SelectedDate.AddDays(1);
+    var today = DateOnly.FromDateTime(DateTime.Today);
+
+    var selectedProfessional = Model.SelectedProfessionalId.HasValue
+        ? Model.Professionals.FirstOrDefault(
+            p => p.Id == Model.SelectedProfessionalId.Value)
+        : null;
+
+    string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "Pending" => "status-pending",
+            "Confirmed" => "status-confirmed",
+            "Waiting" => "status-waiting",
+            "Completed" => "status-completed",
+            "Cancelled" => "status-cancelled",
+            "NoShow" => "status-noshow",
+            _ => "status-default"
+        };
+    }
+
+    string GetStatusText(string status)
+    {
+        return status switch
+        {
+            "Pending" => "Pendiente",
+            "Confirmed" => "Confirmado",
+            "Waiting" => "En espera",
+            "Completed" => "Completado",
+            "Cancelled" => "Cancelado",
+            "NoShow" => "Ausente",
+            _ => status
+        };
+    }
+}
+
+<style>
+    .daily-agenda {
+        min-height: calc(100vh - 70px);
+        padding: 25px;
+        color: #263b59;
+        background: #edf4ff;
+    }
+
+    .daily-agenda .page-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+    }
+
+    .daily-agenda .heading-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .daily-agenda .heading-icon {
+        width: 55px;
+        height: 55px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 15px;
+        background: white;
+        color: #2674ed;
+        font-size: 1.7rem;
+    }
+
+    .daily-agenda h2 {
+        margin: 0;
+        color: #1760c9;
+        font-size: 1.75rem;
+        font-weight: 800;
+    }
+
+    .daily-agenda .subtitle {
+        margin: 5px 0 0;
+        color: #7185a5;
+        font-size: .9rem;
+    }
+
+    .daily-agenda .panel {
+        padding: 20px;
+        background: rgba(255,255,255,.94);
+        border: 1px solid #fff;
+        border-radius: 16px;
+        box-shadow: 0 5px 20px rgba(37,71,120,.07);
+        margin-bottom: 18px;
+    }
+
+    .daily-agenda .filter-form {
+        display: flex;
+        align-items: end;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .daily-agenda .filter-group {
+        flex: 1;
+        min-width: 190px;
+    }
+
+    .daily-agenda .form-label {
+        color: #405b80;
+        font-size: .82rem;
+        font-weight: 700;
+    }
+
+    .daily-agenda .form-control,
+    .daily-agenda .form-select {
+        min-height: 43px;
+        border-color: #dce6f3;
+        border-radius: 9px;
+        color: #304c75;
+    }
+
+    .daily-agenda .btn-filter {
+        min-height: 43px;
+        padding: 9px 20px;
+        border-radius: 9px;
+        background: #2674ed;
+        color: white;
+        font-weight: 650;
+        border: none;
+    }
+
+    .daily-agenda .btn-filter:hover {
+        background: #155fcf;
+    }
+
+    .daily-agenda .date-navigation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .daily-agenda .date-navigation h4 {
+        margin: 0;
+        color: #29466f;
+        font-size: 1.1rem;
+        font-weight: 750;
+        text-transform: capitalize;
+    }
+
+    .daily-agenda .date-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .daily-agenda .date-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 37px;
+        padding: 7px 13px;
+        border: 1px solid #dce6f3;
+        border-radius: 9px;
+        background: white;
+        color: #42628e;
+        text-decoration: none;
+        font-size: .82rem;
+        font-weight: 650;
+    }
+
+    .daily-agenda .date-button:hover {
+        background: #edf4ff;
+        color: #1760c9;
+    }
+
+    .daily-agenda .date-button.active {
+        background: #2674ed;
+        color: white;
+        border-color: #2674ed;
+    }
+
+    .daily-agenda .section-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 17px;
+    }
+
+    .daily-agenda .section-heading h5 {
+        margin: 0;
+        color: #29466f;
+        font-size: 1rem;
+        font-weight: 750;
+    }
+
+    .daily-agenda .professional-card {
+        overflow: hidden;
+        margin-bottom: 18px;
+        border: 1px solid #e5edf7;
+        border-radius: 13px;
+        background: white;
+    }
+
+    .daily-agenda .professional-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 15px 18px;
+        background: #f5f8fe;
+        border-bottom: 1px solid #e8eef7;
+    }
+
+    .daily-agenda .professional-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .daily-agenda .professional-avatar {
+        width: 43px;
+        height: 43px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: #e3edff;
+        color: #2674ed;
+        font-weight: 800;
+    }
+
+    .daily-agenda .professional-name {
+        color: #304c75;
+        font-weight: 750;
+        font-size: .9rem;
+    }
+
+    .daily-agenda .professional-specialty {
+        margin-top: 3px;
+        color: #8495ad;
+        font-size: .77rem;
+    }
+
+    .daily-agenda .professional-count {
+        color: #647d9f;
+        font-size: .78rem;
+        white-space: nowrap;
+    }
+
+    .daily-agenda .agenda-content {
+        padding: 17px 18px;
+    }
+
+    .daily-agenda .agenda-subtitle {
+        margin-bottom: 11px;
+        color: #7185a5;
+        font-size: .76rem;
+        font-weight: 750;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .daily-agenda .appointment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        margin-bottom: 20px;
+    }
+
+    .daily-agenda .appointment-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid #e8eef7;
+        border-left: 4px solid #4385f5;
+        border-radius: 9px;
+        background: #fbfcff;
+    }
+
+    .daily-agenda .appointment-main {
+        min-width: 0;
+    }
+
+    .daily-agenda .appointment-time {
+        color: #2674ed;
+        font-size: .82rem;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .daily-agenda .patient-name {
+        margin-top: 4px;
+        color: #304c75;
+        font-size: .88rem;
+        font-weight: 750;
+    }
+
+    .daily-agenda .patient-document {
+        margin-top: 3px;
+        color: #8495ad;
+        font-size: .75rem;
+    }
+
+    .daily-agenda .appointment-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: end;
+    }
+
+    .daily-agenda .status {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .daily-agenda .status-pending {
+        color: #95620d;
+        background: #fff3d7;
+    }
+
+    .daily-agenda .status-confirmed {
+        color: #2059ac;
+        background: #e4efff;
+    }
+
+    .daily-agenda .status-waiting {
+        color: #8052b4;
+        background: #f0e8ff;
+    }
+
+    .daily-agenda .status-completed {
+        color: #176e44;
+        background: #ddf7e9;
+    }
+
+    .daily-agenda .status-cancelled {
+        color: #a83e51;
+        background: #ffe7eb;
+    }
+
+    .daily-agenda .status-noshow {
+        color: #46566d;
+        background: #e9edf3;
+    }
+
+    .daily-agenda .status-default {
+        color: #536987;
+        background: #edf1f7;
+    }
+
+    .daily-agenda .available-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+    }
+
+    .daily-agenda .available-slot {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 12px;
+        border: 1px solid #b8e7cf;
+        border-radius: 8px;
+        background: #effbf4;
+        color: #197448;
+        text-decoration: none;
+        font-size: .8rem;
+        font-weight: 700;
+        transition: .2s;
+    }
+
+    .daily-agenda .available-slot:hover {
+        background: #dff6e9;
+        border-color: #75c99a;
+        color: #125d39;
+        transform: translateY(-1px);
+    }
+
+    .daily-agenda .empty-message {
+        padding: 14px;
+        border-radius: 9px;
+        background: #f7f9fc;
+        color: #8495ad;
+        font-size: .82rem;
+    }
+
+    .daily-agenda .empty-state {
+        padding: 45px 20px;
+        text-align: center;
+        color: #8495ad;
+    }
+
+    .daily-agenda .empty-state i {
+        display: block;
+        margin-bottom: 12px;
+        color: #a9bad2;
+        font-size: 2.5rem;
+    }
+
+    .daily-agenda .empty-state h5 {
+        color: #405b80;
+        font-size: 1rem;
+        font-weight: 750;
+    }
+
+    .daily-agenda .empty-state p {
+        margin: 5px 0 0;
+        font-size: .84rem;
+    }
+
+    @@media (max-width: 650px) {
+        .daily-agenda {
+            padding: 14px;
+        }
+
+        .daily-agenda .filter-group {
+            min-width: 100%;
+        }
+
+        .daily-agenda .filter-form .btn-filter {
+            width: 100%;
+        }
+
+        .daily-agenda .appointment-item {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .daily-agenda .appointment-meta {
+            justify-content: flex-start;
+        }
+
+        .daily-agenda .professional-header {
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="daily-agenda">
+
+    <div class="page-heading">
+        <div class="heading-content">
+            <div class="heading-icon">
+                <i class="bi bi-calendar2-week"></i>
+            </div>
+
+            <div>
+                <h2>Agenda diaria</h2>
+                <p class="subtitle">
+                    Consultá los turnos y horarios disponibles del consultorio.
+                </p>
+            </div>
+        </div>
+
+        <a asp-area="Reception"
+           asp-controller="Appointments"
+           asp-action="Create"
+           class="btn btn-primary rounded-pill px-4">
+            <i class="bi bi-plus-lg me-2"></i>
+            Asignar turno
+        </a>
+    </div>
+
+    <!-- Date navigation -->
+    <div class="panel">
+        <div class="date-navigation">
+            <div>
+                <div class="text-muted small mb-1">Fecha seleccionada</div>
+                <h4>
+                    @Model.SelectedDate.ToString("dddd dd 'de' MMMM 'de' yyyy")
+                </h4>
+            </div>
+
+            <div class="date-actions">
+                <a asp-action="Index"
+                   asp-route-date="@previousDate.ToString("yyyy-MM-dd")"
+                   asp-route-professionalId="@Model.SelectedProfessionalId"
+                   class="date-button"
+                   title="Día anterior">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-date="@today.ToString("yyyy-MM-dd")"
+                   asp-route-professionalId="@Model.SelectedProfessionalId"
+                   class="date-button active">
+                    Hoy
+                </a>
+
+                <a asp-action="Index"
+                   asp-route-date="@nextDate.ToString("yyyy-MM-dd")"
+                   asp-route-professionalId="@Model.SelectedProfessionalId"
+                   class="date-button"
+                   title="Día siguiente">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="panel">
+        <form asp-area="Reception"
+              asp-controller="Agenda"
+              asp-action="Index"
+              method="get"
+              class="filter-form">
+
+            <div class="filter-group">
+                <label for="date" class="form-label">
+                    Fecha
+                </label>
+
+                <input type="date"
+                       id="date"
+                       name="date"
+                       class="form-control"
+                       value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="filter-group">
+                <label for="professionalId" class="form-label">
+                    Profesional
+                </label>
+
+                <select id="professionalId"
+                        name="professionalId"
+                        class="form-select">
+
+                    <option value="">Todos los profesionales</option>
+
+                    @foreach (var professional in Model.Professionals)
+                    {
+                        <option value="@professional.Id"
+                                selected="@(Model.SelectedProfessionalId == professional.Id)">
+                            @professional.FullName - @professional.SpecialtyName
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="btn-filter">
+                <i class="bi bi-funnel me-2"></i>
+                Aplicar filtros
+            </button>
+        </form>
+    </div>
+
+    <!-- Agenda -->
+    <div class="panel">
+        <div class="section-heading">
+            <h5>
+                <i class="bi bi-clock-history text-primary me-2"></i>
+                Turnos y disponibilidad
+            </h5>
+
+            <span class="text-muted small">
+                @Model.Appointments.Count() turnos
+            </span>
+        </div>
+
+        @if (!Model.Professionals.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-person-x"></i>
+                <h5>No hay profesionales disponibles</h5>
+                <p>No se encontraron profesionales activos para mostrar.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var professional in Model.Professionals)
+            {
+                var appointments = Model.Appointments
+                    .Where(a => a.ProfessionalId == professional.Id)
+                    .OrderBy(a => a.StartTime)
+                    .ToList();
+
+                var slots = Model.AvailableSlots
+                    .Where(s => s.ProfessionalId == professional.Id)
+                    .OrderBy(s => s.StartTime)
+                    .ToList();
+
+                var firstName = professional.FullName
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .FirstOrDefault() ?? "";
+
+                var lastName = professional.FullName
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Skip(1)
+                    .FirstOrDefault() ?? "";
+
+                <div class="professional-card">
+
+                    <div class="professional-header">
+                        <div class="professional-info">
+                            <div class="professional-avatar">
+                                @(firstName.Length > 0 ? firstName[..1] : "")
+                                @(lastName.Length > 0 ? lastName[..1] : "")
+                            </div>
+
+                            <div>
+                                <div class="professional-name">
+                                    @professional.FullName
+                                </div>
+
+                                <div class="professional-specialty">
+                                    @professional.SpecialtyName
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="professional-count">
+                            @appointments.Count turnos
+                        </div>
+                    </div>
+
+                    <div class="agenda-content">
+
+                        <div class="agenda-subtitle">
+                            Turnos asignados
+                        </div>
+
+                        @if (appointments.Any())
+                        {
+                            <div class="appointment-list">
+                                @foreach (var appointment in appointments)
+                                {
+                                    <div class="appointment-item">
+                                        <div class="appointment-main">
+                                            <div class="appointment-time">
+                                                <i class="bi bi-clock me-1"></i>
+                                                @appointment.StartTime.ToString("HH:mm")
+                                                -
+                                                @appointment.EndTime.ToString("HH:mm")
+                                            </div>
+
+                                            <div class="patient-name">
+                                                @appointment.PatientName
+                                            </div>
+
+                                            <div class="patient-document">
+                                                DNI: @appointment.PatientDocument
+                                            </div>
+                                        </div>
+
+                                        <div class="appointment-meta">
+                                            <span class="status @GetStatusClass(appointment.Status)">
+                                                @GetStatusText(appointment.Status)
+                                            </span>
+
+                                            <a asp-area="Reception"
+                                               asp-controller="Appointments"
+                                               asp-action="History"
+                                               asp-route-id="@appointment.Id"
+                                               class="btn btn-sm btn-light border"
+                                               title="Ver historial">
+                                                <i class="bi bi-clock-history"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-message mb-3">
+                                <i class="bi bi-calendar-check me-2"></i>
+                                No hay turnos asignados para este día.
+                            </div>
+                        }
+
+                        <div class="agenda-subtitle">
+                            Horarios disponibles
+                        </div>
+
+                        @if (slots.Any())
+                        {
+                            <div class="available-list">
+                                @foreach (var slot in slots)
+                                {
+                                    <a asp-area="Reception"
+                                       asp-controller="Appointments"
+                                       asp-action="Create"
+                                       asp-route-professionalId="@slot.ProfessionalId"
+                                       asp-route-appointmentDate="@Model.SelectedDate.ToString("yyyy-MM-dd")"
+                                       asp-route-startTime="@slot.StartTime.ToString("HH:mm")"
+                                       class="available-slot"
+                                       title="Asignar turno en este horario">
+                                        <i class="bi bi-plus-circle"></i>
+                                        @slot.StartTime.ToString("HH:mm")
+                                        -
+                                        @slot.EndTime.ToString("HH:mm")
+                                    </a>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-message">
+                                <i class="bi bi-info-circle me-2"></i>
+                                No hay horarios disponibles para este profesional.
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
