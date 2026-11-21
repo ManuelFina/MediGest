@@ -65,6 +65,8 @@ builder.Services.AddScoped<IHealthPlanService, HealthPlanService>();
 builder.Services.AddScoped<IPatientAffiliationService, PatientAffiliationService>();
 builder.Services.AddScoped<IHealthPlanTariffService, HealthPlanTariffService>();
 builder.Services.AddScoped<IMedicalService, MedicalServiceService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddControllersWithViews();
 

@@ -240,6 +240,129 @@ namespace MediGest.Web.Data.Migrations
                     b.ToTable("HealthPlanTariffs", (string)null);
                 });
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Invoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CoverageAmount")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("IssueDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int?>("PatientAffiliationId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PatientAmount")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Number")
+                        .IsUnique();
+
+                    b.HasIndex("PatientAffiliationId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Invoices", (string)null);
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.InvoiceDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AppointmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AuthorizationNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("CoverageAmount")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("InvoiceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MedicalServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PatientAmount")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("ServiceDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<decimal>("UnitCoverageAmount")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppointmentId");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.HasIndex("MedicalServiceId");
+
+                    b.ToTable("InvoiceDetails", (string)null);
+                });
+
             modelBuilder.Entity("MediGest.Web.Models.Entities.MedicalService", b =>
                 {
                     b.Property<int>("Id")
@@ -389,6 +512,42 @@ namespace MediGest.Web.Data.Migrations
                     b.HasIndex("HealthInsuranceId", "MembershipNumber");
 
                     b.ToTable("PatientAffiliations");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("decimal(15,2)");
+
+                    b.Property<int>("InvoiceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Method")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("MediGest.Web.Models.Entities.Professional", b =>
@@ -843,6 +1002,50 @@ namespace MediGest.Web.Data.Migrations
                     b.Navigation("MedicalService");
                 });
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Invoice", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.PatientAffiliation", "PatientAffiliation")
+                        .WithMany()
+                        .HasForeignKey("PatientAffiliationId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("MediGest.Web.Models.Entities.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("PatientAffiliation");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.InvoiceDetail", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.Appointment", "Appointment")
+                        .WithMany()
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("MediGest.Web.Models.Entities.Invoice", "Invoice")
+                        .WithMany("Details")
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MediGest.Web.Models.Entities.MedicalService", "MedicalService")
+                        .WithMany()
+                        .HasForeignKey("MedicalServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("Invoice");
+
+                    b.Navigation("MedicalService");
+                });
+
             modelBuilder.Entity("MediGest.Web.Models.Entities.MedicalService", b =>
                 {
                     b.HasOne("MediGest.Web.Models.Entities.Specialty", "Specialty")
@@ -879,6 +1082,17 @@ namespace MediGest.Web.Data.Migrations
                     b.Navigation("HealthPlan");
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Payment", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.Invoice", "Invoice")
+                        .WithMany("Payments")
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Invoice");
                 });
 
             modelBuilder.Entity("MediGest.Web.Models.Entities.Professional", b =>
@@ -1010,6 +1224,13 @@ namespace MediGest.Web.Data.Migrations
                     b.Navigation("Affiliations");
 
                     b.Navigation("Tariffs");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.Invoice", b =>
+                {
+                    b.Navigation("Details");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("MediGest.Web.Models.Entities.MedicalService", b =>

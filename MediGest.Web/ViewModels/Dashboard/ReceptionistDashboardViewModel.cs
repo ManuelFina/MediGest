@@ -5,6 +5,8 @@ namespace MediGest.Web.ViewModels.Dashboard;
 
 public class ReceptionistDashboardViewModel
 {
+    // Pacientes y turnos
+
     public int TotalPatients { get; set; }
 
     public int TodayAppointments { get; set; }
@@ -19,6 +21,17 @@ public class ReceptionistDashboardViewModel
         = new List<UpcomingAppointmentViewModel>();
 
     public DailyAgendaViewModel? DailyAgenda { get; set; }
+
+
+    // Facturación
+
+    public int TotalInvoices { get; set; }
+
+    public int PendingInvoices { get; set; }
+
+    public decimal TotalCollected { get; set; }
+
+    public decimal PendingBalance { get; set; }
 }
 
 public class UpcomingAppointmentViewModel

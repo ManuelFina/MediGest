@@ -26,6 +26,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<PatientAffiliation> PatientAffiliations => Set<PatientAffiliation>();
     public DbSet<MedicalService> MedicalServices => Set<MedicalService>();
     public DbSet<HealthPlanTariff> HealthPlanTariffs => Set<HealthPlanTariff>();
+    public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<InvoiceDetail> InvoiceDetails => Set<InvoiceDetail>();
+    public DbSet<Payment> Payments => Set<Payment>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

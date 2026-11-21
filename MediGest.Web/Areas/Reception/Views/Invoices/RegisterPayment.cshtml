@@ -1,0 +1,271 @@
+﻿
+@model MediGest.Web.ViewModels.Invoices.PaymentFormViewModel
+
+@using MediGest.Web.Models.Enums
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Registrar pago";
+
+    var culture = new CultureInfo("es-AR");
+}
+
+<div class="container-fluid">
+
+    <!-- Encabezado -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+
+        <div>
+            <h2 class="mb-1">Registrar pago</h2>
+            <p class="text-muted mb-0">
+                Registro de cobros de comprobantes médicos.
+            </p>
+        </div>
+
+        <a asp-area="Reception"
+           asp-controller="Invoices"
+           asp-action="Details"
+           asp-route-id="@Model.InvoiceId"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Volver a la factura
+        </a>
+
+    </div>
+
+    <!-- Errores de validación -->
+    <div asp-validation-summary="ModelOnly"
+         class="alert alert-danger"
+         role="alert"></div>
+
+    <div class="row g-4">
+
+        <!-- Información de la factura -->
+        <div class="col-12 col-lg-5">
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-receipt me-2"></i>
+                        Información de la factura
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <p class="text-muted mb-1">
+                        Número de comprobante
+                    </p>
+
+                    <h5 class="fw-bold mb-3">
+                        @Model.InvoiceNumber
+                    </h5>
+
+                    <p class="text-muted mb-1">
+                        Paciente
+                    </p>
+
+                    <h6 class="mb-3">
+                        @Model.PatientName
+                    </h6>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">
+                            Importe a cargo del paciente
+                        </span>
+
+                        <strong>
+                            @Model.InvoiceAmount.ToString("C2", culture)
+                        </strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">
+                            Total abonado
+                        </span>
+
+                        <strong class="text-success">
+                            @Model.PaidAmount.ToString("C2", culture)
+                        </strong>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">
+                            Saldo pendiente
+                        </span>
+
+                        <h4 class="mb-0 text-danger">
+                            @Model.PendingAmount.ToString("C2", culture)
+                        </h4>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+
+                Podés registrar un pago parcial o cancelar el saldo completo.
+                El sistema actualizará automáticamente el estado de la factura.
+            </div>
+
+        </div>
+
+        <!-- Formulario de pago -->
+        <div class="col-12 col-lg-7">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cash-coin me-2"></i>
+                        Datos del pago
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <form asp-area="Reception"
+                          asp-controller="Invoices"
+                          asp-action="RegisterPayment"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input asp-for="InvoiceId" type="hidden" />
+
+                        <div class="row g-3">
+
+                            <!-- Fecha -->
+                            <div class="col-12 col-md-6">
+
+                                <label asp-for="PaymentDate"
+                                       class="form-label"></label>
+
+                                <input asp-for="PaymentDate"
+                                       type="date"
+                                       class="form-control"
+                                       value="@Model.PaymentDate.ToString("yyyy-MM-dd")" />
+
+                                <span asp-validation-for="PaymentDate"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                            <!-- Importe -->
+                            <div class="col-12 col-md-6">
+
+                                <label asp-for="Amount"
+                                       class="form-label"></label>
+
+                                <div class="input-group">
+
+                                    <span class="input-group-text">$</span>
+
+                                    <input asp-for="Amount"
+                                           type="number"
+                                           class="form-control"
+                                           min="0.01"
+                                           max="@Model.PendingAmount.ToString(CultureInfo.InvariantCulture)"
+                                           step="0.01"
+                                           id="paymentAmount" />
+
+                                </div>
+
+                                <span asp-validation-for="Amount"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                            <!-- Medio de pago -->
+                            <div class="col-12">
+
+                                <label asp-for="Method"
+                                       class="form-label"></label>
+
+                                <select asp-for="Method"
+                                        class="form-select"
+                                        asp-items="Html.GetEnumSelectList<PaymentMethod>()">
+
+                                    <option value="">Seleccionar medio de pago...</option>
+
+                                </select>
+
+                                <span asp-validation-for="Method"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                            <!-- Referencia -->
+                            <div class="col-12">
+
+                                <label asp-for="Reference"
+                                       class="form-label"></label>
+
+                                <input asp-for="Reference"
+                                       class="form-control"
+                                       placeholder="Ej. número de operación o comprobante" />
+
+                                <span asp-validation-for="Reference"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                            <!-- Observaciones -->
+                            <div class="col-12">
+
+                                <label asp-for="Notes"
+                                       class="form-label"></label>
+
+                                <textarea asp-for="Notes"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Observaciones adicionales..."></textarea>
+
+                                <span asp-validation-for="Notes"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Acciones -->
+                        <div class="d-flex flex-wrap justify-content-between gap-2">
+
+                            <a asp-area="Reception"
+                               asp-controller="Invoices"
+                               asp-action="Details"
+                               asp-route-id="@Model.InvoiceId"
+                               class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Registrar pago
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

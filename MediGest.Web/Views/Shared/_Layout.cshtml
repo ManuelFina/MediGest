@@ -45,6 +45,10 @@
         string.IsNullOrEmpty(currentArea) &&
         currentController == "Home";
 
+    var isInvoicesActive =
+        currentArea == "Reception" &&
+        currentController == "Invoices";
+
     var avatarLetter = userName[0].ToString().ToUpperInvariant();
 
     var pageTitle = ViewData["Title"]?.ToString() ?? "Inicio";
@@ -235,6 +239,30 @@
 
                     <i class="bi bi-calendar-check-fill"></i>
                     <span>Turnos</span>
+
+                </a>
+
+                <div class="mg-menu-label">
+                    Facturación y cobros
+                </div>
+
+                <a asp-area="Reception"
+                   asp-controller="Invoices"
+                   asp-action="Index"
+                   class="mg-nav-link @(isInvoicesActive && currentAction == "Index" ? "active" : "")">
+
+                    <i class="bi bi-receipt"></i>
+                    <span>Facturas</span>
+
+                </a>
+
+                <a asp-area="Reception"
+                   asp-controller="Invoices"
+                   asp-action="Create"
+                   class="mg-nav-link @(isInvoicesActive && currentAction == "Create" ? "active" : "")">
+
+                    <i class="bi bi-file-earmark-plus"></i>
+                    <span>Emitir factura</span>
 
                 </a>
             }

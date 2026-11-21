@@ -798,6 +798,133 @@
             </div>
         </section>
 
+        <!-- RESUMEN DE FACTURACIÓN -->
+        <section class="dashboard-section mb-5">
+
+            <div class="dashboard-section-heading">
+                <div>
+                    <h3>Resumen de facturación</h3>
+                    <p>
+                        Estado general de las facturas y los cobros del consultorio.
+                    </p>
+                </div>
+
+                <a asp-area="Reception"
+                   asp-controller="Invoices"
+                   asp-action="Index"
+                   class="btn btn-outline-primary btn-sm">
+
+                    Ver facturas
+                    <i class="bi bi-arrow-right ms-1"></i>
+
+                </a>
+            </div>
+
+            <div class="row g-3">
+
+                <!-- TOTAL DE FACTURAS -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card dashboard-stat shadow-sm">
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="stat-label">Total de facturas</span>
+
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                                    <i class="bi bi-receipt"></i>
+                                </div>
+                            </div>
+
+                            <div class="stat-value">
+                                @receptionistDashboard.TotalInvoices
+                            </div>
+
+                            <div class="stat-label mt-2">
+                                Facturas emitidas
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FACTURAS PENDIENTES -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card dashboard-stat shadow-sm">
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="stat-label">Facturas pendientes</span>
+
+                                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </div>
+                            </div>
+
+                            <div class="stat-value">
+                                @receptionistDashboard.PendingInvoices
+                            </div>
+
+                            <div class="stat-label mt-2">
+                                Con saldo por cobrar
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOTAL RECAUDADO -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card dashboard-stat shadow-sm">
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="stat-label">Total recaudado</span>
+
+                                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-cash-stack"></i>
+                                </div>
+                            </div>
+
+                            <div class="stat-value">
+                                @receptionistDashboard.TotalCollected.ToString("C2", culture)
+                            </div>
+
+                            <div class="stat-label mt-2">
+                                Pagos registrados
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SALDO PENDIENTE -->
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card dashboard-stat shadow-sm">
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="stat-label">Saldo pendiente</span>
+
+                                <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                                    <i class="bi bi-wallet2"></i>
+                                </div>
+                            </div>
+
+                            <div class="stat-value">
+                                @receptionistDashboard.PendingBalance.ToString("C2", culture)
+                            </div>
+
+                            <div class="stat-label mt-2">
+                                Importe pendiente de cobro
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
         <!-- PRÓXIMOS TURNOS -->
         <section class="card dashboard-card shadow-sm mb-5">
 

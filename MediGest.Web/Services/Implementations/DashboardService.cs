@@ -139,6 +139,33 @@ public class DashboardService : IDashboardService
             })
             .ToListAsync();
 
+        // FACTURACIÓN Y COBROS
+
+        var invoiceBalances = await _context.Invoices
+            .AsNoTracking()
+            .Where(invoice => invoice.Status != InvoiceStatus.Cancelled)
+            .Select(invoice => new
+            {
+                invoice.PatientAmount,
+
+                PaidAmount = invoice.Payments
+                    .Sum(payment => (decimal?)payment.Amount) ?? 0m
+            })
+            .ToListAsync();
+
+        var totalInvoices = invoiceBalances.Count;
+
+        var pendingInvoices = invoiceBalances
+            .Count(invoice =>
+                invoice.PatientAmount > invoice.PaidAmount);
+
+        var totalCollected = invoiceBalances
+            .Sum(invoice => invoice.PaidAmount);
+
+        var pendingBalance = invoiceBalances
+            .Sum(invoice =>
+                Math.Max(0m, invoice.PatientAmount - invoice.PaidAmount));
+
         return new ReceptionistDashboardViewModel
         {
             TotalPatients = totalPatients,
@@ -146,7 +173,13 @@ public class DashboardService : IDashboardService
             PendingAppointments = pendingAppointments,
             ConfirmedAppointments = confirmedAppointments,
             WaitingAppointments = waitingAppointments,
-            UpcomingAppointments = upcomingAppointments
+            UpcomingAppointments = upcomingAppointments,
+
+            // Facturación
+            TotalInvoices = totalInvoices,
+            PendingInvoices = pendingInvoices,
+            TotalCollected = totalCollected,
+            PendingBalance = pendingBalance
         };
     }
 }

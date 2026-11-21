@@ -1,0 +1,273 @@
+﻿
+@model MediGest.Web.ViewModels.Invoices.InvoiceListViewModel
+
+@{
+    ViewData["Title"] = "Facturación";
+
+    string GetStatusLabel(MediGest.Web.Models.Enums.InvoiceStatus status)
+    {
+        return status switch
+        {
+            MediGest.Web.Models.Enums.InvoiceStatus.Pending => "Pendiente",
+            MediGest.Web.Models.Enums.InvoiceStatus.PartiallyPaid => "Pago parcial",
+            MediGest.Web.Models.Enums.InvoiceStatus.Paid => "Pagada",
+            MediGest.Web.Models.Enums.InvoiceStatus.Cancelled => "Anulada",
+            _ => "Desconocido"
+        };
+    }
+
+    string GetStatusClass(MediGest.Web.Models.Enums.InvoiceStatus status)
+    {
+        return status switch
+        {
+            MediGest.Web.Models.Enums.InvoiceStatus.Pending => "bg-warning text-dark",
+            MediGest.Web.Models.Enums.InvoiceStatus.PartiallyPaid => "bg-info text-dark",
+            MediGest.Web.Models.Enums.InvoiceStatus.Paid => "bg-success",
+            MediGest.Web.Models.Enums.InvoiceStatus.Cancelled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<div class="container-fluid">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="mb-1">Facturación</h2>
+            <p class="text-muted mb-0">
+                Administración de comprobantes, coberturas y pagos.
+            </p>
+        </div>
+
+        <a asp-area="Reception"
+           asp-controller="Invoices"
+           asp-action="Create"
+           class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>
+            Nueva factura
+        </a>
+    </div>
+
+    @if (TempData["Success"] is not null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] is not null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Comprobantes emitidos</p>
+                            <h3 class="mb-0">@Model.TotalInvoices</h3>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-receipt text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Pendientes</p>
+                            <h3 class="mb-0">@Model.PendingInvoices</h3>
+                        </div>
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                            <i class="bi bi-clock-history text-warning fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Pagos parciales</p>
+                            <h3 class="mb-0">@Model.PartiallyPaidInvoices</h3>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                            <i class="bi bi-cash-coin text-info fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Pagadas</p>
+                            <h3 class="mb-0">@Model.PaidInvoices</h3>
+                        </div>
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total facturado</p>
+                    <h4 class="mb-0">
+                        @Model.TotalBilled.ToString("C2", new System.Globalization.CultureInfo("es-AR"))
+                    </h4>
+                    <small class="text-muted">Comprobantes no anulados</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Saldo pendiente de cobro</p>
+                    <h4 class="mb-0 text-danger">
+                        @Model.TotalPending.ToString("C2", new System.Globalization.CultureInfo("es-AR"))
+                    </h4>
+                    <small class="text-muted">Importes a cargo de los pacientes</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">
+                <i class="bi bi-list-ul me-2"></i>
+                Comprobantes registrados
+            </h5>
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (Model.Invoices.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Comprobante</th>
+                                <th>Fecha</th>
+                                <th>Paciente</th>
+                                <th>Obra social / Plan</th>
+                                <th>Total</th>
+                                <th>A cargo del paciente</th>
+                                <th>Saldo</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-3">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var invoice in Model.Invoices)
+                            {
+                                <tr>
+                                    <td class="ps-3 fw-semibold">
+                                        @invoice.Number
+                                    </td>
+
+                                    <td>
+                                        @invoice.IssueDate.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+                                        @invoice.PatientName
+                                    </td>
+
+                                    <td>
+                                        @if (!string.IsNullOrWhiteSpace(invoice.HealthPlanName))
+                                        {
+                                            @invoice.HealthPlanName
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Particular</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @invoice.Total.ToString("C2", new System.Globalization.CultureInfo("es-AR"))
+                                    </td>
+
+                                    <td>
+                                        @invoice.PatientAmount.ToString("C2", new System.Globalization.CultureInfo("es-AR"))
+                                    </td>
+
+                                    <td class="fw-semibold @(invoice.PendingAmount > 0 ? "text-danger" : "text-success")">
+                                        @invoice.PendingAmount.ToString("C2", new System.Globalization.CultureInfo("es-AR"))
+                                    </td>
+
+                                    <td>
+                                        <span class="badge @GetStatusClass(invoice.Status)">
+                                            @GetStatusLabel(invoice.Status)
+                                        </span>
+                                    </td>
+
+                                    <td class="text-end pe-3">
+                                        <a asp-area="Reception"
+                                           asp-controller="Invoices"
+                                           asp-action="Details"
+                                           asp-route-id="@invoice.Id"
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Ver comprobante">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-receipt text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Todavía no hay facturas registradas</h5>
+                    <p class="text-muted mb-3">
+                        Cuando emitas un comprobante, aparecerá en este listado.
+                    </p>
+                    <a asp-area="Reception"
+                       asp-controller="Invoices"
+                       asp-action="Create"
+                       class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Emitir primera factura
+                    </a>
+                </div>
+            }
+
+        </div>
+    </div>
+
+</div>
