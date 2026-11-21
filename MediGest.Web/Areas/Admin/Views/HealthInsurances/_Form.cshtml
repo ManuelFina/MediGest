@@ -1,0 +1,67 @@
+﻿
+@model MediGest.Web.ViewModels.HealthInsurances.HealthInsuranceFormViewModel
+@using MediGest.Web.Models.Enums
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<div class="row g-3">
+
+    <div class="col-md-6">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="LegalName" class="form-label"></label>
+        <input asp-for="LegalName" class="form-control" />
+        <span asp-validation-for="LegalName" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="CUIT" class="form-label"></label>
+        <input asp-for="CUIT" class="form-control" maxlength="11" />
+        <span asp-validation-for="CUIT" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="EntityType" class="form-label"></label>
+        <select asp-for="EntityType"
+                asp-items="Html.GetEnumSelectList<HealthInsuranceType>()"
+                class="form-select">
+            <option value="">Seleccionar tipo</option>
+        </select>
+        <span asp-validation-for="EntityType" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="RegistrationNumber" class="form-label"></label>
+        <input asp-for="RegistrationNumber" class="form-control" />
+        <span asp-validation-for="RegistrationNumber" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="PhoneNumber" class="form-label"></label>
+        <input asp-for="PhoneNumber" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Address" class="form-label"></label>
+        <input asp-for="Address" class="form-control" />
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+
+</div>

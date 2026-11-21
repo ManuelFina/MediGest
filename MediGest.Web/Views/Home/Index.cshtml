@@ -1,4 +1,5 @@
-﻿@model MediGest.Web.ViewModels.Dashboard.DashboardViewModel
+﻿
+@model MediGest.Web.ViewModels.Dashboard.DashboardViewModel
 
 @{
     ViewData["Title"] = "Inicio";
@@ -52,15 +53,15 @@
             border-bottom: 1px solid #e8edf3;
         }
 
-            .daily-agenda-professional-header h6 {
-                margin-bottom: 3px;
-                font-weight: 700;
-                color: #253247;
-            }
+        .daily-agenda-professional-header h6 {
+            margin-bottom: 3px;
+            font-weight: 700;
+            color: #253247;
+        }
 
-            .daily-agenda-professional-header small {
-                color: #748094;
-            }
+        .daily-agenda-professional-header small {
+            color: #748094;
+        }
 
         .daily-agenda-list {
             padding: 12px 20px;
@@ -74,9 +75,9 @@
             border-bottom: 1px solid #edf0f4;
         }
 
-            .daily-agenda-item:last-child {
-                border-bottom: none;
-            }
+        .daily-agenda-item:last-child {
+            border-bottom: none;
+        }
 
         .daily-agenda-time {
             min-width: 115px;
@@ -90,15 +91,15 @@
             min-width: 0;
         }
 
-            .daily-agenda-details strong {
-                display: block;
-                color: #344256;
-                font-size: .9rem;
-            }
+        .daily-agenda-details strong {
+            display: block;
+            color: #344256;
+            font-size: .9rem;
+        }
 
-            .daily-agenda-details small {
-                color: #7b8798;
-            }
+        .daily-agenda-details small {
+            color: #7b8798;
+        }
 
         .daily-agenda-empty {
             padding: 18px 0;
@@ -118,16 +119,16 @@
             background: #f5fbf7;
         }
 
-            .daily-agenda-slot span {
-                color: #287a48;
-                font-size: .88rem;
-                font-weight: 600;
-            }
+        .daily-agenda-slot span {
+            color: #287a48;
+            font-size: .88rem;
+            font-weight: 600;
+        }
 
-            .daily-agenda-slot a {
-                white-space: nowrap;
-                font-size: .82rem;
-            }
+        .daily-agenda-slot a {
+            white-space: nowrap;
+            font-size: .82rem;
+        }
 
         @@media (max-width: 576px) {
             .daily-agenda-item {
@@ -784,6 +785,7 @@
 
             @if (isAdmin)
             {
+                <!-- USUARIOS -->
                 <div class="col-md-6 col-xl-4">
                     <div class="card dashboard-card shadow-sm h-100">
                         <div class="card-body">
@@ -808,6 +810,7 @@
                     </div>
                 </div>
 
+                <!-- PROFESIONALES -->
                 <div class="col-md-6 col-xl-4">
                     <div class="card dashboard-card shadow-sm h-100">
                         <div class="card-body">
@@ -832,6 +835,7 @@
                     </div>
                 </div>
 
+                <!-- ESPECIALIDADES -->
                 <div class="col-md-6 col-xl-4">
                     <div class="card dashboard-card shadow-sm h-100">
                         <div class="card-body">
@@ -855,10 +859,60 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- COBERTURAS MÉDICAS -->
+                <div class="col-md-6 col-xl-4">
+                    <div class="card dashboard-card shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="dashboard-access-icon bg-info bg-opacity-10 text-info">
+                                <i class="bi bi-shield-plus"></i>
+                            </div>
+
+                            <h6 class="fw-bold">Coberturas médicas</h6>
+
+                            <p class="text-muted small">
+                                Gestioná obras sociales, prepagas y sus respectivos planes de cobertura.
+                            </p>
+
+                            <a asp-area="Admin"
+                               asp-controller="HealthInsurances"
+                               asp-action="Index"
+                               class="dashboard-access-link text-info">
+                                Administrar coberturas
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- PLANES DE COBERTURA -->
+<div class="col-md-6 col-xl-4">
+    <div class="card dashboard-card shadow-sm h-100">
+        <div class="card-body">
+            <div class="dashboard-access-icon bg-success bg-opacity-10 text-success">
+                <i class="bi bi-clipboard2-pulse"></i>
+            </div>
+
+            <h6 class="fw-bold">Planes de cobertura</h6>
+
+            <p class="text-muted small">
+                Gestioná los distintos planes, sus códigos y los requisitos de autorización.
+            </p>
+
+            <a asp-area="Admin"
+               asp-controller="HealthPlans"
+               asp-action="Index"
+               class="dashboard-access-link text-success">
+                Administrar planes
+                <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
             }
 
             @if (isReceptionist)
             {
+                <!-- PACIENTES -->
                 <div class="col-md-6 col-xl-4">
                     <div class="card dashboard-card shadow-sm h-100">
                         <div class="card-body">
@@ -883,6 +937,7 @@
                     </div>
                 </div>
 
+                <!-- TURNOS -->
                 <div class="col-md-6 col-xl-4">
                     <div class="card dashboard-card shadow-sm h-100">
                         <div class="card-body">
@@ -907,6 +962,7 @@
                     </div>
                 </div>
 
+                <!-- AGENDA -->
                 <div class="col-md-6 col-xl-4">
                     <div class="card dashboard-card shadow-sm h-100">
                         <div class="card-body">
@@ -934,6 +990,7 @@
 
             @if (isDoctor)
             {
+                <!-- MI AGENDA -->
                 <div class="col-md-6 col-xl-4">
                     <div class="card dashboard-card shadow-sm h-100">
                         <div class="card-body">
@@ -958,6 +1015,7 @@
                     </div>
                 </div>
 
+                <!-- EXCEPCIONES -->
                 <div class="col-md-6 col-xl-4">
                     <div class="card dashboard-card shadow-sm h-100">
                         <div class="card-body">
