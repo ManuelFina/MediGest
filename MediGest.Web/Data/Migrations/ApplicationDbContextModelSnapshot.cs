@@ -104,6 +104,102 @@ namespace MediGest.Web.Data.Migrations
                     b.ToTable("AppointmentHistories");
                 });
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.HealthInsurance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("CUIT")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("EntityType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LegalName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<string>("RegistrationNumber")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CUIT")
+                        .IsUnique();
+
+                    b.ToTable("HealthInsurances");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.HealthPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("HealthInsuranceId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("RequiresAuthorization")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HealthInsuranceId", "Code")
+                        .IsUnique()
+                        .HasFilter("[Code] IS NOT NULL");
+
+                    b.ToTable("HealthPlans");
+                });
+
             modelBuilder.Entity("MediGest.Web.Models.Entities.Patient", b =>
                 {
                     b.Property<int>("Id")
@@ -575,6 +671,17 @@ namespace MediGest.Web.Data.Migrations
                     b.Navigation("ChangedByUser");
                 });
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.HealthPlan", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.HealthInsurance", "HealthInsurance")
+                        .WithMany("Plans")
+                        .HasForeignKey("HealthInsuranceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("HealthInsurance");
+                });
+
             modelBuilder.Entity("MediGest.Web.Models.Entities.Professional", b =>
                 {
                     b.HasOne("MediGest.Web.Models.Identity.ApplicationUser", "ApplicationUser")
@@ -690,6 +797,11 @@ namespace MediGest.Web.Data.Migrations
             modelBuilder.Entity("MediGest.Web.Models.Entities.AppointmentHistory", b =>
                 {
                     b.Navigation("History");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.HealthInsurance", b =>
+                {
+                    b.Navigation("Plans");
                 });
 
             modelBuilder.Entity("MediGest.Web.Models.Entities.Patient", b =>

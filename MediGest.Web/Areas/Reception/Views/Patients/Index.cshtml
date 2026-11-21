@@ -123,25 +123,23 @@
                   asp-controller="Patients"
                   asp-action="Index"
                   method="get"
-                  class="row g-2 mb-4">
+                  class="row g-2 mb-4"
+                  id="patientSearchForm">
 
                 <div class="col-md-6 col-lg-5">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0">
                             <i class="bi bi-search text-muted"></i>
                         </span>
+
                         <input type="text"
+                               id="patientSearchInput"
                                name="searchTerm"
                                value="@Model.SearchTerm"
                                class="form-control border-start-0"
-                               placeholder="Buscar por nombre, apellido o documento..." />
+                               placeholder="Buscar por nombre, apellido o documento..."
+                               autocomplete="off" />
                     </div>
-                </div>
-
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary px-4">
-                        Buscar
-                    </button>
                 </div>
 
                 @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
@@ -409,3 +407,24 @@
         }
     }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchForm = document.getElementById("patientSearchForm");
+        const searchInput = document.getElementById("patientSearchInput");
+
+        if (!searchForm || !searchInput) {
+            return;
+        }
+
+        let searchTimeout;
+
+        searchInput.addEventListener("input", function () {
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(function () {
+                searchForm.requestSubmit();
+            }, 400);
+        });
+    });
+</script>

@@ -21,6 +21,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<ScheduleException> ScheduleExceptions => Set<ScheduleException>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<AppointmentHistory> AppointmentHistories => Set<AppointmentHistory>();
+    public DbSet<HealthInsurance> HealthInsurances => Set<HealthInsurance>();
+    public DbSet<HealthPlan> HealthPlans => Set<HealthPlan>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
