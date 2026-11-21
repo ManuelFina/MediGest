@@ -30,8 +30,15 @@
     var dayNumber = today.ToString("dd");
     var monthName = today.ToString("MMMM", culture);
     var year = today.ToString("yyyy");
+
     var dayName = culture.TextInfo.ToTitleCase(
         today.ToString("dddd", culture));
+
+    var welcomeSubtitle = isAdmin
+        ? "Administrá y supervisá el funcionamiento del consultorio."
+        : isReceptionist
+            ? "Organizá la atención y gestioná la actividad diaria."
+            : "Consultá tu agenda y organizá tus horarios de atención.";
 }
 
 @section Styles {
@@ -130,6 +137,25 @@
             font-size: .82rem;
         }
 
+        .professional-welcome-card {
+            border: 1px solid #e8edf3;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .professional-welcome-icon {
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(13, 110, 253, .1);
+            color: #0d6efd;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
         @@media (max-width: 576px) {
             .daily-agenda-item {
                 align-items: flex-start;
@@ -154,11 +180,15 @@
     <!-- ENCABEZADO -->
     <section class="dashboard-heading">
         <div class="dashboard-welcome">
+
             <div class="dashboard-welcome-content">
+
                 <span class="dashboard-eyebrow">
-                    @(isAdmin ? "PANEL DE ADMINISTRACIÓN" :
-                      isReceptionist ? "PANEL DE RECEPCIÓN" :
-                      "PANEL PROFESIONAL")
+                    @(isAdmin
+                        ? "PANEL DE ADMINISTRACIÓN"
+                        : isReceptionist
+                            ? "PANEL DE RECEPCIÓN"
+                            : "PANEL PROFESIONAL")
                 </span>
 
                 <h1 class="dashboard-title">
@@ -170,12 +200,14 @@
                 </h2>
 
                 <p class="dashboard-description">
-                    Este es tu espacio de trabajo en MediGest.
+                    @welcomeSubtitle
                 </p>
+
             </div>
 
-            <!-- FECHA Y CALENDARIO -->
+            <!-- FECHA ACTUAL -->
             <div class="dashboard-calendar-card">
+
                 <div class="dashboard-calendar-header">
                     <span>FECHA ACTUAL</span>
 
@@ -185,6 +217,7 @@
                 </div>
 
                 <div class="dashboard-calendar-date">
+
                     <span class="dashboard-calendar-day">
                         @dayNumber
                     </span>
@@ -193,6 +226,7 @@
                         <strong>@monthName.ToUpperInvariant()</strong>
                         <span>@year</span>
                     </div>
+
                 </div>
 
                 <div class="dashboard-calendar-footer">
@@ -203,6 +237,7 @@
                         <small>Organizá tu jornada</small>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -211,6 +246,7 @@
     {
         <!-- RESUMEN GENERAL -->
         <section class="dashboard-section mb-5">
+
             <div class="dashboard-section-heading">
                 <div>
                     <h3>Resumen general</h3>
@@ -225,8 +261,10 @@
                 <div class="col-sm-6 col-xl-3">
                     <div class="card dashboard-stat shadow-sm">
                         <div class="card-body">
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="stat-label">Usuarios registrados</span>
+
                                 <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                                     <i class="bi bi-people-fill"></i>
                                 </div>
@@ -237,8 +275,10 @@
                             </div>
 
                             <div class="stat-label mt-2">
-                                @adminDashboard.ActiveUsers activos · @adminDashboard.InactiveUsers inactivos
+                                @adminDashboard.ActiveUsers activos ·
+                                @adminDashboard.InactiveUsers inactivos
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -246,8 +286,10 @@
                 <div class="col-sm-6 col-xl-3">
                     <div class="card dashboard-stat shadow-sm">
                         <div class="card-body">
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="stat-label">Profesionales</span>
+
                                 <div class="stat-icon bg-success bg-opacity-10 text-success">
                                     <i class="bi bi-person-badge-fill"></i>
                                 </div>
@@ -260,6 +302,7 @@
                             <div class="stat-label mt-2">
                                 @adminDashboard.ActiveProfessionals activos
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -267,8 +310,10 @@
                 <div class="col-sm-6 col-xl-3">
                     <div class="card dashboard-stat shadow-sm">
                         <div class="card-body">
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="stat-label">Especialidades</span>
+
                                 <div class="stat-icon bg-warning bg-opacity-10 text-warning">
                                     <i class="bi bi-heart-pulse-fill"></i>
                                 </div>
@@ -281,6 +326,7 @@
                             <div class="stat-label mt-2">
                                 @adminDashboard.ActiveSpecialties activas
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -288,8 +334,10 @@
                 <div class="col-sm-6 col-xl-3">
                     <div class="card dashboard-stat shadow-sm">
                         <div class="card-body">
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="stat-label">Usuarios activos</span>
+
                                 <div class="stat-icon bg-info bg-opacity-10 text-info">
                                     <i class="bi bi-person-check-fill"></i>
                                 </div>
@@ -302,6 +350,7 @@
                             <div class="stat-label mt-2">
                                 De @adminDashboard.TotalUsers usuarios registrados
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -311,8 +360,11 @@
 
         <!-- ÚLTIMOS USUARIOS -->
         <section class="card dashboard-card shadow-sm mb-5">
+
             <div class="card-body p-4">
+
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
                     <div>
                         <h5 class="dashboard-section-title mb-1">
                             Últimos usuarios registrados
@@ -327,13 +379,18 @@
                        asp-controller="Users"
                        asp-action="Index"
                        class="btn btn-outline-primary btn-sm">
+
                         Ver todos
                         <i class="bi bi-arrow-right ms-1"></i>
+
                     </a>
+
                 </div>
 
                 <div class="table-responsive">
+
                     <table class="table dashboard-table mb-0">
+
                         <thead>
                             <tr>
                                 <th>Usuario</th>
@@ -345,21 +402,31 @@
                         </thead>
 
                         <tbody>
+
                             @if (recentUsers.Any())
                             {
                                 @foreach (var user in recentUsers)
                                 {
                                     <tr>
-                                        <td class="fw-semibold">@user.FullName</td>
-                                        <td>@user.Email</td>
+
+                                        <td class="fw-semibold">
+                                            @user.FullName
+                                        </td>
+
+                                        <td>
+                                            @user.Email
+                                        </td>
+
                                         <td>
                                             <span class="badge bg-light text-dark border">
                                                 @user.Role
                                             </span>
                                         </td>
+
                                         <td>
                                             @user.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
                                         </td>
+
                                         <td>
                                             @if (user.IsActive)
                                             {
@@ -374,6 +441,7 @@
                                                 </span>
                                             }
                                         </td>
+
                                     </tr>
                                 }
                             }
@@ -386,8 +454,10 @@
                                     </td>
                                 </tr>
                             }
+
                         </tbody>
                     </table>
+
                 </div>
             </div>
         </section>
@@ -399,6 +469,7 @@
         <section class="dashboard-section mb-5">
 
             <div class="dashboard-section-heading">
+
                 <div>
                     <h3>
                         <i class="bi bi-calendar-week text-primary me-2"></i>
@@ -414,17 +485,22 @@
                    asp-controller="Agenda"
                    asp-action="Index"
                    class="btn btn-outline-primary btn-sm">
+
                     Abrir agenda completa
                     <i class="bi bi-arrow-right ms-1"></i>
+
                 </a>
+
             </div>
 
             @if (dailyAgenda != null)
             {
                 <div class="card dashboard-card shadow-sm">
+
                     <div class="card-body p-4">
 
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
                             <div>
                                 <h5 class="dashboard-section-title mb-1">
                                     @culture.TextInfo.ToTitleCase(
@@ -443,9 +519,12 @@
                                asp-controller="Appointments"
                                asp-action="Create"
                                class="btn btn-primary btn-sm">
+
                                 <i class="bi bi-plus-lg me-1"></i>
                                 Nuevo turno
+
                             </a>
+
                         </div>
 
                         @if (dailyAgenda.Professionals.Any())
@@ -469,7 +548,9 @@
                                     <div class="daily-agenda-professional">
 
                                         <div class="daily-agenda-professional-header">
+
                                             <div class="d-flex align-items-center gap-2">
+
                                                 <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                                                     <i class="bi bi-person-badge-fill"></i>
                                                 </div>
@@ -478,7 +559,9 @@
                                                     <h6>@professional.FullName</h6>
                                                     <small>@professional.SpecialtyName</small>
                                                 </div>
+
                                             </div>
+
                                         </div>
 
                                         <div class="daily-agenda-list">
@@ -506,6 +589,7 @@
                                                         </div>
 
                                                         <div class="daily-agenda-details">
+
                                                             <strong>
                                                                 @appointment.PatientName
                                                             </strong>
@@ -513,6 +597,7 @@
                                                             <small>
                                                                 DNI: @appointment.PatientDocument
                                                             </small>
+
                                                         </div>
 
                                                         <span class="badge @statusClass">
@@ -526,6 +611,7 @@
                                             @if (professionalSlots.Any())
                                             {
                                                 <div class="mt-2">
+
                                                     <small class="text-muted fw-semibold">
                                                         HORARIOS DISPONIBLES
                                                     </small>
@@ -533,6 +619,7 @@
                                                     @foreach (var slot in professionalSlots)
                                                     {
                                                         <div class="daily-agenda-slot">
+
                                                             <span>
                                                                 <i class="bi bi-clock me-1"></i>
 
@@ -548,9 +635,12 @@
                                                                asp-route-appointmentDate="@dailyAgenda.SelectedDate.ToString("yyyy-MM-dd")"
                                                                asp-route-startTime="@slot.StartTime.ToString("HH:mm")"
                                                                class="btn btn-outline-success btn-sm">
+
                                                                 <i class="bi bi-plus-circle me-1"></i>
                                                                 Asignar turno
+
                                                             </a>
+
                                                         </div>
                                                     }
                                                 </div>
@@ -572,6 +662,7 @@
                         else
                         {
                             <div class="text-center py-5">
+
                                 <i class="bi bi-calendar-x display-5 text-muted"></i>
 
                                 <h6 class="mt-3">
@@ -581,15 +672,19 @@
                                 <p class="text-muted small mb-0">
                                     No se encontraron profesionales activos para mostrar en la agenda.
                                 </p>
+
                             </div>
                         }
+
                     </div>
                 </div>
             }
             else
             {
                 <div class="card dashboard-card shadow-sm">
+
                     <div class="card-body text-center py-5">
+
                         <i class="bi bi-calendar-x display-5 text-muted"></i>
 
                         <h6 class="mt-3">
@@ -599,13 +694,16 @@
                         <p class="text-muted small mb-0">
                             Volvé a ingresar al Dashboard o consultá la agenda completa.
                         </p>
+
                     </div>
                 </div>
             }
+
         </section>
 
         <!-- RESUMEN DE RECEPCIÓN -->
         <section class="dashboard-section mb-5">
+
             <div class="dashboard-section-heading">
                 <div>
                     <h3>Resumen de recepción</h3>
@@ -620,8 +718,10 @@
                 <div class="col-sm-6 col-xl-3">
                     <div class="card dashboard-stat shadow-sm">
                         <div class="card-body">
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="stat-label">Pacientes registrados</span>
+
                                 <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                                     <i class="bi bi-people-fill"></i>
                                 </div>
@@ -630,6 +730,7 @@
                             <div class="stat-value">
                                 @receptionistDashboard.TotalPatients
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -637,8 +738,10 @@
                 <div class="col-sm-6 col-xl-3">
                     <div class="card dashboard-stat shadow-sm">
                         <div class="card-body">
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="stat-label">Turnos de hoy</span>
+
                                 <div class="stat-icon bg-info bg-opacity-10 text-info">
                                     <i class="bi bi-calendar-check-fill"></i>
                                 </div>
@@ -647,6 +750,7 @@
                             <div class="stat-value">
                                 @receptionistDashboard.TodayAppointments
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -654,8 +758,10 @@
                 <div class="col-sm-6 col-xl-3">
                     <div class="card dashboard-stat shadow-sm">
                         <div class="card-body">
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="stat-label">Turnos pendientes</span>
+
                                 <div class="stat-icon bg-warning bg-opacity-10 text-warning">
                                     <i class="bi bi-clock-history"></i>
                                 </div>
@@ -664,6 +770,7 @@
                             <div class="stat-value">
                                 @receptionistDashboard.PendingAppointments
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -671,8 +778,10 @@
                 <div class="col-sm-6 col-xl-3">
                     <div class="card dashboard-stat shadow-sm">
                         <div class="card-body">
+
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="stat-label">Turnos confirmados</span>
+
                                 <div class="stat-icon bg-success bg-opacity-10 text-success">
                                     <i class="bi bi-check-circle-fill"></i>
                                 </div>
@@ -681,6 +790,7 @@
                             <div class="stat-value">
                                 @receptionistDashboard.ConfirmedAppointments
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -690,8 +800,11 @@
 
         <!-- PRÓXIMOS TURNOS -->
         <section class="card dashboard-card shadow-sm mb-5">
+
             <div class="card-body p-4">
+
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
                     <div>
                         <h5 class="dashboard-section-title mb-1">
                             Próximos turnos de hoy
@@ -706,13 +819,18 @@
                        asp-controller="Appointments"
                        asp-action="Index"
                        class="btn btn-outline-primary btn-sm">
+
                         Ver todos
                         <i class="bi bi-arrow-right ms-1"></i>
+
                     </a>
+
                 </div>
 
                 <div class="table-responsive">
+
                     <table class="table dashboard-table mb-0">
+
                         <thead>
                             <tr>
                                 <th>Horario</th>
@@ -724,11 +842,13 @@
                         </thead>
 
                         <tbody>
+
                             @if (receptionistDashboard.UpcomingAppointments.Any())
                             {
                                 @foreach (var appointment in receptionistDashboard.UpcomingAppointments)
                                 {
                                     <tr>
+
                                         <td>
                                             @appointment.StartTime.ToString("HH:mm")
                                             -
@@ -745,14 +865,20 @@
                                             </small>
                                         </td>
 
-                                        <td>@appointment.ProfessionalName</td>
-                                        <td>@appointment.SpecialtyName</td>
+                                        <td>
+                                            @appointment.ProfessionalName
+                                        </td>
+
+                                        <td>
+                                            @appointment.SpecialtyName
+                                        </td>
 
                                         <td>
                                             <span class="badge bg-light text-dark border">
                                                 @appointment.Status
                                             </span>
                                         </td>
+
                                     </tr>
                                 }
                             }
@@ -765,318 +891,67 @@
                                     </td>
                                 </tr>
                             }
+
                         </tbody>
                     </table>
+
                 </div>
             </div>
         </section>
     }
 
-    <!-- ACCESOS RÁPIDOS -->
-    <section class="dashboard-section mb-5">
-        <div class="dashboard-section-heading">
-            <div>
-                <h3>Accesos rápidos</h3>
-                <p>
-                    Ingresá directamente a los módulos disponibles para tu rol.
-                </p>
+    @if (isDoctor)
+    {
+        <!-- ESPACIO PROFESIONAL -->
+        <section class="dashboard-section mb-5">
+
+            <div class="dashboard-section-heading">
+                <div>
+                    <h3>Mi espacio profesional</h3>
+                    <p>
+                        Herramientas para organizar tu actividad en el consultorio.
+                    </p>
+                </div>
             </div>
-        </div>
 
-        <div class="row g-3">
-
-            @if (isAdmin)
-            {
-                <!-- USUARIOS -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Usuarios</h6>
-
-                            <p class="text-muted small">
-                                Administrá las cuentas, los roles y los accesos al sistema.
-                            </p>
-
-                            <a asp-area="Admin"
-                               asp-controller="Users"
-                               asp-action="Index"
-                               class="dashboard-access-link text-primary">
-                                Administrar usuarios
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PROFESIONALES -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-person-badge-fill"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Profesionales</h6>
-
-                            <p class="text-muted small">
-                                Gestioná los profesionales y sus datos laborales.
-                            </p>
-
-                            <a asp-area="Admin"
-                               asp-controller="Professionals"
-                               asp-action="Index"
-                               class="dashboard-access-link text-success">
-                                Administrar profesionales
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ESPECIALIDADES -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-warning bg-opacity-10 text-warning">
-                                <i class="bi bi-heart-pulse-fill"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Especialidades</h6>
-
-                            <p class="text-muted small">
-                                Administrá las especialidades médicas del consultorio.
-                            </p>
-
-                            <a asp-area="Admin"
-                               asp-controller="Specialties"
-                               asp-action="Index"
-                               class="dashboard-access-link text-warning">
-                                Administrar especialidades
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- COBERTURAS MÉDICAS -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-info bg-opacity-10 text-info">
-                                <i class="bi bi-shield-plus"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Coberturas médicas</h6>
-
-                            <p class="text-muted small">
-                                Gestioná obras sociales, prepagas y sus respectivos planes de cobertura.
-                            </p>
-
-                            <a asp-area="Admin"
-                               asp-controller="HealthInsurances"
-                               asp-action="Index"
-                               class="dashboard-access-link text-info">
-                                Administrar coberturas
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PLANES DE COBERTURA -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-clipboard2-pulse"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Planes de cobertura</h6>
-
-                            <p class="text-muted small">
-                                Gestioná los distintos planes, sus códigos y los requisitos de autorización.
-                            </p>
-
-                            <a asp-area="Admin"
-                               asp-controller="HealthPlans"
-                               asp-action="Index"
-                               class="dashboard-access-link text-success">
-                                Administrar planes
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PRESTACIONES MÉDICAS -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-clipboard2-pulse"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Prestaciones médicas</h6>
-
-                            <p class="text-muted small">
-                                Administrá consultas, prácticas y procedimientos, junto con sus valores particulares.
-                            </p>
-
-                            <a asp-area="Admin"
-                               asp-controller="MedicalServices"
-                               asp-action="Index"
-                               class="dashboard-access-link text-primary">
-                                Administrar prestaciones
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @if (isReceptionist)
-            {
-                <!-- PACIENTES -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Pacientes</h6>
-
-                            <p class="text-muted small">
-                                Registrá, consultá y administrá la información de los pacientes.
-                            </p>
-
-                            <a asp-area="Reception"
-                               asp-controller="Patients"
-                               asp-action="Index"
-                               class="dashboard-access-link text-primary">
-                                Ir a pacientes
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TURNOS -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-calendar-check-fill"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Gestión de turnos</h6>
-
-                            <p class="text-muted small">
-                                Asigná, confirmá, cancelá y reprogramá los turnos.
-                            </p>
-
-                            <a asp-area="Reception"
-                               asp-controller="Appointments"
-                               asp-action="Index"
-                               class="dashboard-access-link text-success">
-                                Ir a turnos
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- AGENDA -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-info bg-opacity-10 text-info">
-                                <i class="bi bi-calendar-week-fill"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Agenda diaria</h6>
-
-                            <p class="text-muted small">
-                                Consultá la disponibilidad de los profesionales y sus turnos.
-                            </p>
-
-                            <a asp-area="Reception"
-                               asp-controller="Agenda"
-                               asp-action="Index"
-                               class="dashboard-access-link text-info">
-                                Ver agenda
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            @if (isDoctor)
-            {
-                <!-- MI AGENDA -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-info bg-opacity-10 text-info">
-                                <i class="bi bi-calendar-week-fill"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Mi agenda</h6>
-
-                            <p class="text-muted small">
-                                Consultá y administrá tus horarios de atención.
-                            </p>
-
-                            <a asp-area="Doctor"
-                               asp-controller="ProfessionalSchedules"
-                               asp-action="Index"
-                               class="dashboard-access-link text-info">
-                                Administrar agenda
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- EXCEPCIONES -->
-                <div class="col-md-6 col-xl-4">
-                    <div class="card dashboard-card shadow-sm h-100">
-                        <div class="card-body">
-                            <div class="dashboard-access-icon bg-danger bg-opacity-10 text-danger">
-                                <i class="bi bi-calendar-x-fill"></i>
-                            </div>
-
-                            <h6 class="fw-bold">Excepciones</h6>
-
-                            <p class="text-muted small">
-                                Gestioná vacaciones, licencias y bloqueos de horarios.
-                            </p>
-
-                            <a asp-area="Doctor"
-                               asp-controller="ScheduleExceptions"
-                               asp-action="Index"
-                               class="dashboard-access-link text-danger">
-                                Administrar excepciones
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            }
-
-        </div>
-    </section>
-
-    <!-- INFORMACIÓN INFERIOR -->
-    <section class="row g-3 mb-4">
-        <div class="col-12">
-            <div class="card dashboard-card shadow-sm h-100">
+            <div class="professional-welcome-card shadow-sm">
                 <div class="card-body p-4">
+
+                    <div class="d-flex align-items-start gap-3">
+
+                        <div class="professional-welcome-icon">
+                            <i class="bi bi-calendar2-week"></i>
+                        </div>
+
+                        <div>
+                            <h5 class="dashboard-section-title mb-2">
+                                Organizá tu jornada de atención
+                            </h5>
+
+                            <p class="text-muted small mb-0">
+                                Desde el menú lateral podés consultar tu agenda,
+                                administrar tus horarios de atención y registrar
+                                excepciones como licencias, vacaciones o bloqueos.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+    }
+
+    <!-- INFORMACIÓN INSTITUCIONAL -->
+    <section class="row g-3 mb-4">
+
+        <div class="col-12">
+
+            <div class="card dashboard-card shadow-sm h-100">
+
+                <div class="card-body p-4">
+
                     <h6 class="dashboard-section-title mb-3">
                         <i class="bi bi-info-circle text-primary me-2"></i>
                         Sobre MediGest
@@ -1088,8 +963,10 @@
                         organizar las agendas profesionales y facilitar la
                         administración de turnos.
                     </p>
+
                 </div>
             </div>
+
         </div>
     </section>
 

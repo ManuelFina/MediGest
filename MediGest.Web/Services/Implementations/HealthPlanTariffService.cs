@@ -112,6 +112,7 @@ public class HealthPlanTariffService : IHealthPlanTariffService
         return tariff;
     }
 
+
     public async Task UpdateAsync(int id, HealthPlanTariff tariff)
     {
         var existingTariff = await _context.HealthPlanTariffs
@@ -119,6 +120,13 @@ public class HealthPlanTariffService : IHealthPlanTariffService
 
         if (existingTariff is null)
             throw new BusinessException("La tarifa seleccionada no existe.");
+
+        if (existingTariff.ValidFrom <= DateOnly.FromDateTime(DateTime.Today))
+        {
+            throw new BusinessException(
+                "No se pueden modificar tarifas que ya comenzaron su vigencia. " +
+                "Cerrá la tarifa y registrá una nueva para conservar el historial.");
+        }
 
         ValidateTariff(tariff);
 
@@ -143,6 +151,7 @@ public class HealthPlanTariffService : IHealthPlanTariffService
 
         await _context.SaveChangesAsync();
     }
+
 
     public async Task CloseAsync(int id, DateOnly validTo)
     {

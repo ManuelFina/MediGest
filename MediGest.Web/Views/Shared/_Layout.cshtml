@@ -110,6 +110,7 @@
         <!-- NAVEGACIÓN -->
         <nav class="mg-sidebar-navigation">
 
+            <!-- PRINCIPAL -->
             <div class="mg-menu-label">
                 Principal
             </div>
@@ -124,15 +125,13 @@
 
             </a>
 
-            @if (isAdmin || isReceptionist)
-            {
-                <div class="mg-menu-label">
-                    Gestión
-                </div>
-            }
-
+            <!-- ADMINISTRADOR -->
             @if (isAdmin)
             {
+                <div class="mg-menu-label">
+                    Administración
+                </div>
+
                 <a asp-area="Admin"
                    asp-controller="Users"
                    asp-action="Index"
@@ -162,10 +161,63 @@
                     <span>Especialidades</span>
 
                 </a>
+
+                <div class="mg-menu-label">
+                    Prestaciones y servicios
+                </div>
+
+                <a asp-area="Admin"
+                   asp-controller="MedicalServices"
+                   asp-action="Index"
+                   class="mg-nav-link @(currentArea == "Admin" && currentController == "MedicalServices" ? "active" : "")">
+
+                    <i class="bi bi-clipboard2-pulse"></i>
+                    <span>Prestaciones médicas</span>
+
+                </a>
+
+                <div class="mg-menu-label">
+                    Coberturas y facturación
+                </div>
+
+                <a asp-area="Admin"
+                   asp-controller="HealthInsurances"
+                   asp-action="Index"
+                   class="mg-nav-link @(currentArea == "Admin" && currentController == "HealthInsurances" ? "active" : "")">
+
+                    <i class="bi bi-shield-check"></i>
+                    <span>Obras sociales y prepagas</span>
+
+                </a>
+
+                <a asp-area="Admin"
+                   asp-controller="HealthPlans"
+                   asp-action="Index"
+                   class="mg-nav-link @(currentArea == "Admin" && currentController == "HealthPlans" ? "active" : "")">
+
+                    <i class="bi bi-layers"></i>
+                    <span>Planes de cobertura</span>
+
+                </a>
+
+                <a asp-area="Admin"
+                   asp-controller="HealthPlanTariffs"
+                   asp-action="Index"
+                   class="mg-nav-link @(currentArea == "Admin" && currentController == "HealthPlanTariffs" ? "active" : "")">
+
+                    <i class="bi bi-currency-dollar"></i>
+                    <span>Tarifas por plan</span>
+
+                </a>
             }
 
+            <!-- RECEPCIONISTA -->
             @if (isReceptionist)
             {
+                <div class="mg-menu-label">
+                    Atención de pacientes
+                </div>
+
                 <a asp-area="Reception"
                    asp-controller="Patients"
                    asp-action="Index"
@@ -187,6 +239,7 @@
                 </a>
             }
 
+            <!-- PROFESIONAL -->
             @if (isDoctor)
             {
                 <div class="mg-menu-label">

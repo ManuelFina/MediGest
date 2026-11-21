@@ -1,0 +1,384 @@
+﻿
+@model MediGest.Web.ViewModels.HealthPlanTariffs.HealthPlanTariffListViewModel
+
+@{
+    ViewData["Title"] = "Tarifas por plan";
+
+    var today = DateOnly.FromDateTime(DateTime.Today);
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-currency-dollar text-primary me-2"></i>
+                Tarifas por plan
+            </h2>
+            <p class="text-muted mb-0">
+                Administrá los importes reconocidos por cada plan de cobertura.
+            </p>
+        </div>
+
+        <a asp-area="Admin"
+           asp-controller="HealthPlanTariffs"
+           asp-action="Create"
+           class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>
+            Nueva tarifa
+        </a>
+    </div>
+
+    <!-- Mensajes -->
+    @if (TempData["Success"] is not null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] is not null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Indicadores -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Total de tarifas</p>
+                            <h3 class="fw-bold mb-0">@Model.TotalTariffs</h3>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-list-ul text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Vigentes</p>
+                            <h3 class="fw-bold text-success mb-0">@Model.CurrentTariffs</h3>
+                        </div>
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Vencidas</p>
+                            <h3 class="fw-bold text-danger mb-0">@Model.ExpiredTariffs</h3>
+                        </div>
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                            <i class="bi bi-calendar-x text-danger fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1">Futuras</p>
+                            <h3 class="fw-bold text-info mb-0">@Model.FutureTariffs</h3>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                            <i class="bi bi-calendar-event text-info fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Listado -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h5 class="fw-bold mb-0">
+                    Tarifas registradas
+                </h5>
+
+                <div class="input-group" style="max-width: 320px;">
+                    <span class="input-group-text bg-white">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text"
+                           id="tariffSearch"
+                           class="form-control"
+                           placeholder="Buscar tarifa...">
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (Model.Tariffs.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="tariffsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Cobertura / Plan</th>
+                                <th>Prestación</th>
+                                <th>Importe reconocido</th>
+                                <th>Vigencia</th>
+                                <th>Autorización</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-3">Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var tariff in Model.Tariffs)
+                            {
+                                var isFuture = tariff.ValidFrom > today;
+                                var isExpired = tariff.ValidTo.HasValue &&
+                                                tariff.ValidTo.Value < today;
+                                var isCurrent = !isFuture && !isExpired;
+
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-semibold">
+                                            @tariff.HealthPlan.HealthInsurance.Name
+                                        </div>
+                                        <small class="text-muted">
+                                            @tariff.HealthPlan.Name
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        <div class="fw-semibold">
+                                            @tariff.MedicalService.Name
+                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(tariff.MedicalService.Code))
+                                        {
+                                            <small class="text-muted">
+                                                Código: @tariff.MedicalService.Code
+                                            </small>
+                                        }
+                                    </td>
+
+                                    <td class="fw-semibold text-nowrap">
+                                        @tariff.Amount.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))
+                                    </td>
+
+                                    <td class="text-nowrap">
+                                        <div>
+                                            Desde: @tariff.ValidFrom.ToString("dd/MM/yyyy")
+                                        </div>
+                                        <small class="text-muted">
+                                            Hasta:
+                                            @(tariff.ValidTo?.ToString("dd/MM/yyyy") ?? "Sin fecha")
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        @if (tariff.RequiresAuthorization)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Sí
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                No
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (isFuture)
+                                        {
+                                            <span class="badge bg-info text-dark">
+                                                Futura
+                                            </span>
+                                        }
+                                        else if (isExpired)
+                                        {
+                                            <span class="badge bg-danger">
+                                                Vencida
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                Vigente
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="text-end pe-3">
+                                        @if (isCurrent && !tariff.ValidTo.HasValue)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#closeTariffModal"
+                                                    data-tariff-id="@tariff.Id"
+                                                    data-tariff-name="@tariff.MedicalService.Name"
+                                                    data-tariff-date="@tariff.ValidFrom.ToString("yyyy-MM-dd")">
+                                                <i class="bi bi-calendar-x me-1"></i>
+                                                Cerrar vigencia
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Sin acciones</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-currency-exchange display-4 text-muted"></i>
+                    <h5 class="fw-bold mt-3">Todavía no hay tarifas registradas</h5>
+                    <p class="text-muted mb-3">
+                        Registrá la primera tarifa para comenzar a administrar los valores de cobertura.
+                    </p>
+                    <a asp-area="Admin"
+                       asp-controller="HealthPlanTariffs"
+                       asp-action="Create"
+                       class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Registrar primera tarifa
+                    </a>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal para cerrar vigencia -->
+<div class="modal fade" id="closeTariffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form asp-area="Admin"
+                  asp-controller="HealthPlanTariffs"
+                  asp-action="Close"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        Cerrar vigencia de tarifa
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        Vas a cerrar la vigencia de la prestación:
+                        <strong id="tariffName"></strong>.
+                    </p>
+
+                    <label for="validTo" class="form-label">
+                        Fecha de finalización
+                    </label>
+
+                    <input type="date"
+                           id="validTo"
+                           name="validTo"
+                           class="form-control"
+                           required />
+
+                    <input type="hidden" id="tariffId" name="id" />
+
+                    <div class="form-text">
+                        La fecha no puede ser anterior al inicio de vigencia.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Confirmar cierre
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Búsqueda del listado
+        document.getElementById("tariffSearch")?.addEventListener("input", function () {
+            const search = this.value.toLowerCase();
+
+            document.querySelectorAll("#tariffsTable tbody tr").forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(search)
+                    ? ""
+                    : "none";
+            });
+        });
+
+        // Preparar modal de cierre
+        const closeTariffModal = document.getElementById("closeTariffModal");
+
+        closeTariffModal?.addEventListener("show.bs.modal", function (event) {
+            const button = event.relatedTarget;
+
+            const id = button.getAttribute("data-tariff-id");
+            const name = button.getAttribute("data-tariff-name");
+            const startDate = button.getAttribute("data-tariff-date");
+
+            document.getElementById("tariffId").value = id;
+            document.getElementById("tariffName").textContent = name;
+
+            const validToInput = document.getElementById("validTo");
+            validToInput.min = startDate;
+
+            const today = new Date().toISOString().split("T")[0];
+            validToInput.value = today < startDate ? startDate : today;
+        });
+    </script>
+}
