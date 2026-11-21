@@ -36,4 +36,7 @@ public class Patient
 
     public ICollection<Appointment> Appointments { get; set; }
         = new List<Appointment>();
+
+    public ICollection<PatientAffiliation> Affiliations { get; set; }
+    = new List<PatientAffiliation>();
 }

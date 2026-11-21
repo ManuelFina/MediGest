@@ -44,4 +44,6 @@ public class HealthInsurance
 
     public ICollection<HealthPlan> Plans { get; set; }
         = new List<HealthPlan>();
+    public ICollection<PatientAffiliation> Affiliations { get; set; }
+    = new List<PatientAffiliation>();
 }

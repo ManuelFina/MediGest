@@ -249,6 +249,62 @@ namespace MediGest.Web.Data.Migrations
                     b.ToTable("Patients");
                 });
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.PatientAffiliation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("HealthInsuranceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HealthPlanId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("MemberType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MembershipNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HealthInsuranceId");
+
+                    b.HasIndex("HealthPlanId");
+
+                    b.HasIndex("PatientId");
+
+                    b.HasIndex("HealthInsuranceId", "HealthPlanId");
+
+                    b.HasIndex("HealthInsuranceId", "MembershipNumber");
+
+                    b.ToTable("PatientAffiliations");
+                });
+
             modelBuilder.Entity("MediGest.Web.Models.Entities.Professional", b =>
                 {
                     b.Property<int>("Id")
@@ -682,6 +738,34 @@ namespace MediGest.Web.Data.Migrations
                     b.Navigation("HealthInsurance");
                 });
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.PatientAffiliation", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.HealthInsurance", "HealthInsurance")
+                        .WithMany("Affiliations")
+                        .HasForeignKey("HealthInsuranceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MediGest.Web.Models.Entities.Patient", "Patient")
+                        .WithMany("Affiliations")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MediGest.Web.Models.Entities.HealthPlan", "HealthPlan")
+                        .WithMany("Affiliations")
+                        .HasForeignKey("HealthInsuranceId", "HealthPlanId")
+                        .HasPrincipalKey("HealthInsuranceId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("HealthInsurance");
+
+                    b.Navigation("HealthPlan");
+
+                    b.Navigation("Patient");
+                });
+
             modelBuilder.Entity("MediGest.Web.Models.Entities.Professional", b =>
                 {
                     b.HasOne("MediGest.Web.Models.Identity.ApplicationUser", "ApplicationUser")
@@ -801,11 +885,20 @@ namespace MediGest.Web.Data.Migrations
 
             modelBuilder.Entity("MediGest.Web.Models.Entities.HealthInsurance", b =>
                 {
+                    b.Navigation("Affiliations");
+
                     b.Navigation("Plans");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.HealthPlan", b =>
+                {
+                    b.Navigation("Affiliations");
                 });
 
             modelBuilder.Entity("MediGest.Web.Models.Entities.Patient", b =>
                 {
+                    b.Navigation("Affiliations");
+
                     b.Navigation("Appointments");
                 });
 

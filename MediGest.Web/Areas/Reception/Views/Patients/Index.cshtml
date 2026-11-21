@@ -235,6 +235,7 @@
                                     <td>
                                         <div class="d-flex justify-content-end gap-2">
 
+                                            <!-- Editar paciente -->
                                             <a asp-area="Reception"
                                                asp-controller="Patients"
                                                asp-action="Edit"
@@ -244,8 +245,19 @@
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
 
+                                            <!-- Gestionar afiliaciones -->
+                                            <a asp-area="Reception"
+                                               asp-controller="PatientAffiliations"
+                                               asp-action="Index"
+                                               asp-route-patientId="@patient.Id"
+                                               class="btn btn-sm btn-outline-info"
+                                               title="Gestionar obras sociales y planes">
+                                                <i class="bi bi-card-list"></i>
+                                            </a>
+
                                             @if (patient.IsActive)
                                             {
+                                                <!-- Desactivar -->
                                                 <form asp-area="Reception"
                                                       asp-controller="Patients"
                                                       asp-action="Deactivate"
@@ -262,6 +274,7 @@
                                             }
                                             else
                                             {
+                                                <!-- Activar -->
                                                 <form asp-area="Reception"
                                                       asp-controller="Patients"
                                                       asp-action="Activate"

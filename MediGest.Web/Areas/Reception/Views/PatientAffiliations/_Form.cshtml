@@ -1,0 +1,213 @@
+﻿
+@model MediGest.Web.ViewModels.PatientAffiliations.PatientAffiliationFormViewModel
+
+@using MediGest.Web.Models.Enums
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+<input asp-for="Id" type="hidden" />
+<input asp-for="PatientId" type="hidden" />
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+
+        <div class="mb-4">
+            <h5 class="fw-bold mb-1">
+                <i class="bi bi-person-vcard text-primary me-2"></i>
+                Datos del paciente
+            </h5>
+            <p class="text-muted small mb-0">
+                Paciente al que se asociará la cobertura médica.
+            </p>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Paciente</label>
+            <input type="text"
+                   class="form-control"
+                   value="@Model.PatientName"
+                   readonly />
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="mb-4">
+            <h5 class="fw-bold mb-1">
+                <i class="bi bi-shield-check text-primary me-2"></i>
+                Información de la afiliación
+            </h5>
+            <p class="text-muted small mb-0">
+                Completá los datos de la obra social o prepaga.
+            </p>
+        </div>
+
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <label asp-for="HealthInsuranceId" class="form-label fw-semibold"></label>
+                <select asp-for="HealthInsuranceId"
+                        asp-items="Model.HealthInsurances"
+                        class="form-select"
+                        id="healthInsuranceSelect">
+                    <option value="">Seleccioná una cobertura</option>
+                </select>
+                <span asp-validation-for="HealthInsuranceId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="HealthPlanId" class="form-label fw-semibold"></label>
+                <select asp-for="HealthPlanId"
+                        asp-items="Model.HealthPlans"
+                        class="form-select"
+                        id="healthPlanSelect">
+                    <option value="">Seleccioná un plan</option>
+                </select>
+                <span asp-validation-for="HealthPlanId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="MembershipNumber" class="form-label fw-semibold"></label>
+                <input asp-for="MembershipNumber"
+                       class="form-control"
+                       placeholder="Ej. 123456789" />
+                <span asp-validation-for="MembershipNumber" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="MemberType" class="form-label fw-semibold"></label>
+                <select asp-for="MemberType"
+                        asp-items="Html.GetEnumSelectList<PatientMemberType>()"
+                        class="form-select">
+                    <option value="">Seleccioná un tipo de beneficiario</option>
+                </select>
+                <span asp-validation-for="MemberType" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="ValidFrom" class="form-label fw-semibold"></label>
+                <input asp-for="ValidFrom" type="date" class="form-control" />
+                <span asp-validation-for="ValidFrom" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="ValidTo" class="form-label fw-semibold"></label>
+                <input asp-for="ValidTo" type="date" class="form-control" />
+                <span asp-validation-for="ValidTo" class="text-danger"></span>
+                <small class="text-muted">Dejá vacío si no tiene fecha de finalización.</small>
+            </div>
+
+            <div class="col-12">
+                <div class="form-check form-switch mt-2">
+                    <input asp-for="IsPrimary" class="form-check-input" role="switch" />
+                    <label asp-for="IsPrimary" class="form-check-label fw-semibold"></label>
+                </div>
+                <small class="text-muted">
+                    Indica si esta es la cobertura principal del paciente.
+                </small>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Notes" class="form-label fw-semibold"></label>
+                <textarea asp-for="Notes"
+                          class="form-control"
+                          rows="3"
+                          placeholder="Observaciones adicionales..."></textarea>
+                <span asp-validation-for="Notes" class="text-danger"></span>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end gap-2">
+    <a asp-area="Reception"
+       asp-controller="PatientAffiliations"
+       asp-action="Index"
+       asp-route-patientId="@Model.PatientId"
+       class="btn btn-outline-secondary px-4">
+        Cancelar
+    </a>
+
+    <button type="submit" class="btn btn-primary px-4">
+        <i class="bi bi-check-circle me-2"></i>
+        Guardar afiliación
+    </button>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const insuranceSelect = document.getElementById("healthInsuranceSelect");
+        const planSelect = document.getElementById("healthPlanSelect");
+
+        if (!insuranceSelect || !planSelect) {
+            return;
+        }
+
+        insuranceSelect.addEventListener("change", async function () {
+
+            const insuranceId = this.value;
+
+            // Reiniciamos el selector de planes.
+            planSelect.innerHTML = '<option value="">Seleccioná un plan</option>';
+
+            if (!insuranceId) {
+                return;
+            }
+
+            planSelect.innerHTML = '<option value="">Cargando planes...</option>';
+            planSelect.disabled = true;
+
+            try {
+
+                const baseUrl = '@Url.Action(
+                    "GetPlans",
+                    "PatientAffiliations",
+                    new {
+                        area = "Reception",
+                        patientId = Model.PatientId
+                    })';
+
+                const url = baseUrl
+                    + '?healthInsuranceId='
+                    + encodeURIComponent(insuranceId);
+
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error("No se pudieron cargar los planes.");
+                }
+
+                const plans = await response.json();
+
+                planSelect.innerHTML = '<option value="">Seleccioná un plan</option>';
+
+                plans.forEach(function (plan) {
+
+                    const option = document.createElement("option");
+
+                    option.value = plan.id;
+                    option.textContent = plan.name;
+
+                    planSelect.appendChild(option);
+                });
+
+                if (plans.length === 0) {
+                    planSelect.innerHTML =
+                        '<option value="">No hay planes disponibles</option>';
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                planSelect.innerHTML =
+                    '<option value="">Error al cargar los planes</option>';
+
+            } finally {
+
+                planSelect.disabled = false;
+            }
+        });
+    });
+</script>

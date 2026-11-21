@@ -23,7 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<AppointmentHistory> AppointmentHistories => Set<AppointmentHistory>();
     public DbSet<HealthInsurance> HealthInsurances => Set<HealthInsurance>();
     public DbSet<HealthPlan> HealthPlans => Set<HealthPlan>();
-
+    public DbSet<PatientAffiliation> PatientAffiliations => Set<PatientAffiliation>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

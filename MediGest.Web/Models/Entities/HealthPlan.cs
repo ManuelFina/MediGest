@@ -25,4 +25,6 @@ public class HealthPlan
     public bool RequiresAuthorization { get; set; }
 
     public bool IsActive { get; set; } = true;
+    public ICollection<PatientAffiliation> Affiliations { get; set; }
+    = new List<PatientAffiliation>();
 }

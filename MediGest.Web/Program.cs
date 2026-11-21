@@ -62,6 +62,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IAgendaService, AgendaService>();
 builder.Services.AddScoped<IHealthInsuranceService, HealthInsuranceService>();
 builder.Services.AddScoped<IHealthPlanService, HealthPlanService>();
+builder.Services.AddScoped<IPatientAffiliationService, PatientAffiliationService>();
 
 builder.Services.AddControllersWithViews();
 

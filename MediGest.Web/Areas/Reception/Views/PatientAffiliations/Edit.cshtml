@@ -1,0 +1,36 @@
+﻿
+@model MediGest.Web.ViewModels.PatientAffiliations.PatientAffiliationFormViewModel
+
+@{
+    ViewData["Title"] = "Editar afiliación";
+}
+
+<div class="container-fluid">
+    <div class="mb-4">
+        <h2 class="fw-bold">Editar afiliación</h2>
+        <p class="text-muted">
+            Modificá los datos de la cobertura médica.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">Datos de afiliación</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Edit"
+                  asp-route-patientId="@Model.PatientId"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                <partial name="_Form" model="Model" />
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
