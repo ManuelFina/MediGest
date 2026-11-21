@@ -27,4 +27,6 @@ public class HealthPlan
     public bool IsActive { get; set; } = true;
     public ICollection<PatientAffiliation> Affiliations { get; set; }
     = new List<PatientAffiliation>();
+    public ICollection<HealthPlanTariff> Tariffs { get; set; }
+    = new List<HealthPlanTariff>();
 }

@@ -305,6 +305,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </section>
 
@@ -683,6 +684,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </section>
 
@@ -884,30 +886,56 @@
                         </div>
                     </div>
                 </div>
+
                 <!-- PLANES DE COBERTURA -->
-<div class="col-md-6 col-xl-4">
-    <div class="card dashboard-card shadow-sm h-100">
-        <div class="card-body">
-            <div class="dashboard-access-icon bg-success bg-opacity-10 text-success">
-                <i class="bi bi-clipboard2-pulse"></i>
-            </div>
+                <div class="col-md-6 col-xl-4">
+                    <div class="card dashboard-card shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="dashboard-access-icon bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-clipboard2-pulse"></i>
+                            </div>
 
-            <h6 class="fw-bold">Planes de cobertura</h6>
+                            <h6 class="fw-bold">Planes de cobertura</h6>
 
-            <p class="text-muted small">
-                Gestioná los distintos planes, sus códigos y los requisitos de autorización.
-            </p>
+                            <p class="text-muted small">
+                                Gestioná los distintos planes, sus códigos y los requisitos de autorización.
+                            </p>
 
-            <a asp-area="Admin"
-               asp-controller="HealthPlans"
-               asp-action="Index"
-               class="dashboard-access-link text-success">
-                Administrar planes
-                <i class="bi bi-arrow-right ms-1"></i>
-            </a>
-        </div>
-    </div>
-</div>
+                            <a asp-area="Admin"
+                               asp-controller="HealthPlans"
+                               asp-action="Index"
+                               class="dashboard-access-link text-success">
+                                Administrar planes
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRESTACIONES MÉDICAS -->
+                <div class="col-md-6 col-xl-4">
+                    <div class="card dashboard-card shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="dashboard-access-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-clipboard2-pulse"></i>
+                            </div>
+
+                            <h6 class="fw-bold">Prestaciones médicas</h6>
+
+                            <p class="text-muted small">
+                                Administrá consultas, prácticas y procedimientos, junto con sus valores particulares.
+                            </p>
+
+                            <a asp-area="Admin"
+                               asp-controller="MedicalServices"
+                               asp-action="Index"
+                               class="dashboard-access-link text-primary">
+                                Administrar prestaciones
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             }
 
             @if (isReceptionist)

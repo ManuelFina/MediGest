@@ -200,6 +200,92 @@ namespace MediGest.Web.Data.Migrations
                     b.ToTable("HealthPlans");
                 });
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.HealthPlanTariff", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("HealthPlanId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MedicalServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("RequiresAuthorization")
+                        .HasColumnType("bit");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("ValidTo")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MedicalServiceId");
+
+                    b.HasIndex("HealthPlanId", "MedicalServiceId", "ValidFrom");
+
+                    b.ToTable("HealthPlanTariffs", (string)null);
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.MedicalService", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<decimal>("PrivatePrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("SpecialtyId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasFilter("[Code] IS NOT NULL");
+
+                    b.HasIndex("Name");
+
+                    b.HasIndex("SpecialtyId");
+
+                    b.ToTable("MedicalServices", (string)null);
+                });
+
             modelBuilder.Entity("MediGest.Web.Models.Entities.Patient", b =>
                 {
                     b.Property<int>("Id")
@@ -738,6 +824,35 @@ namespace MediGest.Web.Data.Migrations
                     b.Navigation("HealthInsurance");
                 });
 
+            modelBuilder.Entity("MediGest.Web.Models.Entities.HealthPlanTariff", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.HealthPlan", "HealthPlan")
+                        .WithMany("Tariffs")
+                        .HasForeignKey("HealthPlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("MediGest.Web.Models.Entities.MedicalService", "MedicalService")
+                        .WithMany("Tariffs")
+                        .HasForeignKey("MedicalServiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("HealthPlan");
+
+                    b.Navigation("MedicalService");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.MedicalService", b =>
+                {
+                    b.HasOne("MediGest.Web.Models.Entities.Specialty", "Specialty")
+                        .WithMany("MedicalServices")
+                        .HasForeignKey("SpecialtyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Specialty");
+                });
+
             modelBuilder.Entity("MediGest.Web.Models.Entities.PatientAffiliation", b =>
                 {
                     b.HasOne("MediGest.Web.Models.Entities.HealthInsurance", "HealthInsurance")
@@ -893,6 +1008,13 @@ namespace MediGest.Web.Data.Migrations
             modelBuilder.Entity("MediGest.Web.Models.Entities.HealthPlan", b =>
                 {
                     b.Navigation("Affiliations");
+
+                    b.Navigation("Tariffs");
+                });
+
+            modelBuilder.Entity("MediGest.Web.Models.Entities.MedicalService", b =>
+                {
+                    b.Navigation("Tariffs");
                 });
 
             modelBuilder.Entity("MediGest.Web.Models.Entities.Patient", b =>
@@ -921,6 +1043,8 @@ namespace MediGest.Web.Data.Migrations
 
             modelBuilder.Entity("MediGest.Web.Models.Entities.Specialty", b =>
                 {
+                    b.Navigation("MedicalServices");
+
                     b.Navigation("Professionals");
                 });
 #pragma warning restore 612, 618

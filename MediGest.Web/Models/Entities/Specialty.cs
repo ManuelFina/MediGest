@@ -20,4 +20,6 @@ public class Specialty
     public bool IsActive { get; set; } = true;
 
     public ICollection<Professional> Professionals { get; set; } = new List<Professional>();
+    public ICollection<MedicalService> MedicalServices { get; set; }
+    = new List<MedicalService>();
 }
