@@ -45,6 +45,7 @@ public class InvoiceService : IInvoiceService
             .ToListAsync();
     }
 
+
     public async Task<Invoice?> GetByIdAsync(int id)
     {
         return await _context.Invoices
@@ -52,6 +53,8 @@ public class InvoiceService : IInvoiceService
             .Include(i => i.Patient)
             .Include(i => i.PatientAffiliation)
                 .ThenInclude(a => a!.HealthPlan)
+            .Include(i => i.PatientAffiliation)
+                .ThenInclude(a => a!.HealthInsurance)
             .Include(i => i.Details)
                 .ThenInclude(d => d.MedicalService)
             .Include(i => i.Details)
@@ -59,6 +62,7 @@ public class InvoiceService : IInvoiceService
             .Include(i => i.Payments)
             .FirstOrDefaultAsync(i => i.Id == id);
     }
+
 
     public async Task<Invoice> CreateAsync(Invoice invoice)
     {

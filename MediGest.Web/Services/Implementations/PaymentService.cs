@@ -21,8 +21,8 @@ public class PaymentService : IPaymentService
     {
         return await _context.Payments
             .AsNoTracking()
-            .Where(p => p.InvoiceId == invoiceId)
-            .OrderByDescending(p => p.PaymentDate)
+            .Where(payment => payment.InvoiceId == invoiceId)
+            .OrderByDescending(payment => payment.PaymentDate)
             .ToListAsync();
     }
 
@@ -62,8 +62,9 @@ public class PaymentService : IPaymentService
             await _context.Database.BeginTransactionAsync();
 
         var invoice = await _context.Invoices
-            .Include(i => i.Payments)
-            .FirstOrDefaultAsync(i => i.Id == payment.InvoiceId);
+            .Include(invoice => invoice.Payments)
+            .FirstOrDefaultAsync(invoice =>
+                invoice.Id == payment.InvoiceId);
 
         if (invoice is null)
         {
@@ -76,26 +77,33 @@ public class PaymentService : IPaymentService
                 "No se pueden registrar pagos sobre una factura anulada.");
         }
 
+        if (invoice.Status == InvoiceStatus.Paid)
+        {
+            throw new BusinessException(
+                "La factura ya se encuentra pagada.");
+        }
+
         var paidAmount = invoice.Payments.Sum(p => p.Amount);
+
         var pendingAmount = invoice.PatientAmount - paidAmount;
 
         if (pendingAmount <= 0)
         {
             throw new BusinessException(
-                "La factura ya se encuentra completamente pagada.");
+                "La factura no tiene saldo pendiente.");
         }
 
-        if (payment.Amount > pendingAmount)
+        if (Math.Round(payment.Amount, 2) != Math.Round(pendingAmount, 2))
         {
             throw new BusinessException(
-                $"El importe supera el saldo pendiente de ${pendingAmount:N2}.");
+                $"Debe registrar el importe total pendiente de ${pendingAmount:N2}.");
         }
 
         var newPayment = new Payment
         {
             InvoiceId = invoice.Id,
             PaymentDate = payment.PaymentDate,
-            Amount = Math.Round(payment.Amount, 2),
+            Amount = Math.Round(pendingAmount, 2),
             Method = payment.Method,
             Reference = string.IsNullOrWhiteSpace(payment.Reference)
                 ? null
@@ -107,11 +115,7 @@ public class PaymentService : IPaymentService
 
         _context.Payments.Add(newPayment);
 
-        var newPaidAmount = paidAmount + newPayment.Amount;
-
-        invoice.Status = newPaidAmount >= invoice.PatientAmount
-            ? InvoiceStatus.Paid
-            : InvoiceStatus.PartiallyPaid;
+        invoice.Status = InvoiceStatus.Paid;
 
         await _context.SaveChangesAsync();
         await transaction.CommitAsync();

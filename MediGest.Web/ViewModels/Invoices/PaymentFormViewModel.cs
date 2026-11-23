@@ -13,12 +13,6 @@ public class PaymentFormViewModel
     [Display(Name = "Fecha de pago")]
     public DateTime PaymentDate { get; set; } = DateTime.Today;
 
-    [Required(ErrorMessage = "El importe es obligatorio.")]
-    [Range(0.01, 999999999999.99,
-        ErrorMessage = "El importe debe ser mayor a cero.")]
-    [Display(Name = "Importe")]
-    public decimal Amount { get; set; }
-
     [Required(ErrorMessage = "El medio de pago es obligatorio.")]
     [Display(Name = "Medio de pago")]
     public PaymentMethod Method { get; set; } = PaymentMethod.Cash;
@@ -32,6 +26,8 @@ public class PaymentFormViewModel
         ErrorMessage = "Las observaciones no pueden superar los 500 caracteres.")]
     [Display(Name = "Observaciones")]
     public string? Notes { get; set; }
+
+    // Información de la factura
 
     public string InvoiceNumber { get; set; } = string.Empty;
 

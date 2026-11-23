@@ -65,15 +65,20 @@ public class InvoicesController : Controller
             }).ToList(),
 
             TotalInvoices = invoices.Count,
+
             PendingInvoices = invoices.Count(i =>
                 i.Status == InvoiceStatus.Pending),
+
             PartiallyPaidInvoices = invoices.Count(i =>
                 i.Status == InvoiceStatus.PartiallyPaid),
+
             PaidInvoices = invoices.Count(i =>
                 i.Status == InvoiceStatus.Paid),
+
             TotalBilled = invoices
                 .Where(i => i.Status != InvoiceStatus.Cancelled)
                 .Sum(i => i.Total),
+
             TotalPending = invoices
                 .Where(i => i.Status != InvoiceStatus.Cancelled)
                 .Sum(i => Math.Max(
@@ -117,6 +122,7 @@ public class InvoicesController : Controller
             PatientAffiliationId = viewModel.PatientAffiliationId,
             IssueDate = viewModel.IssueDate,
             Notes = viewModel.Notes,
+
             Details = viewModel.Details.Select(d => new InvoiceDetail
             {
                 MedicalServiceId = d.MedicalServiceId,
@@ -132,11 +138,11 @@ public class InvoicesController : Controller
             var createdInvoice = await _invoiceService.CreateAsync(invoice);
 
             TempData["Success"] =
-                $"La factura {createdInvoice.Number} fue emitida correctamente.";
+                $"La factura {createdInvoice.Number} fue emitida correctamente. Ahora registrá el cobro.";
 
             return RedirectToAction(
-                nameof(Details),
-                new { id = createdInvoice.Id });
+                nameof(RegisterPayment),
+                new { invoiceId = createdInvoice.Id });
         }
         catch (BusinessException exception)
         {
@@ -165,16 +171,22 @@ public class InvoicesController : Controller
             Id = invoice.Id,
             Number = invoice.Number,
             PatientId = invoice.PatientId,
+
             PatientName =
                 $"{invoice.Patient.LastName}, {invoice.Patient.FirstName}",
+
             PatientDocumentNumber = invoice.Patient.DocumentNumber,
             PatientPhoneNumber = invoice.Patient.PhoneNumber,
+
             HealthInsuranceName =
                 invoice.PatientAffiliation?.HealthInsurance.Name,
+
             HealthPlanName =
                 invoice.PatientAffiliation?.HealthPlan.Name,
+
             MembershipNumber =
                 invoice.PatientAffiliation?.MembershipNumber,
+
             IssueDate = invoice.IssueDate,
             Notes = invoice.Notes,
             Subtotal = invoice.Subtotal,
@@ -182,7 +194,11 @@ public class InvoicesController : Controller
             PatientAmount = invoice.PatientAmount,
             Total = invoice.Total,
             PaidAmount = paidAmount,
-            PendingAmount = Math.Max(0, invoice.PatientAmount - paidAmount),
+
+            PendingAmount = Math.Max(
+                0,
+                invoice.PatientAmount - paidAmount),
+
             Status = invoice.Status,
 
             Details = invoice.Details.Select(d =>
@@ -226,9 +242,11 @@ public class InvoicesController : Controller
         }
 
         var paidAmount = invoice.Payments.Sum(p => p.Amount);
+
         var pendingAmount = invoice.PatientAmount - paidAmount;
 
         if (invoice.Status == InvoiceStatus.Cancelled ||
+            invoice.Status == InvoiceStatus.Paid ||
             pendingAmount <= 0)
         {
             TempData["Error"] =
@@ -243,13 +261,15 @@ public class InvoicesController : Controller
         {
             InvoiceId = invoice.Id,
             PaymentDate = DateTime.Today,
+
             InvoiceNumber = invoice.Number,
+
             PatientName =
                 $"{invoice.Patient.LastName}, {invoice.Patient.FirstName}",
+
             InvoiceAmount = invoice.PatientAmount,
             PaidAmount = paidAmount,
-            PendingAmount = pendingAmount,
-            Amount = pendingAmount
+            PendingAmount = pendingAmount
         };
 
         return View(viewModel);
@@ -260,17 +280,53 @@ public class InvoicesController : Controller
     public async Task<IActionResult> RegisterPayment(
         PaymentFormViewModel viewModel)
     {
+        var invoice = await _invoiceService.GetByIdAsync(
+            viewModel.InvoiceId);
+
+        if (invoice is null)
+        {
+            return NotFound();
+        }
+
+        if (invoice.Status == InvoiceStatus.Cancelled ||
+            invoice.Status == InvoiceStatus.Paid)
+        {
+            TempData["Error"] =
+                "La factura no admite nuevos pagos.";
+
+            return RedirectToAction(
+                nameof(Details),
+                new { id = invoice.Id });
+        }
+
         if (!ModelState.IsValid)
         {
             await LoadPaymentFormDataAsync(viewModel);
             return View(viewModel);
         }
 
+        var paidAmount = invoice.Payments.Sum(p => p.Amount);
+
+        var pendingAmount = invoice.PatientAmount - paidAmount;
+
+        if (pendingAmount <= 0)
+        {
+            TempData["Error"] =
+                "La factura no tiene saldo pendiente.";
+
+            return RedirectToAction(
+                nameof(Details),
+                new { id = invoice.Id });
+        }
+
         var payment = new Payment
         {
-            InvoiceId = viewModel.InvoiceId,
+            InvoiceId = invoice.Id,
             PaymentDate = viewModel.PaymentDate,
-            Amount = viewModel.Amount,
+
+            // El importe se calcula desde la factura en el servidor.
+            Amount = pendingAmount,
+
             Method = viewModel.Method,
             Reference = viewModel.Reference,
             Notes = viewModel.Notes
@@ -281,11 +337,11 @@ public class InvoicesController : Controller
             await _paymentService.RegisterAsync(payment);
 
             TempData["Success"] =
-                "El pago fue registrado correctamente.";
+                "El pago fue registrado correctamente. La factura está pagada.";
 
             return RedirectToAction(
                 nameof(Details),
-                new { id = viewModel.InvoiceId });
+                new { id = invoice.Id });
         }
         catch (BusinessException exception)
         {
@@ -394,10 +450,13 @@ public class InvoicesController : Controller
         var paidAmount = invoice.Payments.Sum(p => p.Amount);
 
         viewModel.InvoiceNumber = invoice.Number;
+
         viewModel.PatientName =
             $"{invoice.Patient.LastName}, {invoice.Patient.FirstName}";
+
         viewModel.InvoiceAmount = invoice.PatientAmount;
         viewModel.PaidAmount = paidAmount;
+
         viewModel.PendingAmount = Math.Max(
             0,
             invoice.PatientAmount - paidAmount);

@@ -20,6 +20,22 @@ public class AdminDashboardViewModel
 
     public int ActiveSpecialties { get; set; }
 
+    // Estadísticas de obras sociales
+    public int TotalHealthInsurances { get; set; }
+
+    public int ActiveHealthInsurances { get; set; }
+
+    // Estadísticas de facturación
+    public int TotalInvoices { get; set; }
+
+    public int PendingInvoices { get; set; }
+
+    public int PaidInvoices { get; set; }
+
+    public decimal TotalInvoiced { get; set; }
+
+    public decimal TotalCollected { get; set; }
+
     // Últimos usuarios registrados
     public IEnumerable<RecentUserViewModel> RecentUsers { get; set; }
         = new List<RecentUserViewModel>();

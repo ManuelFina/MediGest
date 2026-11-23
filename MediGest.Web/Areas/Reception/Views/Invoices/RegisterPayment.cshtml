@@ -1,5 +1,4 @@
-﻿
-@model MediGest.Web.ViewModels.Invoices.PaymentFormViewModel
+﻿@model MediGest.Web.ViewModels.Invoices.PaymentFormViewModel
 
 @using MediGest.Web.Models.Enums
 @using System.Globalization
@@ -14,11 +13,10 @@
 
     <!-- Encabezado -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-
         <div>
-            <h2 class="mb-1">Registrar pago</h2>
+            <h2 class="mb-1">Registrar cobro</h2>
             <p class="text-muted mb-0">
-                Registro de cobros de comprobantes médicos.
+                Confirmación del cobro de la factura emitida.
             </p>
         </div>
 
@@ -30,7 +28,6 @@
             <i class="bi bi-arrow-left me-1"></i>
             Volver a la factura
         </a>
-
     </div>
 
     <!-- Errores de validación -->
@@ -40,39 +37,43 @@
 
     <div class="row g-4">
 
-        <!-- Información de la factura -->
+        <!-- Resumen de factura -->
         <div class="col-12 col-lg-5">
 
-            <div class="card border-0 shadow-sm mb-4">
+            <div class="card border-0 shadow-sm h-100">
 
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0">
                         <i class="bi bi-receipt me-2"></i>
-                        Información de la factura
+                        Resumen de factura
                     </h5>
                 </div>
 
                 <div class="card-body">
 
-                    <p class="text-muted mb-1">
-                        Número de comprobante
-                    </p>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">
+                            Número de comprobante
+                        </small>
 
-                    <h5 class="fw-bold mb-3">
-                        @Model.InvoiceNumber
-                    </h5>
+                        <h5 class="fw-bold mb-0">
+                            @Model.InvoiceNumber
+                        </h5>
+                    </div>
 
-                    <p class="text-muted mb-1">
-                        Paciente
-                    </p>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">
+                            Paciente
+                        </small>
 
-                    <h6 class="mb-3">
-                        @Model.PatientName
-                    </h6>
+                        <h6 class="mb-0">
+                            @Model.PatientName
+                        </h6>
+                    </div>
 
                     <hr />
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-muted">
                             Importe a cargo del paciente
                         </span>
@@ -82,7 +83,7 @@
                         </strong>
                     </div>
 
-                    <div class="d-flex justify-content-between mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="text-muted">
                             Total abonado
                         </span>
@@ -94,29 +95,29 @@
 
                     <hr />
 
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="fw-semibold">
-                            Saldo pendiente
-                        </span>
+                    <div class="bg-light rounded p-3">
+                        <small class="text-muted d-block mb-1">
+                            Importe a cobrar
+                        </small>
 
-                        <h4 class="mb-0 text-danger">
+                        <h2 class="text-success fw-bold mb-0">
                             @Model.PendingAmount.ToString("C2", culture)
-                        </h4>
+                        </h2>
+                    </div>
+
+                    <div class="mt-3">
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-clock me-1"></i>
+                            Pendiente de cobro
+                        </span>
                     </div>
 
                 </div>
             </div>
 
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle me-2"></i>
-
-                Podés registrar un pago parcial o cancelar el saldo completo.
-                El sistema actualizará automáticamente el estado de la factura.
-            </div>
-
         </div>
 
-        <!-- Formulario de pago -->
+        <!-- Formulario de cobro -->
         <div class="col-12 col-lg-7">
 
             <div class="card border-0 shadow-sm">
@@ -124,11 +125,16 @@
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0">
                         <i class="bi bi-cash-coin me-2"></i>
-                        Datos del pago
+                        Confirmar cobro
                     </h5>
                 </div>
 
                 <div class="card-body">
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Para completar la operación, registrá el pago por el importe total pendiente.
+                    </div>
 
                     <form asp-area="Reception"
                           asp-controller="Invoices"
@@ -139,98 +145,93 @@
 
                         <input asp-for="InvoiceId" type="hidden" />
 
-                        <div class="row g-3">
+                        <!-- Fecha -->
+                        <div class="mb-3">
 
-                            <!-- Fecha -->
-                            <div class="col-12 col-md-6">
+                            <label asp-for="PaymentDate"
+                                   class="form-label"></label>
 
-                                <label asp-for="PaymentDate"
-                                       class="form-label"></label>
+                            <input asp-for="PaymentDate"
+                                   type="date"
+                                   class="form-control" />
 
-                                <input asp-for="PaymentDate"
-                                       type="date"
-                                       class="form-control"
-                                       value="@Model.PaymentDate.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="PaymentDate"
+                                  class="text-danger"></span>
 
-                                <span asp-validation-for="PaymentDate"
-                                      class="text-danger"></span>
+                        </div>
 
-                            </div>
+                        <!-- Importe -->
+                        <div class="mb-3">
 
-                            <!-- Importe -->
-                            <div class="col-12 col-md-6">
+                            <label class="form-label">
+                                Importe del cobro
+                            </label>
 
-                                <label asp-for="Amount"
-                                       class="form-label"></label>
+                            <div class="input-group input-group-lg">
 
-                                <div class="input-group">
+                                <span class="input-group-text">$</span>
 
-                                    <span class="input-group-text">$</span>
-
-                                    <input asp-for="Amount"
-                                           type="number"
-                                           class="form-control"
-                                           min="0.01"
-                                           max="@Model.PendingAmount.ToString(CultureInfo.InvariantCulture)"
-                                           step="0.01"
-                                           id="paymentAmount" />
-
-                                </div>
-
-                                <span asp-validation-for="Amount"
-                                      class="text-danger"></span>
+                                <input type="text"
+                                       class="form-control fw-bold"
+                                       value="@Model.PendingAmount.ToString("N2", culture)"
+                                       readonly
+                                       aria-label="Importe total a cobrar" />
 
                             </div>
 
-                            <!-- Medio de pago -->
-                            <div class="col-12">
+                            <small class="text-muted">
+                                El importe se calcula automáticamente a partir de la factura.
+                            </small>
 
-                                <label asp-for="Method"
-                                       class="form-label"></label>
+                        </div>
 
-                                <select asp-for="Method"
-                                        class="form-select"
-                                        asp-items="Html.GetEnumSelectList<PaymentMethod>()">
+                        <!-- Medio de pago -->
+                        <div class="mb-3">
 
-                                    <option value="">Seleccionar medio de pago...</option>
+                            <label asp-for="Method"
+                                   class="form-label"></label>
 
-                                </select>
+                            <select asp-for="Method"
+                                    class="form-select"
+                                    asp-items="Html.GetEnumSelectList<PaymentMethod>()">
 
-                                <span asp-validation-for="Method"
-                                      class="text-danger"></span>
+                                <option value="">Seleccionar medio de pago...</option>
 
-                            </div>
+                            </select>
 
-                            <!-- Referencia -->
-                            <div class="col-12">
+                            <span asp-validation-for="Method"
+                                  class="text-danger"></span>
 
-                                <label asp-for="Reference"
-                                       class="form-label"></label>
+                        </div>
 
-                                <input asp-for="Reference"
-                                       class="form-control"
-                                       placeholder="Ej. número de operación o comprobante" />
+                        <!-- Referencia -->
+                        <div class="mb-3">
 
-                                <span asp-validation-for="Reference"
-                                      class="text-danger"></span>
+                            <label asp-for="Reference"
+                                   class="form-label"></label>
 
-                            </div>
+                            <input asp-for="Reference"
+                                   class="form-control"
+                                   placeholder="Número de operación o comprobante" />
 
-                            <!-- Observaciones -->
-                            <div class="col-12">
+                            <span asp-validation-for="Reference"
+                                  class="text-danger"></span>
 
-                                <label asp-for="Notes"
-                                       class="form-label"></label>
+                        </div>
 
-                                <textarea asp-for="Notes"
-                                          class="form-control"
-                                          rows="3"
-                                          placeholder="Observaciones adicionales..."></textarea>
+                        <!-- Observaciones -->
+                        <div class="mb-3">
 
-                                <span asp-validation-for="Notes"
-                                      class="text-danger"></span>
+                            <label asp-for="Notes"
+                                   class="form-label"></label>
 
-                            </div>
+                            <textarea asp-for="Notes"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Observaciones adicionales..."></textarea>
+
+                            <span asp-validation-for="Notes"
+                                  class="text-danger"></span>
 
                         </div>
 
@@ -250,7 +251,7 @@
                             <button type="submit"
                                     class="btn btn-success">
                                 <i class="bi bi-check-circle me-1"></i>
-                                Registrar pago
+                                Confirmar cobro
                             </button>
 
                         </div>
