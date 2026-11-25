@@ -1,20 +1,9 @@
-﻿@using MediGest.Web.Models.Enums
+﻿
+@using MediGest.Web.Models.Enums
 @model MediGest.Web.ViewModels.Appointments.AppointmentCalendarViewModel
 
 @{
     ViewData["Title"] = "Agenda de turnos";
-
-    var monthStart = new DateOnly(
-        Model.SelectedDate.Year,
-        Model.SelectedDate.Month,
-        1);
-
-    var calendarStart = monthStart.AddDays(
-        -(((int)monthStart.DayOfWeek + 6) % 7));
-
-    var monthDays = Enumerable.Range(0, 42)
-        .Select(i => calendarStart.AddDays(i))
-        .ToList();
 
     var previousWeek = Model.SelectedDate.AddDays(-7);
     var nextWeek = Model.SelectedDate.AddDays(7);
@@ -35,532 +24,311 @@
         padding: 8px 0 25px;
     }
 
-        /* Encabezado */
-        .medigest-calendar .page-heading {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 25px;
-        }
-
-        .medigest-calendar .heading-title {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .medigest-calendar .heading-icon {
-            width: 54px;
-            height: 54px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #eaf2ff;
-            color: #2674ed;
-            border-radius: 14px;
-            font-size: 1.6rem;
-        }
-
-        .medigest-calendar h2 {
-            color: #263b59;
-            font-size: 1.55rem;
-            font-weight: 750;
-            margin: 0;
-        }
-
-        .medigest-calendar .heading-subtitle {
-            color: #7b8ba5;
-            margin: 5px 0 0;
-            font-size: .88rem;
-        }
-
-        .medigest-calendar .heading-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .medigest-calendar .action-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            padding: 9px 14px;
-            border-radius: 9px;
-            border: 1px solid #e2e9f2;
-            background: #fff;
-            color: #526783;
-            text-decoration: none;
-            font-size: .82rem;
-            font-weight: 600;
-            transition: .2s;
-        }
-
-            .medigest-calendar .action-button:hover {
-                background: #f5f8ff;
-                border-color: #cbdcf8;
-                color: #2674ed;
-            }
-
-            .medigest-calendar .action-button.primary {
-                color: #fff;
-                background: #2674ed;
-                border-color: #2674ed;
-            }
-
-                .medigest-calendar .action-button.primary:hover {
-                    background: #155fcf;
-                    color: #fff;
-                }
-
-        /* Estructura */
-        .medigest-calendar .calendar-layout {
-            display: grid;
-            grid-template-columns: 275px minmax(0, 1fr);
-            gap: 18px;
-            align-items: start;
-        }
-
-        .medigest-calendar .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            min-width: 0;
-        }
-
-        .medigest-calendar .side-card,
-        .medigest-calendar .calendar-card,
-        .medigest-calendar .legend-card {
-            background: #fff;
-            border: 1px solid #e8edf4;
-            border-radius: 13px;
-            box-shadow: 0 3px 12px rgba(35, 57, 88, .045);
-        }
-
-        .medigest-calendar .side-card {
-            padding: 18px;
-        }
-
-        .medigest-calendar .side-card-title {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #344b6b;
-            font-size: .92rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-
-        /* Mini calendario */
-        .medigest-calendar .month-navigation {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 13px;
-        }
-
-            .medigest-calendar .month-navigation strong {
-                color: #344b6b;
-                font-size: .92rem;
-                text-transform: capitalize;
-            }
-
-            .medigest-calendar .month-navigation a {
-                color: #6f84a2;
-                text-decoration: none;
-                font-size: .9rem;
-                padding: 4px 7px;
-                border-radius: 6px;
-            }
-
-                .medigest-calendar .month-navigation a:hover {
-                    background: #edf3ff;
-                    color: #2674ed;
-                }
-
-        .medigest-calendar .month-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px 2px;
-            text-align: center;
-        }
-
-        .medigest-calendar .weekday {
-            color: #9aa8bb;
-            font-size: .68rem;
-            font-weight: 700;
-            padding: 5px 0;
-        }
-
-        .medigest-calendar .month-day {
-            height: 32px;
-            width: 32px;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            color: #526783;
-            text-decoration: none;
-            font-size: .77rem;
-            transition: .15s;
-        }
-
-            .medigest-calendar .month-day:hover {
-                background: #edf3ff;
-                color: #2674ed;
-            }
-
-            .medigest-calendar .month-day.other-month {
-                color: #c0c9d5;
-            }
-
-            .medigest-calendar .month-day.selected {
-                background: #2674ed;
-                color: #fff;
-                font-weight: 700;
-            }
-
-            .medigest-calendar .month-day.today:not(.selected) {
-                border: 1px solid #2674ed;
-                color: #2674ed;
-                font-weight: 700;
-            }
-
-        /* Profesionales */
-        .medigest-calendar .professional-item {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-            margin-bottom: 14px;
-        }
-
-            .medigest-calendar .professional-item:last-child {
-                margin-bottom: 0;
-            }
-
-        .medigest-calendar .professional-avatar {
-            flex-shrink: 0;
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #eaf2ff;
-            color: #2674ed;
-            font-weight: 750;
-            font-size: .82rem;
-        }
-
-        .medigest-calendar .professional-name {
-            color: #344b6b;
-            font-size: .81rem;
-            font-weight: 700;
-        }
-
-        .medigest-calendar .professional-role {
-            color: #96a4b7;
-            font-size: .73rem;
-            margin-top: 3px;
-        }
-
-        /* Resumen */
-        .medigest-calendar .summary-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            color: #73839b;
-            font-size: .8rem;
-        }
-
-            .medigest-calendar .summary-row:last-child {
-                margin-bottom: 0;
-            }
-
-            .medigest-calendar .summary-row strong {
-                color: #344b6b;
-                font-size: .85rem;
-            }
-
-        .medigest-calendar .summary-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .medigest-calendar .summary-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        /* Calendario semanal */
-        .medigest-calendar .calendar-main {
-            min-width: 0;
-        }
-
-        .medigest-calendar .calendar-card {
-            overflow: hidden;
-        }
-
-        .medigest-calendar .week-toolbar {
-            min-height: 65px;
-            padding: 14px 19px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            border-bottom: 1px solid #edf0f5;
-            flex-wrap: wrap;
-        }
-
-        .medigest-calendar .week-title {
-            color: #344b6b;
-            font-size: .91rem;
-            font-weight: 700;
-        }
-
-        .medigest-calendar .week-navigation {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-            .medigest-calendar .week-navigation a {
-                width: 33px;
-                height: 33px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                border-radius: 8px;
-                background: #f5f7fb;
-                color: #526783;
-                text-decoration: none;
-                font-size: .9rem;
-                transition: .2s;
-            }
-
-                .medigest-calendar .week-navigation a:hover {
-                    background: #eaf2ff;
-                    color: #2674ed;
-                }
-
-        .medigest-calendar .calendar-scroll {
-            overflow-x: auto;
-            overflow-y: hidden;
-        }
-
-        .medigest-calendar .calendar-grid {
-            min-width: 850px;
-            display: grid;
-            grid-template-columns: 62px repeat(7, minmax(0, 1fr));
-        }
-
-        .medigest-calendar .day-header {
-            min-height: 65px;
-            text-align: center;
-            padding: 11px 3px;
-            border-bottom: 1px solid #edf0f5;
-            border-left: 1px solid #edf0f5;
-            background: #fff;
-        }
-
-            .medigest-calendar .day-header .day-name {
-                color: #96a4b7;
-                font-size: .66rem;
-                font-weight: 750;
-            }
-
-            .medigest-calendar .day-header .day-number {
-                color: #344b6b;
-                font-size: .98rem;
-                font-weight: 750;
-                margin-top: 4px;
-            }
-
-            .medigest-calendar .day-header.selected {
-                background: #f1f6ff;
-            }
-
-                .medigest-calendar .day-header.selected .day-number {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 27px;
-                    height: 27px;
-                    border-radius: 8px;
-                    background: #2674ed;
-                    color: white;
-                }
-
-            .medigest-calendar .day-header.today:not(.selected) .day-number {
-                color: #2674ed;
-            }
-
-        .medigest-calendar .time-axis {
-            height: @(trackHeight) px;
-            display: grid;
-            grid-template-rows: repeat( @(halfHourRows), 45px);
-        }
-
-        .medigest-calendar .time-label {
-            color: #96a4b7;
-            font-size: .67rem;
-            text-align: right;
-            padding-right: 8px;
-            transform: translateY(-7px);
-        }
-
-        .medigest-calendar .day-track {
-            height: @(trackHeight) px;
-            position: relative;
-            border-left: 1px solid #edf0f5;
-            background-image: repeating-linear-gradient( to bottom, transparent 0, transparent 44px, #edf0f5 44px, #edf0f5 45px );
-        }
-
-        /* Turnos */
-        .medigest-calendar .calendar-event {
-            position: absolute;
-            left: 3px;
-            right: 3px;
-            min-height: 32px;
-            padding: 6px 6px;
-            border-radius: 6px;
-            overflow: hidden;
-            z-index: 2;
-            font-size: .67rem;
-            line-height: 1.3;
-            border-left: 3px solid;
-        }
-
-            .medigest-calendar .calendar-event strong {
-                display: block;
-                font-size: .69rem;
-                font-weight: 750;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                padding-right: 12px;
-            }
-
-            .medigest-calendar .calendar-event small {
-                display: block;
-                font-size: .63rem;
-                margin-top: 3px;
-            }
-
-        .medigest-calendar .event-pending {
-            background: #fff7e6;
-            border-color: #e9a326;
-            color: #95620d;
-        }
-
-        .medigest-calendar .event-confirmed {
-            background: #edf4ff;
-            border-color: #4385f5;
-            color: #245da9;
-        }
-
-        .medigest-calendar .event-cancelled {
-            background: #fff0f1;
-            border-color: #e66b7d;
-            color: #a83e51;
-        }
-
-        .medigest-calendar .event-completed {
-            background: #eaf8f0;
-            border-color: #35a970;
-            color: #176e44;
-        }
-
-        .medigest-calendar .event-absent {
-            background: #f0f2f5;
-            border-color: #8292a9;
-            color: #46566d;
-        }
-
-        .medigest-calendar .event-menu {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-        }
-
-            .medigest-calendar .event-menu .dropdown-toggle {
-                border: 0;
-                padding: 0 3px;
-                color: inherit;
-                background: transparent;
-                font-size: .8rem;
-            }
-
-                .medigest-calendar .event-menu .dropdown-toggle::after {
-                    display: none;
-                }
-
-        .medigest-calendar .dropdown-menu {
-            z-index: 30;
-            font-size: .8rem;
-            box-shadow: 0 5px 20px rgba(30, 50, 80, .12);
-            border: 1px solid #edf0f5;
-            border-radius: 9px;
-        }
-
-        /* Referencias */
-        .medigest-calendar .legend-card {
-            margin-top: 14px;
-            padding: 14px 18px;
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            flex-wrap: wrap;
-        }
-
-        .medigest-calendar .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            color: #73839b;
-            font-size: .76rem;
-        }
-
-        .medigest-calendar .legend-dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-        }
-
-    /* Responsive */
-    @@media (max-width: 1050px) {
-        .medigest-calendar .calendar-layout {
-            grid-template-columns: 235px minmax(0, 1fr);
-        }
+    .medigest-calendar .page-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
     }
 
-    @@media (max-width: 800px) {
-        .medigest-calendar .calendar-layout {
-            grid-template-columns: 1fr;
-        }
+    .medigest-calendar .heading-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-        .medigest-calendar .sidebar {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
+    .medigest-calendar .heading-icon {
+        width: 54px;
+        height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eaf2ff;
+        color: #2674ed;
+        border-radius: 14px;
+        font-size: 1.6rem;
+    }
 
-            .medigest-calendar .sidebar .side-card:last-child {
-                grid-column: 1 / -1;
-            }
+    .medigest-calendar h2 {
+        color: #263b59;
+        font-size: 1.55rem;
+        font-weight: 750;
+        margin: 0;
+    }
+
+    .medigest-calendar .heading-subtitle {
+        color: #7b8ba5;
+        margin: 5px 0 0;
+        font-size: .88rem;
+    }
+
+    .medigest-calendar .heading-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .medigest-calendar .action-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 9px 14px;
+        border-radius: 9px;
+        border: 1px solid #e2e9f2;
+        background: #fff;
+        color: #526783;
+        text-decoration: none;
+        font-size: .82rem;
+        font-weight: 600;
+        transition: .2s;
+    }
+
+    .medigest-calendar .action-button:hover {
+        background: #f5f8ff;
+        border-color: #cbdcf8;
+        color: #2674ed;
+    }
+
+    /* Calendario a ancho completo */
+    .medigest-calendar .calendar-layout {
+        display: block;
+        width: 100%;
+    }
+
+    .medigest-calendar .calendar-main {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .medigest-calendar .calendar-card,
+    .medigest-calendar .legend-card {
+        background: #fff;
+        border: 1px solid #e8edf4;
+        border-radius: 13px;
+        box-shadow: 0 3px 12px rgba(35, 57, 88, .045);
+    }
+
+    .medigest-calendar .calendar-card {
+        overflow: hidden;
+    }
+
+    .medigest-calendar .week-toolbar {
+        min-height: 65px;
+        padding: 14px 19px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid #edf0f5;
+        flex-wrap: wrap;
+    }
+
+    .medigest-calendar .week-title {
+        color: #344b6b;
+        font-size: .91rem;
+        font-weight: 700;
+    }
+
+    .medigest-calendar .week-navigation {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .medigest-calendar .week-navigation a {
+        width: 33px;
+        height: 33px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 8px;
+        background: #f5f7fb;
+        color: #526783;
+        text-decoration: none;
+        font-size: .9rem;
+        transition: .2s;
+    }
+
+    .medigest-calendar .week-navigation a:hover {
+        background: #eaf2ff;
+        color: #2674ed;
+    }
+
+    .medigest-calendar .calendar-scroll {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .medigest-calendar .calendar-grid {
+        min-width: 850px;
+        display: grid;
+        grid-template-columns: 62px repeat(7, minmax(0, 1fr));
+    }
+
+    .medigest-calendar .day-header {
+        min-height: 65px;
+        text-align: center;
+        padding: 11px 3px;
+        border-bottom: 1px solid #edf0f5;
+        border-left: 1px solid #edf0f5;
+        background: #fff;
+    }
+
+    .medigest-calendar .day-header .day-name {
+        color: #96a4b7;
+        font-size: .66rem;
+        font-weight: 750;
+    }
+
+    .medigest-calendar .day-header .day-number {
+        color: #344b6b;
+        font-size: .98rem;
+        font-weight: 750;
+        margin-top: 4px;
+    }
+
+    .medigest-calendar .day-header.selected {
+        background: #f1f6ff;
+    }
+
+    .medigest-calendar .day-header.selected .day-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 27px;
+        height: 27px;
+        border-radius: 8px;
+        background: #2674ed;
+        color: white;
+    }
+
+    .medigest-calendar .day-header.today:not(.selected) .day-number {
+        color: #2674ed;
+    }
+
+    .medigest-calendar .time-axis {
+        height: @(trackHeight)px;
+        display: grid;
+        grid-template-rows: repeat(@(halfHourRows), 45px);
+    }
+
+    .medigest-calendar .time-label {
+        color: #96a4b7;
+        font-size: .67rem;
+        text-align: right;
+        padding-right: 8px;
+        transform: translateY(-7px);
+    }
+
+    .medigest-calendar .day-track {
+        height: @(trackHeight)px;
+        position: relative;
+        border-left: 1px solid #edf0f5;
+        background-image: repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 44px,
+            #edf0f5 44px,
+            #edf0f5 45px
+        );
+    }
+
+    /* Turnos */
+    .medigest-calendar .calendar-event {
+        position: absolute;
+        left: 3px;
+        right: 3px;
+        min-height: 32px;
+        padding: 6px;
+        border-radius: 6px;
+        overflow: hidden;
+        z-index: 2;
+        font-size: .67rem;
+        line-height: 1.3;
+        border-left: 3px solid;
+        cursor: default;
+    }
+
+    .medigest-calendar .calendar-event strong {
+        display: block;
+        font-size: .69rem;
+        font-weight: 750;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .medigest-calendar .calendar-event small {
+        display: block;
+        font-size: .63rem;
+        margin-top: 3px;
+    }
+
+    .medigest-calendar .event-pending {
+        background: #fff7e6;
+        border-color: #e9a326;
+        color: #95620d;
+    }
+
+    .medigest-calendar .event-confirmed {
+        background: #edf4ff;
+        border-color: #4385f5;
+        color: #245da9;
+    }
+
+    .medigest-calendar .event-waiting {
+        background: #e8f8fc;
+        border-color: #20a5c4;
+        color: #08728b;
+    }
+
+    .medigest-calendar .event-cancelled {
+        background: #fff0f1;
+        border-color: #e66b7d;
+        color: #a83e51;
+    }
+
+    .medigest-calendar .event-completed {
+        background: #eaf8f0;
+        border-color: #35a970;
+        color: #176e44;
+    }
+
+    .medigest-calendar .event-absent {
+        background: #f0f2f5;
+        border-color: #8292a9;
+        color: #46566d;
+    }
+
+    /* Referencias */
+    .medigest-calendar .legend-card {
+        margin-top: 14px;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+
+    .medigest-calendar .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #73839b;
+        font-size: .76rem;
+    }
+
+    .medigest-calendar .legend-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
     }
 
     @@media (max-width: 560px) {
-        .medigest-calendar .sidebar {
-            display: flex;
-        }
-
         .medigest-calendar .page-heading {
             align-items: flex-start;
         }
@@ -572,28 +340,14 @@
         .medigest-calendar .action-button {
             flex: 1;
         }
+
+        .medigest-calendar .week-toolbar {
+            align-items: flex-start;
+        }
     }
 </style>
 
 <div class="medigest-calendar">
-
-    @if (TempData["Success"] is not null)
-    {
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle me-2"></i>
-            @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
-    @if (TempData["Error"] is not null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="bi bi-exclamation-circle me-2"></i>
-            @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
 
     <!-- ENCABEZADO -->
     <div class="page-heading">
@@ -605,7 +359,7 @@
             <div>
                 <h2>Agenda de turnos</h2>
                 <p class="heading-subtitle">
-                    Organizá las consultas médicas de tu consultorio.
+                    Consulta de turnos y disponibilidad del consultorio.
                 </p>
             </div>
         </div>
@@ -631,166 +385,11 @@
                 <i class="bi bi-chevron-right"></i>
                 Semana siguiente
             </a>
-
-            <a asp-area="Reception"
-               asp-controller="Appointments"
-               asp-action="Create"
-               class="action-button primary">
-                <i class="bi bi-plus-lg"></i>
-                Asignar turno
-            </a>
         </div>
     </div>
 
+    <!-- CALENDARIO -->
     <div class="calendar-layout">
-
-        <!-- PANEL LATERAL -->
-        <aside class="sidebar">
-
-            <!-- MINI CALENDARIO -->
-            <div class="side-card">
-                <div class="month-navigation">
-                    <strong>
-                        @Model.SelectedDate.ToString("MMMM yyyy")
-                    </strong>
-
-                    <div>
-                        <a asp-action="Index"
-                           asp-route-date="@Model.SelectedDate.AddMonths(-1).ToString("yyyy-MM-dd")"
-                           title="Mes anterior">
-                            <i class="bi bi-chevron-left"></i>
-                        </a>
-
-                        <a asp-action="Index"
-                           asp-route-date="@Model.SelectedDate.AddMonths(1).ToString("yyyy-MM-dd")"
-                           title="Mes siguiente">
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="month-grid">
-                    @foreach (var dayName in weekDayNames)
-                    {
-                        <div class="weekday">@dayName.Substring(0, 1)</div>
-                    }
-
-                    @foreach (var day in monthDays)
-                    {
-                        var dayClass = "month-day";
-
-                        if (day.Month != Model.SelectedDate.Month)
-                        {
-                            dayClass += " other-month";
-                        }
-
-                        if (day == Model.SelectedDate)
-                        {
-                            dayClass += " selected";
-                        }
-                        else if (day == today)
-                        {
-                            dayClass += " today";
-                        }
-
-                        <a asp-action="Index"
-                           asp-route-date="@day.ToString("yyyy-MM-dd")"
-                           class="@dayClass">
-                            @day.Day
-                        </a>
-                    }
-                </div>
-            </div>
-
-            <!-- PROFESIONALES -->
-            <div class="side-card">
-                <div class="side-card-title">
-                    <span>Profesionales</span>
-                    <span>@Model.Professionals.Count()</span>
-                </div>
-
-                @if (!Model.Professionals.Any())
-                {
-                    <p class="text-muted small mb-0">
-                        No hay profesionales activos.
-                    </p>
-                }
-                else
-                {
-                    @foreach (var professional in Model.Professionals)
-                    {
-                        var firstName = professional.ApplicationUser.FirstName ?? "";
-                        var lastName = professional.ApplicationUser.LastName ?? "";
-
-                        var initials =
-                            (firstName.Length > 0 ? firstName.Substring(0, 1) : "") +
-                            (lastName.Length > 0 ? lastName.Substring(0, 1) : "");
-
-                        <div class="professional-item">
-                            <div class="professional-avatar">
-                                @initials
-                            </div>
-
-                            <div>
-                                <div class="professional-name">
-                                    @lastName, @firstName
-                                </div>
-
-                                <div class="professional-role">
-                                    Profesional médico
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
-            </div>
-
-            <!-- RESUMEN SEMANAL -->
-            <div class="side-card">
-                <div class="side-card-title">
-                    <span>Resumen semanal</span>
-                    <i class="bi bi-bar-chart-line text-primary"></i>
-                </div>
-
-                <div class="summary-row">
-                    <span>Total</span>
-                    <strong>@Model.TotalAppointments</strong>
-                </div>
-
-                <div class="summary-row">
-                    <span class="summary-label">
-                        <span class="summary-dot" style="background:#e9a326;"></span>
-                        Pendientes
-                    </span>
-                    <strong style="color:#d9971e;">
-                        @Model.PendingAppointments
-                    </strong>
-                </div>
-
-                <div class="summary-row">
-                    <span class="summary-label">
-                        <span class="summary-dot" style="background:#4385f5;"></span>
-                        Confirmados
-                    </span>
-                    <strong style="color:#2674ed;">
-                        @Model.ConfirmedAppointments
-                    </strong>
-                </div>
-
-                <div class="summary-row">
-                    <span class="summary-label">
-                        <span class="summary-dot" style="background:#e66b7d;"></span>
-                        Cancelados
-                    </span>
-                    <strong style="color:#df5268;">
-                        @Model.CancelledAppointments
-                    </strong>
-                </div>
-            </div>
-
-        </aside>
-
-        <!-- CALENDARIO PRINCIPAL -->
         <main class="calendar-main">
 
             <div class="calendar-card">
@@ -903,6 +502,7 @@
                                     {
                                         AppointmentStatus.Pending => "event-pending",
                                         AppointmentStatus.Confirmed => "event-confirmed",
+                                        AppointmentStatus.Waiting => "event-waiting",
                                         AppointmentStatus.Cancelled => "event-cancelled",
                                         AppointmentStatus.Completed => "event-completed",
                                         AppointmentStatus.NoShow => "event-absent",
@@ -924,72 +524,6 @@
                                             @appointment.EndTime.ToString("HH:mm")
                                         </small>
 
-                                        <div class="dropdown event-menu">
-                                            <button type="button"
-                                                    class="dropdown-toggle"
-                                                    data-bs-toggle="dropdown"
-                                                    aria-expanded="false"
-                                                    title="Acciones">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-
-                                            <ul class="dropdown-menu dropdown-menu-end">
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                       asp-action="History"
-                                                       asp-route-id="@appointment.Id">
-                                                        <i class="bi bi-clock-history me-2"></i>
-                                                        Historial
-                                                    </a>
-                                                </li>
-
-                                                @if (appointment.Status is AppointmentStatus.Pending or AppointmentStatus.Confirmed)
-                                                {
-                                                    <li>
-                                                        <a class="dropdown-item"
-                                                           asp-action="Reschedule"
-                                                           asp-route-id="@appointment.Id">
-                                                            <i class="bi bi-calendar2-week me-2"></i>
-                                                            Reprogramar
-                                                        </a>
-                                                    </li>
-                                                }
-
-                                                @if (appointment.Status == AppointmentStatus.Pending)
-                                                {
-                                                    <li>
-                                                        <form asp-action="Confirm"
-                                                              asp-route-id="@appointment.Id"
-                                                              method="post">
-                                                            @Html.AntiForgeryToken()
-
-                                                            <button type="submit" class="dropdown-item">
-                                                                <i class="bi bi-check-circle me-2"></i>
-                                                                Confirmar
-                                                            </button>
-                                                        </form>
-                                                    </li>
-                                                }
-
-                                                @if (appointment.Status is AppointmentStatus.Pending or AppointmentStatus.Confirmed)
-                                                {
-                                                    <li>
-                                                        <hr class="dropdown-divider" />
-                                                    </li>
-
-                                                    <li>
-                                                        <button type="button"
-                                                                class="dropdown-item text-danger"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#cancelModal"
-                                                                data-appointment-id="@appointment.Id">
-                                                            <i class="bi bi-x-circle me-2"></i>
-                                                            Cancelar
-                                                        </button>
-                                                    </li>
-                                                }
-                                            </ul>
-                                        </div>
                                     </div>
                                 }
 
@@ -1013,6 +547,11 @@
                 </span>
 
                 <span class="legend-item">
+                    <span class="legend-dot" style="background:#20a5c4;"></span>
+                    En espera
+                </span>
+
+                <span class="legend-item">
                     <span class="legend-dot" style="background:#e66b7d;"></span>
                     Cancelado
                 </span>
@@ -1031,81 +570,3 @@
         </main>
     </div>
 </div>
-
-<!-- MODAL DE CANCELACIÓN -->
-<div class="modal fade"
-     id="cancelModal"
-     tabindex="-1"
-     aria-labelledby="cancelModalLabel"
-     aria-hidden="true">
-
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow"
-             style="border-radius:13px;">
-
-            <form asp-action="Cancel" method="post">
-                @Html.AntiForgeryToken()
-
-                <div class="modal-header border-0 px-4 pt-4">
-                    <div>
-                        <h5 class="modal-title fw-bold" id="cancelModalLabel">
-                            Cancelar turno
-                        </h5>
-
-                        <p class="text-muted small mb-0">
-                            Indicá el motivo de la cancelación.
-                        </p>
-                    </div>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal">
-                    </button>
-                </div>
-
-                <div class="modal-body px-4">
-                    <input type="hidden"
-                           name="id"
-                           id="cancelAppointmentId" />
-
-                    <label for="cancelReason" class="form-label">
-                        Motivo de cancelación
-                    </label>
-
-                    <textarea id="cancelReason"
-                              name="reason"
-                              class="form-control"
-                              maxlength="250"
-                              rows="4"
-                              placeholder="Escribí el motivo..."
-                              required></textarea>
-                </div>
-
-                <div class="modal-footer border-0 px-4 pb-4">
-                    <button type="button"
-                            class="btn btn-light border"
-                            data-bs-dismiss="modal">
-                        Volver
-                    </button>
-
-                    <button type="submit" class="btn btn-danger">
-                        Confirmar cancelación
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        const cancelModal = document.getElementById("cancelModal");
-
-        cancelModal.addEventListener("show.bs.modal", function (event) {
-            const button = event.relatedTarget;
-
-            document.getElementById("cancelAppointmentId").value =
-                button.getAttribute("data-appointment-id");
-        });
-    </script>
-}
