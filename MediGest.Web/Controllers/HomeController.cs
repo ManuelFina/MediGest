@@ -27,7 +27,9 @@ public class HomeController : Controller
         _userManager = userManager;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(
+        DateOnly? date,
+        int? professionalId)
     {
         var user = await _userManager.GetUserAsync(User);
 
@@ -47,9 +49,13 @@ public class HomeController : Controller
             var receptionistDashboard =
                 await _dashboardService.GetReceptionistDashboardAsync();
 
+            var selectedDate = date ??
+                DateOnly.FromDateTime(DateTime.Today);
+
             receptionistDashboard.DailyAgenda =
                 await _agendaService.GetReceptionistAgendaAsync(
-                    DateOnly.FromDateTime(DateTime.Today));
+                    selectedDate,
+                    professionalId);
 
             dashboard.ReceptionistDashboard = receptionistDashboard;
         }
