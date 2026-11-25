@@ -1,5 +1,4 @@
-﻿
-@model MediGest.Web.ViewModels.Users.UserListViewModel
+﻿@model MediGest.Web.ViewModels.Users.UserListViewModel
 
 @{
     ViewData["Title"] = "Usuarios";
@@ -264,56 +263,59 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <div class="d-inline-flex gap-1">
+                                    @if (user.Role != "Administrator")
+                                    {
+                                        <div class="d-inline-flex gap-1">
 
-                                        <a asp-area="Admin"
-                                           asp-controller="Users"
-                                           asp-action="Edit"
-                                           asp-route-id="@user.Id"
-                                           class="action-btn action-edit"
-                                           title="Editar usuario"
-                                           aria-label="Editar usuario">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
+                                            <a asp-area="Admin"
+                                               asp-controller="Users"
+                                               asp-action="Edit"
+                                               asp-route-id="@user.Id"
+                                               class="action-btn action-edit"
+                                               title="Editar usuario"
+                                               aria-label="Editar usuario">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
 
-                                        @if (user.IsActive)
-                                        {
-                                            <form asp-area="Admin"
-                                                  asp-controller="Users"
-                                                  asp-action="Deactivate"
-                                                  asp-route-id="@user.Id"
-                                                  method="post"
-                                                  class="d-inline"
-                                                  onsubmit="return confirm('¿Deseás desactivar esta cuenta?');">
+                                            @if (user.IsActive)
+                                            {
+                                                <form asp-area="Admin"
+                                                      asp-controller="Users"
+                                                      asp-action="Deactivate"
+                                                      asp-route-id="@user.Id"
+                                                      method="post"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('¿Deseás desactivar esta cuenta?');">
 
-                                                <button type="submit"
-                                                        class="action-btn action-deactivate"
-                                                        title="Desactivar usuario"
-                                                        aria-label="Desactivar usuario">
-                                                    <i class="bi bi-person-x"></i>
-                                                </button>
-                                            </form>
-                                        }
-                                        else
-                                        {
-                                            <form asp-area="Admin"
-                                                  asp-controller="Users"
-                                                  asp-action="Activate"
-                                                  asp-route-id="@user.Id"
-                                                  method="post"
-                                                  class="d-inline"
-                                                  onsubmit="return confirm('¿Deseás activar esta cuenta?');">
+                                                    <button type="submit"
+                                                            class="action-btn action-deactivate"
+                                                            title="Desactivar usuario"
+                                                            aria-label="Desactivar usuario">
+                                                        <i class="bi bi-person-x"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-area="Admin"
+                                                      asp-controller="Users"
+                                                      asp-action="Activate"
+                                                      asp-route-id="@user.Id"
+                                                      method="post"
+                                                      class="d-inline"
+                                                      onsubmit="return confirm('¿Deseás activar esta cuenta?');">
 
-                                                <button type="submit"
-                                                        class="action-btn action-activate"
-                                                        title="Activar usuario"
-                                                        aria-label="Activar usuario">
-                                                    <i class="bi bi-person-check"></i>
-                                                </button>
-                                            </form>
-                                        }
+                                                    <button type="submit"
+                                                            class="action-btn action-activate"
+                                                            title="Activar usuario"
+                                                            aria-label="Activar usuario">
+                                                        <i class="bi bi-person-check"></i>
+                                                    </button>
+                                                </form>
+                                            }
 
-                                    </div>
+                                        </div>
+                                    }
                                 </td>
                             </tr>
                         }

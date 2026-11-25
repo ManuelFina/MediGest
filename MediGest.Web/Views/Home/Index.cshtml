@@ -1,5 +1,4 @@
-﻿
-@model MediGest.Web.ViewModels.Dashboard.DashboardViewModel
+﻿@model MediGest.Web.ViewModels.Dashboard.DashboardViewModel
 
 @{
     ViewData["Title"] = "Inicio";
@@ -12,11 +11,6 @@
         ?? User.Identity?.Name
         ?? "Usuario";
 
-    if (string.IsNullOrWhiteSpace(userName))
-    {
-        userName = "Usuario";
-    }
-
     var adminDashboard = Model?.AdminDashboard;
     var receptionistDashboard = Model?.ReceptionistDashboard;
     var dailyAgenda = receptionistDashboard?.DailyAgenda;
@@ -25,8 +19,8 @@
         ?? Enumerable.Empty<MediGest.Web.ViewModels.Dashboard.RecentUserViewModel>();
 
     var culture = new System.Globalization.CultureInfo("es-AR");
-    var today = DateTime.Today;
 
+    var today = DateTime.Today;
     var dayNumber = today.ToString("dd");
     var monthName = today.ToString("MMMM", culture);
     var year = today.ToString("yyyy");
@@ -60,15 +54,15 @@
             border-bottom: 1px solid #e8edf3;
         }
 
-        .daily-agenda-professional-header h6 {
-            margin-bottom: 3px;
-            font-weight: 700;
-            color: #253247;
-        }
+            .daily-agenda-professional-header h6 {
+                margin-bottom: 3px;
+                font-weight: 700;
+                color: #253247;
+            }
 
-        .daily-agenda-professional-header small {
-            color: #748094;
-        }
+            .daily-agenda-professional-header small {
+                color: #748094;
+            }
 
         .daily-agenda-list {
             padding: 12px 20px;
@@ -82,9 +76,9 @@
             border-bottom: 1px solid #edf0f4;
         }
 
-        .daily-agenda-item:last-child {
-            border-bottom: none;
-        }
+            .daily-agenda-item:last-child {
+                border-bottom: none;
+            }
 
         .daily-agenda-time {
             min-width: 115px;
@@ -98,15 +92,15 @@
             min-width: 0;
         }
 
-        .daily-agenda-details strong {
-            display: block;
-            color: #344256;
-            font-size: .9rem;
-        }
+            .daily-agenda-details strong {
+                display: block;
+                color: #344256;
+                font-size: .9rem;
+            }
 
-        .daily-agenda-details small {
-            color: #7b8798;
-        }
+            .daily-agenda-details small {
+                color: #7b8798;
+            }
 
         .daily-agenda-empty {
             padding: 18px 0;
@@ -126,16 +120,16 @@
             background: #f5fbf7;
         }
 
-        .daily-agenda-slot span {
-            color: #287a48;
-            font-size: .88rem;
-            font-weight: 600;
-        }
+            .daily-agenda-slot span {
+                color: #287a48;
+                font-size: .88rem;
+                font-weight: 600;
+            }
 
-        .daily-agenda-slot a {
-            white-space: nowrap;
-            font-size: .82rem;
-        }
+            .daily-agenda-slot a {
+                white-space: nowrap;
+                font-size: .82rem;
+            }
 
         .professional-welcome-card {
             border: 1px solid #e8edf3;
@@ -205,7 +199,6 @@
 
             </div>
 
-            <!-- FECHA ACTUAL -->
             <div class="dashboard-calendar-card">
 
                 <div class="dashboard-calendar-header">
@@ -244,7 +237,7 @@
 
     @if (isAdmin && adminDashboard != null)
     {
-        <!-- RESUMEN GENERAL -->
+        <!-- DASHBOARD ADMINISTRADOR -->
         <section class="dashboard-section mb-5">
 
             <div class="dashboard-section-heading">
@@ -258,8 +251,9 @@
 
             <div class="row g-3">
 
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card dashboard-stat shadow-sm">
+                <!-- USUARIOS REGISTRADOS -->
+                <div class="col-md-4">
+                    <div class="card dashboard-stat shadow-sm h-100">
                         <div class="card-body">
 
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -275,16 +269,16 @@
                             </div>
 
                             <div class="stat-label mt-2">
-                                @adminDashboard.ActiveUsers activos ·
-                                @adminDashboard.InactiveUsers inactivos
+                                Total de cuentas registradas
                             </div>
 
                         </div>
                     </div>
                 </div>
 
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card dashboard-stat shadow-sm">
+                <!-- PROFESIONALES -->
+                <div class="col-md-4">
+                    <div class="card dashboard-stat shadow-sm h-100">
                         <div class="card-body">
 
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -300,45 +294,47 @@
                             </div>
 
                             <div class="stat-label mt-2">
-                                @adminDashboard.ActiveProfessionals activos
+                                Profesionales registrados
                             </div>
 
                         </div>
                     </div>
                 </div>
 
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card dashboard-stat shadow-sm">
+                <!-- OBRAS SOCIALES -->
+                <div class="col-md-4">
+                    <div class="card dashboard-stat shadow-sm h-100">
                         <div class="card-body">
 
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="stat-label">Especialidades</span>
+                                <span class="stat-label">Obras sociales</span>
 
-                                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
-                                    <i class="bi bi-heart-pulse-fill"></i>
+                                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                                    <i class="bi bi-hospital-fill"></i>
                                 </div>
                             </div>
 
                             <div class="stat-value">
-                                @adminDashboard.TotalSpecialties
+                                @adminDashboard.TotalHealthInsurances
                             </div>
 
                             <div class="stat-label mt-2">
-                                @adminDashboard.ActiveSpecialties activas
+                                Entidades registradas
                             </div>
 
                         </div>
                     </div>
                 </div>
 
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card dashboard-stat shadow-sm">
+                <!-- USUARIOS ACTIVOS -->
+                <div class="col-md-4">
+                    <div class="card dashboard-stat shadow-sm h-100">
                         <div class="card-body">
 
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="stat-label">Usuarios activos</span>
 
-                                <div class="stat-icon bg-info bg-opacity-10 text-info">
+                                <div class="stat-icon bg-success bg-opacity-10 text-success">
                                     <i class="bi bi-person-check-fill"></i>
                                 </div>
                             </div>
@@ -348,7 +344,57 @@
                             </div>
 
                             <div class="stat-label mt-2">
-                                De @adminDashboard.TotalUsers usuarios registrados
+                                Cuentas habilitadas
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CANTIDAD DE FACTURAS -->
+                <div class="col-md-4">
+                    <div class="card dashboard-stat shadow-sm h-100">
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="stat-label">Facturas emitidas</span>
+
+                                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                                    <i class="bi bi-receipt"></i>
+                                </div>
+                            </div>
+
+                            <div class="stat-value">
+                                @adminDashboard.TotalInvoices
+                            </div>
+
+                            <div class="stat-label mt-2">
+                                Comprobantes no anulados
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TOTAL FACTURADO -->
+                <div class="col-md-4">
+                    <div class="card dashboard-stat shadow-sm h-100">
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="stat-label">Total facturado</span>
+
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                                    <i class="bi bi-cash-stack"></i>
+                                </div>
+                            </div>
+
+                            <div class="stat-value">
+                                @adminDashboard.TotalInvoiced.ToString("C2", culture)
+                            </div>
+
+                            <div class="stat-label mt-2">
+                                Importe total de prestaciones
                             </div>
 
                         </div>
@@ -456,6 +502,7 @@
                             }
 
                         </tbody>
+
                     </table>
 
                 </div>

@@ -22,6 +22,7 @@
 
         <div>
             <h2 class="page-title mb-1">Especialidades médicas</h2>
+
             <p class="page-subtitle mb-0">
                 Administrá las especialidades disponibles en MediGest.
             </p>
@@ -43,6 +44,7 @@
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="bi bi-check-circle me-2"></i>
             @TempData["Success"]
+
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="alert"
@@ -55,6 +57,7 @@
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-circle me-2"></i>
             @TempData["Error"]
+
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="alert"
@@ -67,6 +70,7 @@
 
         <div class="col-md-4">
             <div class="stat-card h-100">
+
                 <div>
                     <p class="stat-label">Total de especialidades</p>
                     <h3 class="stat-value">@Model.TotalSpecialties</h3>
@@ -75,13 +79,16 @@
                 <div class="stat-icon stat-icon-primary">
                     <i class="bi bi-clipboard2-pulse"></i>
                 </div>
+
             </div>
         </div>
 
         <div class="col-md-4">
             <div class="stat-card h-100">
+
                 <div>
                     <p class="stat-label">Especialidades activas</p>
+
                     <h3 class="stat-value text-success">
                         @Model.ActiveSpecialties
                     </h3>
@@ -90,13 +97,16 @@
                 <div class="stat-icon stat-icon-success">
                     <i class="bi bi-check-circle"></i>
                 </div>
+
             </div>
         </div>
 
         <div class="col-md-4">
             <div class="stat-card h-100">
+
                 <div>
                     <p class="stat-label">Especialidades inactivas</p>
+
                     <h3 class="stat-value text-secondary">
                         @Model.InactiveSpecialties
                     </h3>
@@ -105,6 +115,7 @@
                 <div class="stat-icon stat-icon-secondary">
                     <i class="bi bi-pause-circle"></i>
                 </div>
+
             </div>
         </div>
 
@@ -127,208 +138,177 @@
                     </p>
                 </div>
 
-                <form asp-area="Admin"
-                      asp-controller="Specialties"
-                      asp-action="Index"
-                      method="get"
-                      class="specialty-search">
+                <!-- Buscador -->
+                <div class="specialty-search">
 
                     <input type="search"
-                           name="searchTerm"
+                           id="specialtySearch"
                            value="@Model.SearchTerm"
                            class="form-control"
                            placeholder="Buscar especialidad..."
-                           aria-label="Buscar especialidad" />
+                           aria-label="Buscar especialidad"
+                           autocomplete="off" />
 
-                    <button type="submit"
-                            class="btn btn-admin-primary"
-                            title="Buscar">
-                        <i class="bi bi-search"></i>
+                    <button type="button"
+                            id="clearSpecialtySearch"
+                            class="btn btn-admin-light"
+                            title="Limpiar búsqueda"
+                            aria-label="Limpiar búsqueda">
+                        <i class="bi bi-x-lg"></i>
                     </button>
 
-                    @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
-                    {
-                        <a asp-area="Admin"
-                           asp-controller="Specialties"
-                           asp-action="Index"
-                           class="btn btn-admin-light"
-                           title="Limpiar búsqueda">
-                            <i class="bi bi-x-lg"></i>
-                        </a>
-                    }
-
-                </form>
+                </div>
 
             </div>
 
         </div>
 
+        <!-- Tabla -->
         <div class="content-card-body p-0">
 
-            @if (!Model.Specialties.Any())
-            {
-                <div class="empty-state">
+            <div class="table-responsive">
 
-                    <div class="empty-state-icon">
-                        <i class="bi bi-clipboard2-x"></i>
-                    </div>
+                <table class="table users-table specialties-table mb-0">
 
-                    <h5>No se encontraron especialidades</h5>
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Especialidad</th>
+                            <th>Descripción</th>
+                            <th class="text-center">Médicos</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
 
-                    <p>
-                        Todavía no hay especialidades para mostrar con esta búsqueda.
-                    </p>
+                    <tbody id="specialtiesTableBody">
 
-                    @if (string.IsNullOrWhiteSpace(Model.SearchTerm))
-                    {
-                        <a asp-area="Admin"
-                           asp-controller="Specialties"
-                           asp-action="Create"
-                           class="btn btn-admin-primary">
-                            <i class="bi bi-plus-lg me-1"></i>
-                            Registrar primera especialidad
-                        </a>
-                    }
+                        @await Html.PartialAsync(
+                            "_SpecialtyRows",
+                            Model.Specialties)
 
-                </div>
-            }
-            else
-            {
-                <div class="table-responsive">
+                    </tbody>
 
-                    <table class="table users-table specialties-table mb-0">
+                </table>
 
-                        <thead>
-                            <tr>
-                                <th class="ps-4">Especialidad</th>
-                                <th>Descripción</th>
-                                <th class="text-center">Médicos</th>
-                                <th class="text-center">Estado</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            @foreach (var specialty in Model.Specialties)
-                            {
-                                <tr>
-
-                                    <td class="ps-4">
-                                        <div class="specialty-title">
-                                            <div class="specialty-icon">
-                                                <i class="bi bi-clipboard2-pulse"></i>
-                                            </div>
-
-                                            <span>@specialty.Name</span>
-                                        </div>
-                                    </td>
-
-                                    <td>
-                                        <span class="specialty-description">
-                                            @(string.IsNullOrWhiteSpace(specialty.Description)
-                                                ? "Sin descripción"
-                                                : specialty.Description)
-                                        </span>
-                                    </td>
-
-                                    <td class="text-center">
-                                        <span class="professional-count">
-                                            <i class="bi bi-people me-1"></i>
-                                            @specialty.ProfessionalsCount
-                                        </span>
-                                    </td>
-
-                                    <td class="text-center">
-                                        @if (specialty.IsActive)
-                                        {
-                                            <span class="status-badge status-active">
-                                                <i class="bi bi-check-circle me-1"></i>
-                                                Activa
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="status-badge status-inactive">
-                                                <i class="bi bi-pause-circle me-1"></i>
-                                                Inactiva
-                                            </span>
-                                        }
-                                    </td>
-
-                                    <td class="text-end pe-4">
-
-                                        <div class="d-inline-flex gap-2">
-
-                                            <a asp-area="Admin"
-                                               asp-controller="Specialties"
-                                               asp-action="Edit"
-                                               asp-route-id="@specialty.Id"
-                                               class="action-btn action-edit"
-                                               title="Editar especialidad"
-                                               aria-label="Editar especialidad">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-
-                                            @if (specialty.IsActive)
-                                            {
-                                                <form asp-area="Admin"
-                                                      asp-controller="Specialties"
-                                                      asp-action="Deactivate"
-                                                      asp-route-id="@specialty.Id"
-                                                      method="post"
-                                                      onsubmit="return confirm('¿Estás seguro de desactivar esta especialidad?');">
-
-                                                    <button type="submit"
-                                                            class="action-btn action-deactivate"
-                                                            title="Desactivar especialidad"
-                                                            aria-label="Desactivar especialidad">
-                                                        <i class="bi bi-pause-circle"></i>
-                                                    </button>
-
-                                                </form>
-                                            }
-                                            else
-                                            {
-                                                <form asp-area="Admin"
-                                                      asp-controller="Specialties"
-                                                      asp-action="Activate"
-                                                      asp-route-id="@specialty.Id"
-                                                      method="post"
-                                                      onsubmit="return confirm('¿Deseás volver a activar esta especialidad?');">
-
-                                                    <button type="submit"
-                                                            class="action-btn action-activate"
-                                                            title="Activar especialidad"
-                                                            aria-label="Activar especialidad">
-                                                        <i class="bi bi-check-circle"></i>
-                                                    </button>
-
-                                                </form>
-                                            }
-
-                                        </div>
-
-                                    </td>
-
-                                </tr>
-                            }
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-            }
+            </div>
 
         </div>
 
+        <!-- Contador -->
         <div class="content-card-footer">
-            <small>
+
+            <small id="specialtyResultsCount">
                 Mostrando @Model.Specialties.Count() especialidades.
             </small>
+
         </div>
 
     </div>
 
 </div>
+
+@section Scripts {
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchInput = document.getElementById("specialtySearch");
+            const clearButton = document.getElementById("clearSpecialtySearch");
+            const tableBody = document.getElementById("specialtiesTableBody");
+            const resultsCount = document.getElementById("specialtyResultsCount");
+
+            const searchUrl = '@Url.Action("Search", "Specialties", new { area = "Admin" })';
+
+            let debounceTimer;
+            let currentRequest = null;
+
+            async function searchSpecialties() {
+
+                const searchTerm = searchInput.value.trim();
+
+                if (currentRequest) {
+                    currentRequest.abort();
+                }
+
+                currentRequest = new AbortController();
+
+                try {
+
+                    const url = new URL(searchUrl, window.location.origin);
+
+                    url.searchParams.set("searchTerm", searchTerm);
+
+                    const response = await fetch(url, {
+                        method: "GET",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        signal: currentRequest.signal
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("No se pudo realizar la búsqueda.");
+                    }
+
+                    const html = await response.text();
+
+                    tableBody.innerHTML = html;
+
+                    const count = Number(
+                        response.headers.get("X-Results-Count") ?? 0
+                    );
+
+                    resultsCount.textContent =
+                        `Mostrando ${count} especialidad${count === 1 ? "" : "es"}.`;
+
+                    // Actualizar URL sin recargar la página.
+                    const browserUrl = new URL(window.location.href);
+
+                    if (searchTerm) {
+                        browserUrl.searchParams.set("searchTerm", searchTerm);
+                    } else {
+                        browserUrl.searchParams.delete("searchTerm");
+                    }
+
+                    window.history.replaceState({}, "", browserUrl);
+
+                } catch (error) {
+
+                    if (error.name !== "AbortError") {
+                        console.error(error);
+
+                        resultsCount.textContent =
+                            "Ocurrió un error al buscar especialidades.";
+                    }
+                }
+            }
+
+            // Búsqueda automática con debounce.
+            searchInput.addEventListener("input", function () {
+
+                clearTimeout(debounceTimer);
+
+                debounceTimer = setTimeout(
+                    searchSpecialties,
+                    300
+                );
+
+            });
+
+            // Limpiar búsqueda.
+            clearButton.addEventListener("click", function () {
+
+                searchInput.value = "";
+
+                clearTimeout(debounceTimer);
+
+                searchSpecialties();
+
+                searchInput.focus();
+
+            });
+
+        });
+    </script>
+
+}

@@ -24,13 +24,18 @@ public class DashboardService : IDashboardService
 
     public async Task<AdminDashboardViewModel> GetAdminDashboardAsync()
     {
+        // USUARIOS
+
         var users = _userManager.Users;
 
         var totalUsers = await users.CountAsync();
 
-        var activeUsers = await users.CountAsync(user => user.IsActive);
+        var activeUsers = await users
+            .CountAsync(user => user.IsActive);
 
         var inactiveUsers = totalUsers - activeUsers;
+
+        // PROFESIONALES
 
         var totalProfessionals = await _context.Professionals
             .CountAsync();
@@ -38,11 +43,49 @@ public class DashboardService : IDashboardService
         var activeProfessionals = await _context.Professionals
             .CountAsync(professional => professional.IsActive);
 
+        // ESPECIALIDADES
+
         var totalSpecialties = await _context.Specialties
             .CountAsync();
 
         var activeSpecialties = await _context.Specialties
             .CountAsync(specialty => specialty.IsActive);
+
+        // OBRAS SOCIALES
+
+        var totalHealthInsurances = await _context.HealthInsurances
+            .CountAsync();
+
+        var activeHealthInsurances = await _context.HealthInsurances
+            .CountAsync(healthInsurance => healthInsurance.IsActive);
+
+        // FACTURACIÓN
+
+        var invoices = _context.Invoices
+            .AsNoTracking()
+            .Where(invoice => invoice.Status != InvoiceStatus.Cancelled);
+
+        var totalInvoices = await invoices.CountAsync();
+
+        var pendingInvoices = await invoices
+            .CountAsync(invoice =>
+                invoice.Status == InvoiceStatus.Pending ||
+                invoice.Status == InvoiceStatus.PartiallyPaid);
+
+        var paidInvoices = await invoices
+            .CountAsync(invoice =>
+                invoice.Status == InvoiceStatus.Paid);
+
+        // Importe total de las prestaciones facturadas.
+        var totalInvoiced = await invoices
+            .SumAsync(invoice => (decimal?)invoice.Total) ?? 0m;
+
+        // Dinero efectivamente recibido mediante pagos registrados.
+        var totalCollected = await invoices
+            .SelectMany(invoice => invoice.Payments)
+            .SumAsync(payment => (decimal?)payment.Amount) ?? 0m;
+
+        // ÚLTIMOS USUARIOS REGISTRADOS
 
         var recentUsers = await users
             .AsNoTracking()
@@ -68,13 +111,31 @@ public class DashboardService : IDashboardService
 
         return new AdminDashboardViewModel
         {
+            // Usuarios
             TotalUsers = totalUsers,
             ActiveUsers = activeUsers,
             InactiveUsers = inactiveUsers,
+
+            // Profesionales
             TotalProfessionals = totalProfessionals,
             ActiveProfessionals = activeProfessionals,
+
+            // Especialidades
             TotalSpecialties = totalSpecialties,
             ActiveSpecialties = activeSpecialties,
+
+            // Obras sociales
+            TotalHealthInsurances = totalHealthInsurances,
+            ActiveHealthInsurances = activeHealthInsurances,
+
+            // Facturación
+            TotalInvoices = totalInvoices,
+            PendingInvoices = pendingInvoices,
+            PaidInvoices = paidInvoices,
+            TotalInvoiced = totalInvoiced,
+            TotalCollected = totalCollected,
+
+            // Usuarios recientes
             RecentUsers = recentUserViewModels
         };
     }
@@ -117,7 +178,8 @@ public class DashboardService : IDashboardService
             {
                 AppointmentId = appointment.Id,
 
-                PatientName = $"{appointment.Patient.FirstName} {appointment.Patient.LastName}",
+                PatientName =
+                    $"{appointment.Patient.FirstName} {appointment.Patient.LastName}",
 
                 PatientDocument = appointment.Patient.DocumentNumber,
 

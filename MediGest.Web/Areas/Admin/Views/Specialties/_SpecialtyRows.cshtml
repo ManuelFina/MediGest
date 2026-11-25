@@ -1,0 +1,121 @@
+﻿
+@model IEnumerable<MediGest.Web.ViewModels.Specialties.SpecialtyItemViewModel>
+
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="5">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-clipboard2-x"></i>
+                </div>
+
+                <h5>No se encontraron especialidades</h5>
+
+                <p>Probá con otro término de búsqueda.</p>
+            </div>
+        </td>
+    </tr>
+}
+else
+{
+    @foreach (var specialty in Model)
+    {
+        <tr>
+            <td class="ps-4">
+                <div class="specialty-title">
+                    <div class="specialty-icon">
+                        <i class="bi bi-clipboard2-pulse"></i>
+                    </div>
+
+                    <span>@specialty.Name</span>
+                </div>
+            </td>
+
+            <td>
+                <span class="specialty-description">
+                    @(string.IsNullOrWhiteSpace(specialty.Description)
+                        ? "Sin descripción"
+                        : specialty.Description)
+                </span>
+            </td>
+
+            <td class="text-center">
+                <span class="professional-count">
+                    <i class="bi bi-people me-1"></i>
+                    @specialty.ProfessionalsCount
+                </span>
+            </td>
+
+            <td class="text-center">
+                @if (specialty.IsActive)
+                {
+                    <span class="status-badge status-active">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Activa
+                    </span>
+                }
+                else
+                {
+                    <span class="status-badge status-inactive">
+                        <i class="bi bi-pause-circle me-1"></i>
+                        Inactiva
+                    </span>
+                }
+            </td>
+
+            <td class="text-end pe-4">
+                <div class="d-inline-flex gap-2">
+
+                    <a asp-area="Admin"
+                       asp-controller="Specialties"
+                       asp-action="Edit"
+                       asp-route-id="@specialty.Id"
+                       class="action-btn action-edit"
+                       title="Editar especialidad"
+                       aria-label="Editar especialidad">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+
+                    @if (specialty.IsActive)
+                    {
+                        <form asp-area="Admin"
+                              asp-controller="Specialties"
+                              asp-action="Deactivate"
+                              asp-route-id="@specialty.Id"
+                              method="post"
+                              onsubmit="return confirm('¿Estás seguro de desactivar esta especialidad?');">
+
+                            <button type="submit"
+                                    class="action-btn action-deactivate"
+                                    title="Desactivar especialidad"
+                                    aria-label="Desactivar especialidad">
+                                <i class="bi bi-pause-circle"></i>
+                            </button>
+
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-area="Admin"
+                              asp-controller="Specialties"
+                              asp-action="Activate"
+                              asp-route-id="@specialty.Id"
+                              method="post"
+                              onsubmit="return confirm('¿Deseás volver a activar esta especialidad?');">
+
+                            <button type="submit"
+                                    class="action-btn action-activate"
+                                    title="Activar especialidad"
+                                    aria-label="Activar especialidad">
+                                <i class="bi bi-check-circle"></i>
+                            </button>
+
+                        </form>
+                    }
+
+                </div>
+            </td>
+        </tr>
+    }
+}

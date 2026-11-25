@@ -26,17 +26,9 @@ public class SpecialtiesController : Controller
         var allSpecialties = (await _specialtyService.GetAllAsync())
             .ToList();
 
-        var filteredSpecialties = allSpecialties.AsEnumerable();
-
-        if (!string.IsNullOrWhiteSpace(searchTerm))
-        {
-            var normalizedSearch = searchTerm.Trim();
-
-            filteredSpecialties = filteredSpecialties.Where(s =>
-                s.Name.Contains(
-                    normalizedSearch,
-                    StringComparison.OrdinalIgnoreCase));
-        }
+        var filteredSpecialties = FilterSpecialties(
+            allSpecialties,
+            searchTerm);
 
         var viewModel = new SpecialtyListViewModel
         {
@@ -59,6 +51,34 @@ public class SpecialtiesController : Controller
 
         return View(viewModel);
     }
+
+
+    [HttpGet]
+    public async Task<IActionResult> Search(string? searchTerm)
+    {
+        var allSpecialties = (await _specialtyService.GetAllAsync())
+            .ToList();
+
+        var filteredSpecialties = FilterSpecialties(
+            allSpecialties,
+            searchTerm);
+
+        var results = filteredSpecialties
+            .Select(s => new SpecialtyItemViewModel
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Description = s.Description,
+                IsActive = s.IsActive,
+                ProfessionalsCount = s.Professionals.Count
+            })
+            .ToList();
+
+        Response.Headers["X-Results-Count"] = results.Count.ToString();
+
+        return PartialView("_SpecialtyRows", results);
+    }
+
 
     [HttpGet]
     public IActionResult Create()
@@ -193,5 +213,26 @@ public class SpecialtiesController : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    private static IEnumerable<Specialty> FilterSpecialties(
+        IEnumerable<Specialty> specialties,
+        string? searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            return specialties;
+        }
+
+        string normalizedSearch = searchTerm.Trim();
+
+        return specialties.Where(s =>
+            s.Name.Contains(
+                normalizedSearch,
+                StringComparison.OrdinalIgnoreCase)
+            ||
+            (s.Description?.Contains(
+                normalizedSearch,
+                StringComparison.OrdinalIgnoreCase) ?? false));
     }
 }
