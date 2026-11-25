@@ -138,26 +138,20 @@
                     </p>
                 </div>
 
-                <!-- Buscador -->
-                <div class="specialty-search">
+<div class="specialty-search">
+    <input type="search"
+           id="healthPlanSearch"
+           class="form-control"
+           placeholder="Buscar planes médicos..."
+           autocomplete="off" />
 
-                    <input type="search"
-                           id="specialtySearch"
-                           value="@Model.SearchTerm"
-                           class="form-control"
-                           placeholder="Buscar especialidad..."
-                           aria-label="Buscar especialidad"
-                           autocomplete="off" />
-
-                    <button type="button"
-                            id="clearSpecialtySearch"
-                            class="btn btn-admin-light"
-                            title="Limpiar búsqueda"
-                            aria-label="Limpiar búsqueda">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-
-                </div>
+    <button type="button"
+            id="clearHealthPlanSearch"
+            class="btn btn-admin-light"
+            title="Limpiar búsqueda">
+        <i class="bi bi-x-lg"></i>
+    </button>
+</div>
 
             </div>
 
@@ -312,3 +306,4 @@
     </script>
 
 }
+

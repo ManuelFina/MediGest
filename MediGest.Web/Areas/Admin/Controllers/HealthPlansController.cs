@@ -43,6 +43,26 @@ public class HealthPlansController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Search(string? searchTerm)
+    {
+        var healthPlans = (await _healthPlanService.GetAllAsync())
+            .Where(plan =>
+                string.IsNullOrWhiteSpace(searchTerm) ||
+                plan.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                (plan.Code != null &&
+                 plan.Code.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (plan.Description != null &&
+                 plan.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (plan.HealthInsurance != null &&
+                 plan.HealthInsurance.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        Response.Headers["X-Results-Count"] = healthPlans.Count.ToString();
+
+        return PartialView("_HealthPlanRows", healthPlans);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Create()
     {
         var viewModel = new HealthPlanFormViewModel();

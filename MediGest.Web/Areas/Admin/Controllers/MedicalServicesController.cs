@@ -43,6 +43,31 @@ public class MedicalServicesController : Controller
     }
 
     [HttpGet]
+    public async Task<IActionResult> Search(string? searchTerm)
+    {
+        var medicalServices = (await _medicalService.GetAllAsync())
+            .Where(service =>
+                string.IsNullOrWhiteSpace(searchTerm) ||
+                (!string.IsNullOrWhiteSpace(service.Code) &&
+                 service.Code.Contains(
+                     searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                service.Name.Contains(
+                    searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                (!string.IsNullOrWhiteSpace(service.Description) &&
+                 service.Description.Contains(
+                     searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (service.Specialty != null &&
+                 service.Specialty.Name.Contains(
+                     searchTerm, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        Response.Headers["X-Results-Count"] =
+            medicalServices.Count.ToString();
+
+        return PartialView("_MedicalServiceRows", medicalServices);
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Create()
     {
         var viewModel = new MedicalServiceFormViewModel();

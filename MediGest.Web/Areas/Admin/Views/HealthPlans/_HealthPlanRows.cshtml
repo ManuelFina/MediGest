@@ -1,0 +1,113 @@
+﻿
+@model IEnumerable<MediGest.Web.Models.Entities.HealthPlan>
+
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="6">
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <h5>No se encontraron planes</h5>
+                <p>Probá con otro término de búsqueda.</p>
+            </div>
+        </td>
+    </tr>
+}
+else
+{
+    @foreach (var plan in Model)
+    {
+        <tr>
+            <td>
+                <div class="fw-semibold">@plan.Name</div>
+
+                @if (!string.IsNullOrWhiteSpace(plan.Description))
+                {
+                    <small class="text-muted">
+                        @plan.Description
+                    </small>
+                }
+            </td>
+
+            <td>
+                @(string.IsNullOrWhiteSpace(plan.Code) ? "—" : plan.Code)
+            </td>
+
+            <td>
+                @plan.HealthInsurance.Name
+            </td>
+
+            <td>
+                @if (plan.RequiresAuthorization)
+                {
+                    <span class="badge bg-warning-subtle text-warning-emphasis">
+                        Requiere autorización
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-light text-dark">
+                        No requiere
+                    </span>
+                }
+            </td>
+
+            <td>
+                @if (plan.IsActive && plan.HealthInsurance.IsActive)
+                {
+                    <span class="badge bg-success-subtle text-success">
+                        Activo
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary-subtle text-secondary">
+                        Inactivo
+                    </span>
+                }
+            </td>
+
+            <td class="text-end">
+                <div class="d-inline-flex gap-2">
+                    <a asp-area="Admin"
+                       asp-controller="HealthPlans"
+                       asp-action="Edit"
+                       asp-route-id="@plan.Id"
+                       class="btn btn-sm btn-outline-primary"
+                       title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+
+                    @if (plan.IsActive)
+                    {
+                        <form asp-area="Admin"
+                              asp-controller="HealthPlans"
+                              asp-action="Deactivate"
+                              asp-route-id="@plan.Id"
+                              method="post">
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger"
+                                    title="Desactivar">
+                                <i class="bi bi-toggle-off"></i>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-area="Admin"
+                              asp-controller="HealthPlans"
+                              asp-action="Activate"
+                              asp-route-id="@plan.Id"
+                              method="post">
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-success"
+                                    title="Activar">
+                                <i class="bi bi-toggle-on"></i>
+                            </button>
+                        </form>
+                    }
+                </div>
+            </td>
+        </tr>
+    }
+}

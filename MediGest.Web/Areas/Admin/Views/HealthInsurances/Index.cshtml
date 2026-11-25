@@ -6,12 +6,23 @@
     ViewData["Title"] = "Obras sociales y prepagas";
 }
 
-<div class="container-fluid">
+@section Styles {
+    <link rel="stylesheet"
+          href="~/css/admin/users.css"
+          asp-append-version="true" />
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <link rel="stylesheet"
+          href="~/css/admin/specialties.css"
+          asp-append-version="true" />
+}
+
+<div class="container-fluid admin-page">
+
+    <!-- ENCABEZADO -->
+    <div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Obras sociales y prepagas</h2>
-            <p class="text-muted mb-0">
+            <h2 class="page-title">Obras sociales y prepagas</h2>
+            <p class="page-subtitle">
                 Administración de entidades de cobertura médica.
             </p>
         </div>
@@ -19,47 +30,54 @@
         <a asp-area="Admin"
            asp-controller="HealthInsurances"
            asp-action="Create"
-           class="btn btn-primary">
+           class="btn btn-admin-primary">
             <i class="bi bi-plus-lg me-1"></i>
             Nueva cobertura
         </a>
     </div>
 
+    <!-- ESTADÍSTICAS -->
     <div class="row g-3 mb-4">
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small">Total de coberturas</div>
-                    <h3 class="fw-bold mb-0">@Model.TotalHealthInsurances</h3>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Total de coberturas</div>
+                    <div class="stat-value">@Model.TotalHealthInsurances</div>
+                </div>
+                <div class="stat-icon stat-icon-primary">
+                    <i class="bi bi-shield-plus"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small">Activas</div>
-                    <h3 class="fw-bold text-success mb-0">
-                        @Model.ActiveHealthInsurances
-                    </h3>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Activas</div>
+                    <div class="stat-value">@Model.ActiveHealthInsurances</div>
+                </div>
+                <div class="stat-icon stat-icon-success">
+                    <i class="bi bi-check-circle"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small">Inactivas</div>
-                    <h3 class="fw-bold text-secondary mb-0">
-                        @Model.InactiveHealthInsurances
-                    </h3>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Inactivas</div>
+                    <div class="stat-value">@Model.InactiveHealthInsurances</div>
+                </div>
+                <div class="stat-icon stat-icon-secondary">
+                    <i class="bi bi-pause-circle"></i>
                 </div>
             </div>
         </div>
 
     </div>
 
+    <!-- MENSAJES -->
     @if (TempData["Success"] is not null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -76,126 +94,152 @@
         </div>
     }
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-semibold">Coberturas registradas</h5>
-        </div>
+    <!-- LISTADO -->
+    <div class="content-card">
 
-        <div class="card-body p-0">
-            @if (!Model.HealthInsurances.Any())
-            {
-                <div class="text-center py-5">
-                    <i class="bi bi-shield-plus fs-1 text-muted"></i>
-                    <h5 class="mt-3">Todavía no hay coberturas registradas</h5>
-                    <p class="text-muted mb-3">
-                        Registrá una obra social o prepaga para comenzar.
+        <div class="content-card-header">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="section-title mb-1">Coberturas registradas</h5>
+                    <p class="section-description mb-0">
+                        Listado de obras sociales y prepagas del sistema.
                     </p>
-                    <a asp-action="Create" class="btn btn-primary">
-                        Nueva cobertura
-                    </a>
                 </div>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Razón social</th>
-                                <th>CUIT</th>
-                                <th>Tipo</th>
-                                <th class="text-center">Planes</th>
-                                <th>Estado</th>
-                                <th class="text-end">Acciones</th>
-                            </tr>
-                        </thead>
 
-                        <tbody>
-                            @foreach (var insurance in Model.HealthInsurances)
-                            {
-                                <tr>
-                                    <td class="fw-semibold">@insurance.Name</td>
-                                    <td>@insurance.LegalName</td>
-                                    <td>@insurance.CUIT</td>
-                                    <td>
-                                        @switch (insurance.EntityType)
-                                        {
-                                            case HealthInsuranceType.SocialSecurity:
-                                                <span>Obra social</span>
-                                                break;
-                                            case HealthInsuranceType.PrepaidMedicine:
-                                                <span>Prepaga</span>
-                                                break;
-                                            default:
-                                                <span>Otra</span>
-                                                break;
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-light text-dark">
-                                            @(insurance.Plans?.Count ?? 0)
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @if (insurance.IsActive)
-                                        {
-                                            <span class="badge bg-success-subtle text-success">
-                                                Activa
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary-subtle text-secondary">
-                                                Inactiva
-                                            </span>
-                                        }
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="d-inline-flex gap-2">
-                                            <a asp-action="Edit"
-                                               asp-route-id="@insurance.Id"
-                                               class="btn btn-sm btn-outline-primary"
-                                               title="Editar">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
+                <div class="specialty-search">
+                    <input type="search"
+                           id="healthInsuranceSearch"
+                           class="form-control"
+                           placeholder="Buscar cobertura..."
+                           autocomplete="off" />
 
-                                            @if (insurance.IsActive)
-                                            {
-                                                <form asp-action="Deactivate"
-                                                      asp-route-id="@insurance.Id"
-                                                      method="post"
-                                                      class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <button type="submit"
-                                                            class="btn btn-sm btn-outline-danger"
-                                                            title="Desactivar">
-                                                        <i class="bi bi-toggle-off"></i>
-                                                    </button>
-                                                </form>
-                                            }
-                                            else
-                                            {
-                                                <form asp-action="Activate"
-                                                      asp-route-id="@insurance.Id"
-                                                      method="post"
-                                                      class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <button type="submit"
-                                                            class="btn btn-sm btn-outline-success"
-                                                            title="Activar">
-                                                        <i class="bi bi-toggle-on"></i>
-                                                    </button>
-                                                </form>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                    <button type="button"
+                            id="clearHealthInsuranceSearch"
+                            class="btn btn-admin-light"
+                            title="Limpiar búsqueda">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
-            }
+            </div>
         </div>
+
+        <div class="content-card-body p-0">
+            <div class="table-responsive">
+                <table class="table users-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Razón social</th>
+                            <th>CUIT</th>
+                            <th>Tipo</th>
+                            <th class="text-center">Planes</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="healthInsurancesTableBody">
+                        @await Html.PartialAsync(
+                            "_HealthInsuranceRows",
+                            Model.HealthInsurances)
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-card-footer d-flex justify-content-between align-items-center">
+            <small id="healthInsuranceResultsCount">
+                Mostrando @Model.HealthInsurances.Count() coberturas.
+            </small>
+        </div>
+
     </div>
+
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchInput = document.getElementById("healthInsuranceSearch");
+            const clearButton = document.getElementById("clearHealthInsuranceSearch");
+            const tableBody = document.getElementById("healthInsurancesTableBody");
+            const resultsCount = document.getElementById("healthInsuranceResultsCount");
+
+            const searchUrl = '@Url.Action("Search", "HealthInsurances", new { area = "Admin" })';
+
+            let debounceTimer;
+            let abortController;
+
+            async function searchHealthInsurances() {
+
+                const searchTerm = searchInput.value.trim();
+
+                if (abortController) {
+                    abortController.abort();
+                }
+
+                abortController = new AbortController();
+
+                const url = new URL(searchUrl, window.location.origin);
+                url.searchParams.set("searchTerm", searchTerm);
+
+                try {
+                    const response = await fetch(url, {
+                        method: "GET",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        signal: abortController.signal
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("No se pudo realizar la búsqueda.");
+                    }
+
+                    const html = await response.text();
+
+                    tableBody.innerHTML = html;
+
+                    const count = response.headers.get("X-Results-Count") ?? "0";
+
+                    resultsCount.textContent =
+                        `Mostrando ${count} coberturas.`;
+
+                    const currentUrl = new URL(window.location.href);
+
+                    if (searchTerm) {
+                        currentUrl.searchParams.set("searchTerm", searchTerm);
+                    } else {
+                        currentUrl.searchParams.delete("searchTerm");
+                    }
+
+                    window.history.replaceState({}, "", currentUrl);
+
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        console.error(error);
+                    }
+                }
+            }
+
+            searchInput.addEventListener("input", function () {
+                clearTimeout(debounceTimer);
+
+                debounceTimer = setTimeout(
+                    searchHealthInsurances,
+                    300
+                );
+            });
+
+            clearButton.addEventListener("click", function () {
+                searchInput.value = "";
+                searchInput.focus();
+
+                clearTimeout(debounceTimer);
+                searchHealthInsurances();
+            });
+
+        });
+    </script>
+}

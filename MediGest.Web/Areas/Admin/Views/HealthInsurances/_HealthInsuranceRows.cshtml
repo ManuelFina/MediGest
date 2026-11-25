@@ -1,0 +1,109 @@
+﻿
+@model IEnumerable<MediGest.Web.Models.Entities.HealthInsurance>
+@using MediGest.Web.Models.Enums
+
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="7">
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <h5>No se encontraron coberturas</h5>
+                <p>Probá con otro término de búsqueda.</p>
+            </div>
+        </td>
+    </tr>
+}
+else
+{
+    @foreach (var insurance in Model)
+    {
+        <tr>
+            <td class="fw-semibold">@insurance.Name</td>
+
+            <td>@insurance.LegalName</td>
+
+            <td>@insurance.CUIT</td>
+
+            <td>
+                @switch (insurance.EntityType)
+                {
+                    case HealthInsuranceType.SocialSecurity:
+                        <span>Obra social</span>
+                        break;
+
+                    case HealthInsuranceType.PrepaidMedicine:
+                        <span>Prepaga</span>
+                        break;
+
+                    default:
+                        <span>Otra</span>
+                        break;
+                }
+            </td>
+
+            <td class="text-center">
+                <span class="badge bg-light text-dark">
+                    @(insurance.Plans?.Count ?? 0)
+                </span>
+            </td>
+
+            <td>
+                @if (insurance.IsActive)
+                {
+                    <span class="badge bg-success-subtle text-success">
+                        Activa
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary-subtle text-secondary">
+                        Inactiva
+                    </span>
+                }
+            </td>
+
+            <td class="text-end">
+                <div class="d-inline-flex gap-2">
+                    <a asp-action="Edit"
+                       asp-route-id="@insurance.Id"
+                       class="btn btn-sm btn-outline-primary"
+                       title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+
+                    @if (insurance.IsActive)
+                    {
+                        <form asp-action="Deactivate"
+                              asp-route-id="@insurance.Id"
+                              method="post"
+                              class="d-inline">
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger"
+                                    title="Desactivar">
+                                <i class="bi bi-toggle-off"></i>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="Activate"
+                              asp-route-id="@insurance.Id"
+                              method="post"
+                              class="d-inline">
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-success"
+                                    title="Activar">
+                                <i class="bi bi-toggle-on"></i>
+                            </button>
+                        </form>
+                    }
+                </div>
+            </td>
+        </tr>
+    }
+}

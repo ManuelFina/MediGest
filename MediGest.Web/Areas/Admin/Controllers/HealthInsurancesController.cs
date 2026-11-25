@@ -1,6 +1,7 @@
 ﻿
 using MediGest.Web.Exceptions;
 using MediGest.Web.Models.Entities;
+using MediGest.Web.Models.Enums;
 using MediGest.Web.Models.Identity;
 using MediGest.Web.Services.Interfaces;
 using MediGest.Web.ViewModels.HealthInsurances;
@@ -36,6 +37,40 @@ public class HealthInsurancesController : Controller
         };
 
         return View(viewModel);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Search(string? searchTerm)
+    {
+        var healthInsurances = (await _healthInsuranceService.GetAllAsync())
+            .Where(insurance =>
+                string.IsNullOrWhiteSpace(searchTerm) ||
+                insurance.Name.Contains(
+                    searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                (insurance.LegalName != null &&
+                 insurance.LegalName.Contains(
+                    searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                (insurance.CUIT != null &&
+                 insurance.CUIT.Contains(
+                    searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                GetEntityTypeLabel(insurance.EntityType).Contains(
+                    searchTerm, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Response.Headers["X-Results-Count"] =
+            healthInsurances.Count.ToString();
+
+        return PartialView("_HealthInsuranceRows", healthInsurances);
+    }
+
+    private static string GetEntityTypeLabel(HealthInsuranceType entityType)
+    {
+        return entityType switch
+        {
+            HealthInsuranceType.SocialSecurity => "Obra social",
+            HealthInsuranceType.PrepaidMedicine => "Prepaga",
+            _ => "Otra"
+        };
     }
 
     [HttpGet]

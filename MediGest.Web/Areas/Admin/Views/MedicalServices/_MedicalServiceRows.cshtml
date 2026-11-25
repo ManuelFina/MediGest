@@ -1,0 +1,116 @@
+﻿
+@model IEnumerable<MediGest.Web.Models.Entities.MedicalService>
+
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="6">
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <h5>No se encontraron prestaciones</h5>
+                <p>Probá con otro término de búsqueda.</p>
+            </div>
+        </td>
+    </tr>
+}
+else
+{
+    @foreach (var service in Model)
+    {
+        <tr>
+            <td>
+                <span class="text-muted">
+                    @(service.Code ?? "Sin código")
+                </span>
+            </td>
+
+            <td>
+                <div class="fw-semibold">@service.Name</div>
+
+                @if (!string.IsNullOrWhiteSpace(service.Description))
+                {
+                    <small class="text-muted">
+                        @service.Description
+                    </small>
+                }
+            </td>
+
+            <td>
+                @(service.Specialty?.Name ?? "Sin especialidad")
+            </td>
+
+            <td class="fw-semibold">
+                @service.PrivatePrice.ToString("C2")
+            </td>
+
+            <td>
+                @if (service.IsActive)
+                {
+                    <span class="badge bg-success-subtle text-success">
+                        Activa
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary-subtle text-secondary">
+                        Inactiva
+                    </span>
+                }
+            </td>
+
+            <td class="text-end">
+                <div class="d-inline-flex gap-2">
+
+                    <a asp-area="Admin"
+                       asp-controller="MedicalServices"
+                       asp-action="Edit"
+                       asp-route-id="@service.Id"
+                       class="btn btn-sm btn-outline-primary"
+                       title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+
+                    @if (service.IsActive)
+                    {
+                        <form asp-area="Admin"
+                              asp-controller="MedicalServices"
+                              asp-action="Deactivate"
+                              asp-route-id="@service.Id"
+                              method="post"
+                              class="d-inline"
+                              onsubmit="return confirm('¿Desactivar esta prestación?');">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-danger"
+                                    title="Desactivar">
+                                <i class="bi bi-pause-circle"></i>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-area="Admin"
+                              asp-controller="MedicalServices"
+                              asp-action="Activate"
+                              asp-route-id="@service.Id"
+                              method="post"
+                              class="d-inline"
+                              onsubmit="return confirm('¿Activar esta prestación?');">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-success"
+                                    title="Activar">
+                                <i class="bi bi-check-circle"></i>
+                            </button>
+                        </form>
+                    }
+
+                </div>
+            </td>
+        </tr>
+    }
+}
