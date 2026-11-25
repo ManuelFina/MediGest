@@ -489,3 +489,60 @@
     .form-status-box .form-check-label {
         cursor: pointer;
     }
+
+/* Buscador de usuarios */
+
+.user-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.user-search-input {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+}
+
+    .user-search-input > i {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+    }
+
+    .user-search-input .search-input {
+        padding-left: 38px;
+        width: 100%;
+    }
+
+.user-search-actions {
+    display: flex;
+    gap: 8px;
+}
+
+    .user-search-actions .btn {
+        min-height: 43px;
+    }
+
+@media (max-width: 576px) {
+    .user-search {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .user-search-input {
+        width: 100%;
+    }
+
+    .user-search-actions {
+        width: 100%;
+    }
+
+        .user-search-actions .btn {
+            flex: 1;
+        }
+}
