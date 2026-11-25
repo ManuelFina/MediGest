@@ -48,14 +48,7 @@ public class ProfessionalSchedulesController : Controller
             StartDate = DateOnly.FromDateTime(DateTime.Today),
             EndDate = DateOnly.FromDateTime(DateTime.Today.AddMonths(6)),
             AppointmentDurationMinutes = 30,
-            ScheduleDays = Enumerable
-                .Range(0, 7)
-                .Select(i => new ScheduleDayFormViewModel
-                {
-                    DayOfWeek = (DayOfWeek)((i + 1) % 7),
-                    IsEnabled = false
-                })
-                .ToList()
+            ScheduleDays = CreateDefaultScheduleDays()
         });
     }
 
@@ -75,23 +68,7 @@ public class ProfessionalSchedulesController : Controller
             .Where(day => day.IsEnabled)
             .ToList();
 
-        if (enabledDays.Count == 0)
-        {
-            ModelState.AddModelError(
-                nameof(viewModel.ScheduleDays),
-                "Debés seleccionar al menos un día de atención.");
-        }
-
-        foreach (var day in enabledDays)
-        {
-            if (day.StartTime >= day.EndTime)
-            {
-                ModelState.AddModelError(
-                    nameof(viewModel.ScheduleDays),
-                    $"El horario de {day.DayOfWeek} no es válido. " +
-                    "La hora de inicio debe ser anterior a la hora de finalización.");
-            }
-        }
+        ValidateScheduleDays(enabledDays);
 
         if (!ModelState.IsValid)
         {
@@ -107,14 +84,7 @@ public class ProfessionalSchedulesController : Controller
                 viewModel.AppointmentDurationMinutes,
             ProfessionalId = professional.Id,
             IsActive = viewModel.IsActive,
-            ScheduleDays = enabledDays
-                .Select(day => new ScheduleDay
-                {
-                    DayOfWeek = day.DayOfWeek,
-                    StartTime = day.StartTime,
-                    EndTime = day.EndTime
-                })
-                .ToList()
+            ScheduleDays = MapScheduleDays(enabledDays)
         };
 
         try
@@ -155,6 +125,9 @@ public class ProfessionalSchedulesController : Controller
             return Forbid();
         }
 
+        var configuredDays = schedule.ScheduleDays
+            .ToDictionary(day => day.DayOfWeek);
+
         var viewModel = new ProfessionalScheduleFormViewModel
         {
             Id = schedule.Id,
@@ -164,7 +137,23 @@ public class ProfessionalSchedulesController : Controller
             AppointmentDurationMinutes =
                 schedule.AppointmentDurationMinutes,
             ProfessionalId = professional.Id,
-            IsActive = schedule.IsActive
+            IsActive = schedule.IsActive,
+
+            ScheduleDays = CreateDefaultScheduleDays()
+                .Select(day =>
+                {
+                    if (configuredDays.TryGetValue(
+                        day.DayOfWeek,
+                        out var configuredDay))
+                    {
+                        day.IsEnabled = true;
+                        day.StartTime = configuredDay.StartTime;
+                        day.EndTime = configuredDay.EndTime;
+                    }
+
+                    return day;
+                })
+                .ToList()
         };
 
         return View(viewModel);
@@ -200,6 +189,12 @@ public class ProfessionalSchedulesController : Controller
             return Forbid();
         }
 
+        var enabledDays = viewModel.ScheduleDays
+            .Where(day => day.IsEnabled)
+            .ToList();
+
+        ValidateScheduleDays(enabledDays);
+
         if (!ModelState.IsValid)
         {
             return View(viewModel);
@@ -214,7 +209,8 @@ public class ProfessionalSchedulesController : Controller
             AppointmentDurationMinutes =
                 viewModel.AppointmentDurationMinutes,
             ProfessionalId = professional.Id,
-            IsActive = viewModel.IsActive
+            IsActive = viewModel.IsActive,
+            ScheduleDays = MapScheduleDays(enabledDays)
         };
 
         try
@@ -282,5 +278,51 @@ public class ProfessionalSchedulesController : Controller
 
         return await _professionalService
             .GetByApplicationUserIdAsync(userId);
+    }
+
+    private static List<ScheduleDayFormViewModel>
+        CreateDefaultScheduleDays()
+    {
+        return Enumerable
+            .Range(0, 7)
+            .Select(i => new ScheduleDayFormViewModel
+            {
+                DayOfWeek = (DayOfWeek)((i + 1) % 7),
+                IsEnabled = false
+            })
+            .ToList();
+    }
+
+    private void ValidateScheduleDays(
+        List<ScheduleDayFormViewModel> enabledDays)
+    {
+        if (enabledDays.Count == 0)
+        {
+            ModelState.AddModelError(
+                nameof(ProfessionalScheduleFormViewModel.ScheduleDays),
+                "Debés seleccionar al menos un día de atención.");
+        }
+
+        foreach (var day in enabledDays)
+        {
+            if (day.StartTime >= day.EndTime)
+            {
+                ModelState.AddModelError(
+                    nameof(ProfessionalScheduleFormViewModel.ScheduleDays),
+                    $"El horario de {day.DayOfWeek} no es válido. " +
+                    "La hora de inicio debe ser anterior a la hora de finalización.");
+            }
+        }
+    }
+
+    private static List<ScheduleDay> MapScheduleDays(
+        IEnumerable<ScheduleDayFormViewModel> days)
+    {
+        return days.Select(day => new ScheduleDay
+        {
+            DayOfWeek = day.DayOfWeek,
+            StartTime = day.StartTime,
+            EndTime = day.EndTime
+        }).ToList();
     }
 }

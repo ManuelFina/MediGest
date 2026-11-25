@@ -39,8 +39,7 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
     public async Task<ProfessionalSchedule> CreateAsync(
         ProfessionalSchedule schedule)
     {
-        ValidateScheduleDates(schedule);
-        ValidateAppointmentDuration(schedule);
+        ValidateSchedule(schedule);
 
         var professionalExists = await _context.Professionals
             .AnyAsync(p =>
@@ -51,22 +50,6 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
         {
             throw new BusinessException(
                 "El profesional no existe o se encuentra inactivo.");
-        }
-
-        if (schedule.ScheduleDays is null ||
-            schedule.ScheduleDays.Count == 0)
-        {
-            throw new BusinessException(
-                "La agenda debe tener al menos un día y horario configurado.");
-        }
-
-        foreach (var day in schedule.ScheduleDays)
-        {
-            if (day.StartTime >= day.EndTime)
-            {
-                throw new BusinessException(
-                    $"El horario del día {day.DayOfWeek} no es válido.");
-            }
         }
 
         await ValidateOverlappingSchedulesAsync(schedule);
@@ -80,16 +63,15 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
 
     public async Task UpdateAsync(ProfessionalSchedule schedule)
     {
-        ValidateScheduleDates(schedule);
-        ValidateAppointmentDuration(schedule);
+        ValidateSchedule(schedule);
 
         var existingSchedule = await _context.ProfessionalSchedules
+            .Include(s => s.ScheduleDays)
             .FirstOrDefaultAsync(s => s.Id == schedule.Id);
 
         if (existingSchedule is null)
         {
-            throw new BusinessException(
-                "La agenda no existe.");
+            throw new BusinessException("La agenda no existe.");
         }
 
         if (existingSchedule.ProfessionalId != schedule.ProfessionalId)
@@ -109,6 +91,18 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
             schedule.AppointmentDurationMinutes;
         existingSchedule.IsActive = schedule.IsActive;
 
+        _context.ScheduleDays.RemoveRange(existingSchedule.ScheduleDays);
+
+        existingSchedule.ScheduleDays = schedule.ScheduleDays
+            .Select(day => new ScheduleDay
+            {
+                DayOfWeek = day.DayOfWeek,
+                StartTime = day.StartTime,
+                EndTime = day.EndTime,
+                ProfessionalScheduleId = existingSchedule.Id
+            })
+            .ToList();
+
         await _context.SaveChangesAsync();
     }
 
@@ -120,8 +114,7 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
 
         if (schedule is null)
         {
-            throw new BusinessException(
-                "La agenda no existe.");
+            throw new BusinessException("La agenda no existe.");
         }
 
         var hasAppointments = await _context.Appointments
@@ -145,7 +138,6 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
     private async Task ValidateOverlappingSchedulesAsync(
         ProfessionalSchedule schedule)
     {
-        // Las agendas inactivas no bloquean períodos.
         if (!schedule.IsActive)
         {
             return;
@@ -177,8 +169,8 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
                 a.ProfessionalId == schedule.ProfessionalId &&
                 a.Status != AppointmentStatus.Cancelled &&
                 a.AppointmentDate >= today &&
-                (a.AppointmentDate < schedule.StartDate ||
-                 a.AppointmentDate > schedule.EndDate))
+                a.AppointmentDate >= schedule.StartDate &&
+                a.AppointmentDate <= schedule.EndDate)
             .ToListAsync();
 
         if (appointments.Count == 0)
@@ -186,30 +178,35 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
             return;
         }
 
-        var otherActiveSchedules = await _context.ProfessionalSchedules
-            .AsNoTracking()
-            .Where(s =>
-                s.Id != schedule.Id &&
-                s.ProfessionalId == schedule.ProfessionalId &&
-                s.IsActive)
-            .Select(s => new
+        var scheduleDays = schedule.ScheduleDays
+            .ToDictionary(day => day.DayOfWeek);
+
+        var hasInvalidAppointment = appointments.Any(appointment =>
+        {
+            if (!scheduleDays.TryGetValue(
+                appointment.AppointmentDate.DayOfWeek,
+                out var scheduleDay))
             {
-                s.StartDate,
-                s.EndDate
-            })
-            .ToListAsync();
+                return true;
+            }
 
-        var hasAppointmentsOutsideAvailablePeriods = appointments.Any(
-            appointment =>
-                !otherActiveSchedules.Any(other =>
-                    appointment.AppointmentDate >= other.StartDate &&
-                    appointment.AppointmentDate <= other.EndDate));
+            return appointment.StartTime < scheduleDay.StartTime ||
+                   appointment.EndTime > scheduleDay.EndTime;
+        });
 
-        if (hasAppointmentsOutsideAvailablePeriods)
+        if (hasInvalidAppointment)
         {
             throw new BusinessException(
-                "No se puede modificar el período de la agenda porque existen turnos asignados fuera del nuevo rango de fechas.");
+                "No se puede modificar la agenda porque existen turnos asignados fuera de los nuevos días u horarios de atención.");
         }
+    }
+
+    private static void ValidateSchedule(
+        ProfessionalSchedule schedule)
+    {
+        ValidateScheduleDates(schedule);
+        ValidateAppointmentDuration(schedule);
+        ValidateScheduleDays(schedule);
     }
 
     private static void ValidateScheduleDates(
@@ -232,6 +229,34 @@ public class ProfessionalScheduleService : IProfessionalScheduleService
         {
             throw new BusinessException(
                 "La duración del turno debe estar entre 5 y 240 minutos.");
+        }
+    }
+
+    private static void ValidateScheduleDays(
+        ProfessionalSchedule schedule)
+    {
+        if (schedule.ScheduleDays is null ||
+            schedule.ScheduleDays.Count == 0)
+        {
+            throw new BusinessException(
+                "La agenda debe tener al menos un día y horario configurado.");
+        }
+
+        if (schedule.ScheduleDays.Any(day =>
+            day.StartTime >= day.EndTime))
+        {
+            throw new BusinessException(
+                "Todos los horarios deben tener una hora de inicio anterior a la hora de finalización.");
+        }
+
+        var duplicateDays = schedule.ScheduleDays
+            .GroupBy(day => day.DayOfWeek)
+            .Any(group => group.Count() > 1);
+
+        if (duplicateDays)
+        {
+            throw new BusinessException(
+                "No se puede configurar más de un horario para el mismo día de la semana.");
         }
     }
 }

@@ -3,6 +3,28 @@
 
 @{
     ViewData["Title"] = "Editar agenda";
+
+    var daysOfWeek = new[]
+    {
+        DayOfWeek.Monday,
+        DayOfWeek.Tuesday,
+        DayOfWeek.Wednesday,
+        DayOfWeek.Thursday,
+        DayOfWeek.Friday,
+        DayOfWeek.Saturday,
+        DayOfWeek.Sunday
+    };
+
+    var dayNames = new Dictionary<DayOfWeek, string>
+    {
+        [DayOfWeek.Monday] = "Lunes",
+        [DayOfWeek.Tuesday] = "Martes",
+        [DayOfWeek.Wednesday] = "Miércoles",
+        [DayOfWeek.Thursday] = "Jueves",
+        [DayOfWeek.Friday] = "Viernes",
+        [DayOfWeek.Saturday] = "Sábado",
+        [DayOfWeek.Sunday] = "Domingo"
+    };
 }
 
 <div class="container-fluid">
@@ -16,7 +38,8 @@
         <h2 class="fw-bold mt-3 mb-1">Editar agenda</h2>
 
         <p class="text-muted">
-            Modificá los datos y el período de vigencia de tu agenda.
+            Modificá el período de vigencia, la duración de los turnos
+            y tus días y horarios de atención.
         </p>
     </div>
 
@@ -44,21 +67,18 @@
                 <div class="row g-3">
 
                     <div class="col-md-12">
-                        <label asp-for="Name" class="form-label">
-                            Nombre de la agenda
-                        </label>
+                        <label asp-for="Name" class="form-label"></label>
 
                         <input asp-for="Name"
-                               class="form-control" />
+                               class="form-control"
+                               placeholder="Ej.: Agenda de consultorio 2026" />
 
                         <span asp-validation-for="Name"
                               class="text-danger"></span>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="StartDate" class="form-label">
-                            Fecha de inicio
-                        </label>
+                        <label asp-for="StartDate" class="form-label"></label>
 
                         <input asp-for="StartDate"
                                type="date"
@@ -69,9 +89,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="EndDate" class="form-label">
-                            Fecha de finalización
-                        </label>
+                        <label asp-for="EndDate" class="form-label"></label>
 
                         <input asp-for="EndDate"
                                type="date"
@@ -83,9 +101,7 @@
 
                     <div class="col-md-6">
                         <label asp-for="AppointmentDurationMinutes"
-                               class="form-label">
-                            Duración de cada turno
-                        </label>
+                               class="form-label"></label>
 
                         <select asp-for="AppointmentDurationMinutes"
                                 class="form-select">
@@ -116,6 +132,80 @@
 
                 <hr class="my-4" />
 
+                <div class="mb-3">
+                    <h5 class="fw-semibold mb-1">
+                        Días y horarios de atención
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        Modificá los días en los que atendés y sus respectivos horarios.
+                    </p>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Seleccioná los días de atención e indicá el horario de inicio y finalización.
+                </div>
+
+                <div class="border rounded-3 overflow-hidden">
+
+                    @for (var i = 0; i < daysOfWeek.Length; i++)
+                    {
+                        var day = daysOfWeek[i];
+
+                        <div class="row align-items-center g-3 p-3 @(i < daysOfWeek.Length - 1 ? "border-bottom" : "")">
+
+                            <input type="hidden"
+                                   asp-for="ScheduleDays[i].DayOfWeek"
+                                   value="@day" />
+
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input asp-for="ScheduleDays[i].IsEnabled"
+                                           class="form-check-input day-checkbox"
+                                           data-day-index="@i" />
+
+                                    <label class="form-check-label fw-semibold"
+                                           asp-for="ScheduleDays[i].IsEnabled">
+                                        @dayNames[day]
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">
+                                    Desde
+                                </label>
+
+                                <input asp-for="ScheduleDays[i].StartTime"
+                                       type="time"
+                                       class="form-control day-time"
+                                       data-day-index="@i"
+                                       disabled="@(!Model.ScheduleDays[i].IsEnabled)" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">
+                                    Hasta
+                                </label>
+
+                                <input asp-for="ScheduleDays[i].EndTime"
+                                       type="time"
+                                       class="form-control day-time"
+                                       data-day-index="@i"
+                                       disabled="@(!Model.ScheduleDays[i].IsEnabled)" />
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+                <span asp-validation-for="ScheduleDays"
+                      class="text-danger d-block mt-2"></span>
+
+                <hr class="my-4" />
+
                 <div class="d-flex justify-content-end gap-2">
 
                     <a asp-action="Index"
@@ -139,4 +229,28 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const checkboxes = document.querySelectorAll(".day-checkbox");
+
+            checkboxes.forEach(function (checkbox) {
+                function updateDayFields() {
+                    const index = checkbox.dataset.dayIndex;
+
+                    const fields = document.querySelectorAll(
+                        `.day-time[data-day-index="${index}"]`
+                    );
+
+                    fields.forEach(function (field) {
+                        field.disabled = !checkbox.checked;
+                    });
+                }
+
+                checkbox.addEventListener("change", updateDayFields);
+
+                updateDayFields();
+            });
+        });
+    </script>
 }
