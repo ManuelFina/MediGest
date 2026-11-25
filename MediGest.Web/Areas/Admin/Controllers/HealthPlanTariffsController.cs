@@ -14,6 +14,8 @@ namespace MediGest.Web.Areas.Admin.Controllers;
 [Authorize(Roles = ApplicationRoles.Administrator)]
 public class HealthPlanTariffsController : Controller
 {
+    private const int PageSize = 25;
+
     private readonly IHealthPlanTariffService _tariffService;
     private readonly IHealthPlanService _healthPlanService;
     private readonly IMedicalService _medicalService;
@@ -29,29 +31,47 @@ public class HealthPlanTariffsController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int page = 1)
     {
-        var tariffs = (await _tariffService.GetAllAsync()).ToList();
-
         var today = DateOnly.FromDateTime(DateTime.Today);
+
+        var tariffs = await _tariffService.GetPageAsync(page, PageSize);
+        var statistics = await _tariffService.GetStatisticsAsync(today);
 
         var viewModel = new HealthPlanTariffListViewModel
         {
-            Tariffs = tariffs,
-            TotalTariffs = tariffs.Count,
-
-            CurrentTariffs = tariffs.Count(t =>
-                t.ValidFrom <= today &&
-                (!t.ValidTo.HasValue || t.ValidTo.Value >= today)),
-
-            ExpiredTariffs = tariffs.Count(t =>
-                t.ValidTo.HasValue && t.ValidTo.Value < today),
-
-            FutureTariffs = tariffs.Count(t =>
-                t.ValidFrom > today)
+            Tariffs = tariffs.Tariffs,
+            TotalTariffs = statistics.TotalTariffs,
+            CurrentTariffs = statistics.CurrentTariffs,
+            ExpiredTariffs = statistics.ExpiredTariffs,
+            FutureTariffs = statistics.FutureTariffs
         };
 
+        ViewBag.Pagination = tariffs;
+
         return View(viewModel);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Search(
+        string? searchTerm,
+        int page = 1)
+    {
+        var tariffs = await _tariffService.SearchAsync(
+            searchTerm,
+            page,
+            PageSize);
+
+        Response.Headers["X-Results-Count"] =
+            tariffs.TotalCount.ToString();
+
+        Response.Headers["X-Current-Page"] =
+            tariffs.Page.ToString();
+
+        Response.Headers["X-Total-Pages"] =
+            tariffs.TotalPages.ToString();
+
+        return PartialView("_HealthPlanTariffRows", tariffs.Tariffs);
     }
 
     [HttpGet]

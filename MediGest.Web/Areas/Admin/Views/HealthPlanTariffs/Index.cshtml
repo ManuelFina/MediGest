@@ -4,19 +4,33 @@
 @{
     ViewData["Title"] = "Tarifas por plan";
 
-    var today = DateOnly.FromDateTime(DateTime.Today);
+    var pagination = ViewBag.Pagination as
+        MediGest.Web.ViewModels.HealthPlanTariffs.HealthPlanTariffSearchViewModel;
+
+    int currentPage = pagination?.Page ?? 1;
+    int totalPages = pagination?.TotalPages ?? 1;
+    int totalCount = pagination?.TotalCount ?? Model.TotalTariffs;
+    int pageSize = pagination?.PageSize ?? 25;
+    int displayedCount = Model.Tariffs.Count();
 }
 
-<div class="container-fluid py-4">
+@section Styles {
+    <link rel="stylesheet"
+          href="~/css/admin/users.css"
+          asp-append-version="true" />
 
-    <!-- Encabezado -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <link rel="stylesheet"
+          href="~/css/admin/specialties.css"
+          asp-append-version="true" />
+}
+
+<div class="container-fluid admin-page">
+
+    <!-- ENCABEZADO -->
+    <div class="page-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">
-                <i class="bi bi-currency-dollar text-primary me-2"></i>
-                Tarifas por plan
-            </h2>
-            <p class="text-muted mb-0">
+            <h2 class="page-title">Tarifas por plan</h2>
+            <p class="page-subtitle">
                 Administrá los importes reconocidos por cada plan de cobertura.
             </p>
         </div>
@@ -24,13 +38,13 @@
         <a asp-area="Admin"
            asp-controller="HealthPlanTariffs"
            asp-action="Create"
-           class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i>
+           class="btn btn-admin-primary">
+            <i class="bi bi-plus-lg me-1"></i>
             Nueva tarifa
         </a>
     </div>
 
-    <!-- Mensajes -->
+    <!-- MENSAJES -->
     @if (TempData["Success"] is not null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -49,242 +63,158 @@
         </div>
     }
 
-    <!-- Indicadores -->
+    <!-- ESTADÍSTICAS -->
     <div class="row g-3 mb-4">
 
         <div class="col-md-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Total de tarifas</p>
-                            <h3 class="fw-bold mb-0">@Model.TotalTariffs</h3>
-                        </div>
-                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
-                            <i class="bi bi-list-ul text-primary fs-4"></i>
-                        </div>
-                    </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Total de tarifas</div>
+                    <div class="stat-value">@Model.TotalTariffs</div>
+                </div>
+                <div class="stat-icon stat-icon-primary">
+                    <i class="bi bi-list-ul"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Vigentes</p>
-                            <h3 class="fw-bold text-success mb-0">@Model.CurrentTariffs</h3>
-                        </div>
-                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
-                            <i class="bi bi-check-circle text-success fs-4"></i>
-                        </div>
-                    </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Vigentes</div>
+                    <div class="stat-value">@Model.CurrentTariffs</div>
+                </div>
+                <div class="stat-icon stat-icon-success">
+                    <i class="bi bi-check-circle"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Vencidas</p>
-                            <h3 class="fw-bold text-danger mb-0">@Model.ExpiredTariffs</h3>
-                        </div>
-                        <div class="rounded-circle bg-danger bg-opacity-10 p-3">
-                            <i class="bi bi-calendar-x text-danger fs-4"></i>
-                        </div>
-                    </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Vencidas</div>
+                    <div class="stat-value">@Model.ExpiredTariffs</div>
+                </div>
+                <div class="stat-icon stat-icon-secondary">
+                    <i class="bi bi-calendar-x"></i>
                 </div>
             </div>
         </div>
 
         <div class="col-md-6 col-xl-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <p class="text-muted mb-1">Futuras</p>
-                            <h3 class="fw-bold text-info mb-0">@Model.FutureTariffs</h3>
-                        </div>
-                        <div class="rounded-circle bg-info bg-opacity-10 p-3">
-                            <i class="bi bi-calendar-event text-info fs-4"></i>
-                        </div>
-                    </div>
+            <div class="stat-card">
+                <div>
+                    <div class="stat-label">Futuras</div>
+                    <div class="stat-value">@Model.FutureTariffs</div>
+                </div>
+                <div class="stat-icon stat-icon-primary">
+                    <i class="bi bi-calendar-event"></i>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- Listado -->
-    <div class="card border-0 shadow-sm">
+    <!-- LISTADO -->
+    <div class="content-card">
 
-        <div class="card-header bg-white py-3">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <h5 class="fw-bold mb-0">
-                    Tarifas registradas
-                </h5>
+        <div class="content-card-header">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
-                <div class="input-group" style="max-width: 320px;">
-                    <span class="input-group-text bg-white">
-                        <i class="bi bi-search"></i>
-                    </span>
-                    <input type="text"
+                <div>
+                    <h5 class="section-title mb-1">
+                        Tarifas registradas
+                    </h5>
+                    <p class="section-description mb-0">
+                        Importes reconocidos por cobertura y prestación.
+                    </p>
+                </div>
+
+                <div class="specialty-search">
+                    <input type="search"
                            id="tariffSearch"
                            class="form-control"
-                           placeholder="Buscar tarifa...">
+                           placeholder="Buscar tarifa..."
+                           autocomplete="off" />
+
+                    <button type="button"
+                            id="clearTariffSearch"
+                            class="btn btn-admin-light"
+                            title="Limpiar búsqueda">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
+
             </div>
         </div>
 
-        <div class="card-body p-0">
+        <div class="content-card-body p-0">
+            <div class="table-responsive">
+                <table class="table users-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Cobertura / Plan</th>
+                            <th>Prestación</th>
+                            <th>Importe reconocido</th>
+                            <th>Vigencia</th>
+                            <th>Autorización</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
 
-            @if (Model.Tariffs.Any())
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="tariffsTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3">Cobertura / Plan</th>
-                                <th>Prestación</th>
-                                <th>Importe reconocido</th>
-                                <th>Vigencia</th>
-                                <th>Autorización</th>
-                                <th>Estado</th>
-                                <th class="text-end pe-3">Acciones</th>
-                            </tr>
-                        </thead>
+                    <tbody id="tariffsTableBody">
+                        @await Html.PartialAsync(
+                            "_HealthPlanTariffRows",
+                            Model.Tariffs)
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-                        <tbody>
-                            @foreach (var tariff in Model.Tariffs)
-                            {
-                                var isFuture = tariff.ValidFrom > today;
-                                var isExpired = tariff.ValidTo.HasValue &&
-                                                tariff.ValidTo.Value < today;
-                                var isCurrent = !isFuture && !isExpired;
+        <!-- PIE Y PAGINACIÓN -->
+        <div class="content-card-footer d-flex flex-wrap justify-content-between align-items-center gap-3">
 
-                                <tr>
-                                    <td class="ps-3">
-                                        <div class="fw-semibold">
-                                            @tariff.HealthPlan.HealthInsurance.Name
-                                        </div>
-                                        <small class="text-muted">
-                                            @tariff.HealthPlan.Name
-                                        </small>
-                                    </td>
+            <small id="tariffResultsCount">
+                Mostrando @displayedCount de @totalCount tarifas.
+            </small>
 
-                                    <td>
-                                        <div class="fw-semibold">
-                                            @tariff.MedicalService.Name
-                                        </div>
-                                        @if (!string.IsNullOrWhiteSpace(tariff.MedicalService.Code))
-                                        {
-                                            <small class="text-muted">
-                                                Código: @tariff.MedicalService.Code
-                                            </small>
-                                        }
-                                    </td>
+            <nav id="tariffPagination"
+                 aria-label="Paginación de tarifas"
+                 class="d-flex align-items-center gap-2">
 
-                                    <td class="fw-semibold text-nowrap">
-                                        @tariff.Amount.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("es-AR"))
-                                    </td>
+                <button type="button"
+                        class="btn btn-admin-light btn-sm"
+                        id="previousTariffPage"
+                        data-page="@(currentPage - 1)"
+                        disabled="@(currentPage <= 1)">
+                    <i class="bi bi-chevron-left"></i>
+                    Anterior
+                </button>
 
-                                    <td class="text-nowrap">
-                                        <div>
-                                            Desde: @tariff.ValidFrom.ToString("dd/MM/yyyy")
-                                        </div>
-                                        <small class="text-muted">
-                                            Hasta:
-                                            @(tariff.ValidTo?.ToString("dd/MM/yyyy") ?? "Sin fecha")
-                                        </small>
-                                    </td>
+                <span id="tariffPageInfo" class="small text-muted">
+                    Página @currentPage de @Math.Max(1, totalPages)
+                </span>
 
-                                    <td>
-                                        @if (tariff.RequiresAuthorization)
-                                        {
-                                            <span class="badge bg-warning text-dark">
-                                                Sí
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">
-                                                No
-                                            </span>
-                                        }
-                                    </td>
+                <button type="button"
+                        class="btn btn-admin-light btn-sm"
+                        id="nextTariffPage"
+                        data-page="@(currentPage + 1)"
+                        disabled="@(currentPage >= totalPages)">
+                    Siguiente
+                    <i class="bi bi-chevron-right"></i>
+                </button>
 
-                                    <td>
-                                        @if (isFuture)
-                                        {
-                                            <span class="badge bg-info text-dark">
-                                                Futura
-                                            </span>
-                                        }
-                                        else if (isExpired)
-                                        {
-                                            <span class="badge bg-danger">
-                                                Vencida
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-success">
-                                                Vigente
-                                            </span>
-                                        }
-                                    </td>
-
-                                    <td class="text-end pe-3">
-                                        @if (isCurrent && !tariff.ValidTo.HasValue)
-                                        {
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#closeTariffModal"
-                                                    data-tariff-id="@tariff.Id"
-                                                    data-tariff-name="@tariff.MedicalService.Name"
-                                                    data-tariff-date="@tariff.ValidFrom.ToString("yyyy-MM-dd")">
-                                                <i class="bi bi-calendar-x me-1"></i>
-                                                Cerrar vigencia
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">Sin acciones</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <i class="bi bi-currency-exchange display-4 text-muted"></i>
-                    <h5 class="fw-bold mt-3">Todavía no hay tarifas registradas</h5>
-                    <p class="text-muted mb-3">
-                        Registrá la primera tarifa para comenzar a administrar los valores de cobertura.
-                    </p>
-                    <a asp-area="Admin"
-                       asp-controller="HealthPlanTariffs"
-                       asp-action="Create"
-                       class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i>
-                        Registrar primera tarifa
-                    </a>
-                </div>
-            }
+            </nav>
 
         </div>
+
     </div>
+
 </div>
 
-<!-- Modal para cerrar vigencia -->
+<!-- MODAL PARA CERRAR VIGENCIA -->
 <div class="modal fade" id="closeTariffModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -300,6 +230,7 @@
                     <h5 class="modal-title fw-bold">
                         Cerrar vigencia de tarifa
                     </h5>
+
                     <button type="button"
                             class="btn-close"
                             data-bs-dismiss="modal"
@@ -350,35 +281,184 @@
 
 @section Scripts {
     <script>
-        // Búsqueda del listado
-        document.getElementById("tariffSearch")?.addEventListener("input", function () {
-            const search = this.value.toLowerCase();
+        document.addEventListener("DOMContentLoaded", function () {
 
-            document.querySelectorAll("#tariffsTable tbody tr").forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(search)
-                    ? ""
-                    : "none";
+            // ELEMENTOS
+            const searchInput = document.getElementById("tariffSearch");
+            const clearButton = document.getElementById("clearTariffSearch");
+            const tableBody = document.getElementById("tariffsTableBody");
+            const resultsCount = document.getElementById("tariffResultsCount");
+
+            const previousButton = document.getElementById("previousTariffPage");
+            const nextButton = document.getElementById("nextTariffPage");
+            const pageInfo = document.getElementById("tariffPageInfo");
+
+            const searchUrl = '@Url.Action("Search", "HealthPlanTariffs", new { area = "Admin" })';
+
+            let debounceTimer;
+            let abortController;
+            let currentPage = @currentPage;
+
+            // ACTUALIZAR PAGINACIÓN
+            function updatePagination(page, totalPages) {
+
+                currentPage = page;
+
+                const safeTotalPages = Math.max(1, totalPages);
+
+                pageInfo.textContent =
+                    `Página ${page} de ${safeTotalPages}`;
+
+                previousButton.disabled = page <= 1;
+                nextButton.disabled = page >= safeTotalPages;
+
+                previousButton.dataset.page = Math.max(1, page - 1);
+                nextButton.dataset.page = Math.min(safeTotalPages, page + 1);
+            }
+
+            // BÚSQUEDA Y PAGINACIÓN AJAX
+            async function searchTariffs(page = 1) {
+
+                const searchTerm = searchInput.value.trim();
+
+                if (abortController) {
+                    abortController.abort();
+                }
+
+                abortController = new AbortController();
+
+                const url = new URL(searchUrl, window.location.origin);
+
+                url.searchParams.set("searchTerm", searchTerm);
+                url.searchParams.set("page", page);
+
+                try {
+                    const response = await fetch(url, {
+                        method: "GET",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        signal: abortController.signal
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("No se pudo realizar la búsqueda.");
+                    }
+
+                    const html = await response.text();
+
+                    tableBody.innerHTML = html;
+
+                    const count = Number(
+                        response.headers.get("X-Results-Count") ?? 0
+                    );
+
+                    const responsePage = Number(
+                        response.headers.get("X-Current-Page") ?? 1
+                    );
+
+                    const totalPages = Number(
+                        response.headers.get("X-Total-Pages") ?? 0
+                    );
+
+                    const start = count === 0
+                        ? 0
+                        : ((responsePage - 1) * @pageSize) + 1;
+
+                    const end = Math.min(
+                        responsePage * @pageSize,
+                        count
+                    );
+
+                    resultsCount.textContent =
+                        count === 0
+                            ? "No se encontraron tarifas."
+                            : `Mostrando ${start} a ${end} de ${count} tarifas.`;
+
+                    updatePagination(responsePage, totalPages);
+
+                    const currentUrl = new URL(window.location.href);
+
+                    if (searchTerm) {
+                        currentUrl.searchParams.set("searchTerm", searchTerm);
+                    } else {
+                        currentUrl.searchParams.delete("searchTerm");
+                    }
+
+                    if (responsePage > 1) {
+                        currentUrl.searchParams.set("page", responsePage);
+                    } else {
+                        currentUrl.searchParams.delete("page");
+                    }
+
+                    window.history.replaceState({}, "", currentUrl);
+
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        console.error(error);
+                    }
+                }
+            }
+
+            // BUSCADOR CON DEBOUNCE
+            searchInput.addEventListener("input", function () {
+                clearTimeout(debounceTimer);
+
+                debounceTimer = setTimeout(function () {
+                    searchTariffs(1);
+                }, 300);
             });
-        });
 
-        // Preparar modal de cierre
-        const closeTariffModal = document.getElementById("closeTariffModal");
+            // LIMPIAR BÚSQUEDA
+            clearButton.addEventListener("click", function () {
+                searchInput.value = "";
+                searchInput.focus();
 
-        closeTariffModal?.addEventListener("show.bs.modal", function (event) {
-            const button = event.relatedTarget;
+                clearTimeout(debounceTimer);
+                searchTariffs(1);
+            });
 
-            const id = button.getAttribute("data-tariff-id");
-            const name = button.getAttribute("data-tariff-name");
-            const startDate = button.getAttribute("data-tariff-date");
+            // PAGINACIÓN
+            previousButton.addEventListener("click", function () {
+                if (!previousButton.disabled) {
+                    searchTariffs(Number(previousButton.dataset.page));
+                }
+            });
 
-            document.getElementById("tariffId").value = id;
-            document.getElementById("tariffName").textContent = name;
+            nextButton.addEventListener("click", function () {
+                if (!nextButton.disabled) {
+                    searchTariffs(Number(nextButton.dataset.page));
+                }
+            });
 
-            const validToInput = document.getElementById("validTo");
-            validToInput.min = startDate;
+            // MODAL DE CIERRE
+            const closeTariffModal =
+                document.getElementById("closeTariffModal");
 
-            const today = new Date().toISOString().split("T")[0];
-            validToInput.value = today < startDate ? startDate : today;
+            closeTariffModal.addEventListener("show.bs.modal", function (event) {
+
+                const button = event.relatedTarget;
+
+                const id = button.getAttribute("data-tariff-id");
+                const name = button.getAttribute("data-tariff-name");
+                const startDate = button.getAttribute("data-tariff-date");
+
+                document.getElementById("tariffId").value = id;
+                document.getElementById("tariffName").textContent = name;
+
+                const validToInput = document.getElementById("validTo");
+
+                validToInput.min = startDate;
+
+                const today = new Date();
+                const localToday = new Date(
+                    today.getTime() - today.getTimezoneOffset() * 60000
+                ).toISOString().split("T")[0];
+
+                validToInput.value =
+                    localToday < startDate ? startDate : localToday;
+            });
+
         });
     </script>
 }

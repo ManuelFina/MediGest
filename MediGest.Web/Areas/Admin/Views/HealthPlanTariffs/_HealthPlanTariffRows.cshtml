@@ -1,0 +1,127 @@
+﻿
+@model IEnumerable<MediGest.Web.Models.Entities.HealthPlanTariff>
+
+@{
+    var today = DateOnly.FromDateTime(DateTime.Today);
+}
+
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="7">
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <h5>No se encontraron tarifas</h5>
+                <p>Probá con otro término de búsqueda.</p>
+            </div>
+        </td>
+    </tr>
+}
+else
+{
+    @foreach (var tariff in Model)
+    {
+        var isFuture = tariff.ValidFrom > today;
+        var isExpired = tariff.ValidTo.HasValue &&
+                        tariff.ValidTo.Value < today;
+        var isCurrent = !isFuture && !isExpired;
+
+        <tr>
+            <td>
+                <div class="fw-semibold">
+                    @tariff.HealthPlan.HealthInsurance.Name
+                </div>
+                <small class="text-muted">
+                    @tariff.HealthPlan.Name
+                </small>
+            </td>
+
+            <td>
+                <div class="fw-semibold">
+                    @tariff.MedicalService.Name
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(tariff.MedicalService.Code))
+                {
+                    <small class="text-muted">
+                        Código: @tariff.MedicalService.Code
+                    </small>
+                }
+            </td>
+
+            <td class="fw-semibold text-nowrap">
+                @tariff.Amount.ToString(
+                    "C2",
+                    System.Globalization.CultureInfo.GetCultureInfo("es-AR"))
+            </td>
+
+            <td class="text-nowrap">
+                <div>
+                    Desde: @tariff.ValidFrom.ToString("dd/MM/yyyy")
+                </div>
+                <small class="text-muted">
+                    Hasta:
+                    @(tariff.ValidTo?.ToString("dd/MM/yyyy") ?? "Sin fecha")
+                </small>
+            </td>
+
+            <td>
+                @if (tariff.RequiresAuthorization)
+                {
+                    <span class="badge bg-warning text-dark">
+                        Sí
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">
+                        No
+                    </span>
+                }
+            </td>
+
+            <td>
+                @if (isFuture)
+                {
+                    <span class="badge bg-info text-dark">
+                        Futura
+                    </span>
+                }
+                else if (isExpired)
+                {
+                    <span class="badge bg-danger">
+                        Vencida
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-success">
+                        Vigente
+                    </span>
+                }
+            </td>
+
+            <td class="text-end">
+                @if (isCurrent && !tariff.ValidTo.HasValue)
+                {
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#closeTariffModal"
+                            data-tariff-id="@tariff.Id"
+                            data-tariff-name="@tariff.MedicalService.Name"
+                            data-tariff-date="@tariff.ValidFrom.ToString("yyyy-MM-dd")">
+                        <i class="bi bi-calendar-x me-1"></i>
+                        Cerrar vigencia
+                    </button>
+                }
+                else
+                {
+                    <span class="text-muted small">
+                        Sin acciones
+                    </span>
+                }
+            </td>
+        </tr>
+    }
+}

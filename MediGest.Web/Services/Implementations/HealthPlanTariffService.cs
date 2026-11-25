@@ -3,6 +3,7 @@ using MediGest.Web.Data;
 using MediGest.Web.Exceptions;
 using MediGest.Web.Models.Entities;
 using MediGest.Web.Services.Interfaces;
+using MediGest.Web.ViewModels.HealthPlanTariffs;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediGest.Web.Services;
@@ -29,6 +30,91 @@ public class HealthPlanTariffService : IHealthPlanTariffService
             .ThenBy(t => t.MedicalService.Name)
             .ThenByDescending(t => t.ValidFrom)
             .ToListAsync();
+    }
+
+    public async Task<HealthPlanTariffSearchViewModel> GetPageAsync(
+        int page,
+        int pageSize)
+    {
+        return await SearchAsync(null, page, pageSize);
+    }
+
+    public async Task<HealthPlanTariffSearchViewModel> SearchAsync(
+        string? searchTerm,
+        int page,
+        int pageSize)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        IQueryable<HealthPlanTariff> query = _context.HealthPlanTariffs
+            .AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            string term = searchTerm.Trim();
+
+            query = query.Where(t =>
+                t.HealthPlan.HealthInsurance.Name.Contains(term) ||
+                t.HealthPlan.Name.Contains(term) ||
+                t.MedicalService.Name.Contains(term) ||
+                (t.MedicalService.Code != null &&
+                 t.MedicalService.Code.Contains(term)) ||
+                t.Amount.ToString().Contains(term));
+        }
+
+        int totalCount = await query.CountAsync();
+
+        int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        if (totalPages > 0)
+            page = Math.Min(page, totalPages);
+        else
+            page = 1;
+
+        var tariffs = await query
+            .Include(t => t.HealthPlan)
+                .ThenInclude(p => p.HealthInsurance)
+            .Include(t => t.MedicalService)
+                .ThenInclude(s => s.Specialty)
+            .OrderBy(t => t.HealthPlan.HealthInsurance.Name)
+            .ThenBy(t => t.HealthPlan.Name)
+            .ThenBy(t => t.MedicalService.Name)
+            .ThenByDescending(t => t.ValidFrom)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new HealthPlanTariffSearchViewModel
+        {
+            Tariffs = tariffs,
+            SearchTerm = searchTerm,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
+    }
+
+    public async Task<HealthPlanTariffStatisticsViewModel> GetStatisticsAsync(
+        DateOnly today)
+    {
+        var query = _context.HealthPlanTariffs.AsNoTracking();
+
+        return new HealthPlanTariffStatisticsViewModel
+        {
+            TotalTariffs = await query.CountAsync(),
+
+            CurrentTariffs = await query.CountAsync(t =>
+                t.ValidFrom <= today &&
+                (!t.ValidTo.HasValue || t.ValidTo.Value >= today)),
+
+            ExpiredTariffs = await query.CountAsync(t =>
+                t.ValidTo.HasValue &&
+                t.ValidTo.Value < today),
+
+            FutureTariffs = await query.CountAsync(t =>
+                t.ValidFrom > today)
+        };
     }
 
     public async Task<IEnumerable<HealthPlanTariff>> GetByHealthPlanIdAsync(
@@ -112,7 +198,6 @@ public class HealthPlanTariffService : IHealthPlanTariffService
         return tariff;
     }
 
-
     public async Task UpdateAsync(int id, HealthPlanTariff tariff)
     {
         var existingTariff = await _context.HealthPlanTariffs
@@ -151,7 +236,6 @@ public class HealthPlanTariffService : IHealthPlanTariffService
 
         await _context.SaveChangesAsync();
     }
-
 
     public async Task CloseAsync(int id, DateOnly validTo)
     {

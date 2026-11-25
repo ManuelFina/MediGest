@@ -1,5 +1,5 @@
-﻿
-using MediGest.Web.Models.Entities;
+﻿using MediGest.Web.Models.Entities;
+using MediGest.Web.ViewModels.HealthPlanTariffs;
 
 namespace MediGest.Web.Services.Interfaces;
 
@@ -17,6 +17,18 @@ public interface IHealthPlanTariffService
         int healthPlanId,
         int medicalServiceId,
         DateOnly date);
+
+    Task<HealthPlanTariffSearchViewModel> GetPageAsync(
+        int page,
+        int pageSize);
+
+    Task<HealthPlanTariffSearchViewModel> SearchAsync(
+        string? searchTerm,
+        int page,
+        int pageSize);
+
+    Task<HealthPlanTariffStatisticsViewModel> GetStatisticsAsync(
+        DateOnly today);
 
     Task<HealthPlanTariff> CreateAsync(HealthPlanTariff tariff);
 
